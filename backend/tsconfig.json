@@ -1,0 +1,17 @@
+{"exclude": ["jest.config.ts"],
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "outDir": "dist",
+        "useUnknownInCatchVariables": false, //maria
+        "esModuleInterop": true,
+        "strict": false,
+        "noImplicitAny": false,
+        "experimentalDecorators": true,
+        "strictPropertyInitialization": false,
+        "emitDecoratorMetadata": true,
+        "resolveJsonModule": true
+    },
+    "include": ["src", "context","./package.json"]
+}
