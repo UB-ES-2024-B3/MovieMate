@@ -16,10 +16,6 @@ export class UserController {
     static async deleteUser(req: Request, res: Response) {
         try {
             const userName = req.params.userName;
-            //validacion de datos
-            if (typeof userName !== "string") {
-                return res.status(400).json({message: "userName must be a string"});
-            }
             const result = await this.userService.deleteUser(userName);
             return res.status(200).json(result);
         } catch (e) {
