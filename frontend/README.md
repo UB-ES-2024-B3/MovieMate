@@ -1,12 +1,12 @@
 # MovieMate VUE App
 
 ## Instalación
-```
+```bash
 npm install
 ```
 
 ## Como levantar el servicio en local
-```
+```bash
 npm run serve
 ```
 
@@ -14,11 +14,10 @@ npm run serve
 
 ```bash
 npm run lint
-
 ```
 
 ### Como levantar el servicio para producción
-```
+```bash
 npm run build
 ```
 
@@ -26,11 +25,10 @@ npm run build
 
 Para trabajar con esta aplicación tenemos una serie de carpetas:
 - Public: Donde se encuentra el header
+- src: Todos los archivos vue
 - src/components: Añadir todos los componentes de la aplicacion
 - src/router: Para linkear todos los componentes con la aplicacion
 - src/style: Añadir todos los CSS pero con Tailwind no necesitaremos
-- src: Todos los archivos vue
-
 ## Contribución
 
 Las pull requests son bienvenidas. Para grandes cambios, abrid primero un incident para poder discutir en profundidad.
