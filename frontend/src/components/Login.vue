@@ -3,9 +3,10 @@
 
   </div>
 </template>
+
 <script>
 export default {
-    name: "HomeView"
+    name: "LoginView"
 }
 </script>
 
