@@ -5,7 +5,7 @@ export class UserEntity extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column({nullable: false})
+    @Column({nullable: false, unique:true})
     userName: string;
 
     @Column({nullable: false})
