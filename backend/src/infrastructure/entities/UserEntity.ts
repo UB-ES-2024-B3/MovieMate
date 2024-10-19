@@ -8,15 +8,18 @@ export class UserEntity extends BaseEntity {
     @Column({nullable: false})
     userName: string;
 
-    @Column({nullable: true})
+    @Column({nullable: false})
     email: string;
 
-    @Column({nullable: true})
+    @Column({nullable: false})
     password: string;
 
-    @Column({nullable: true})
+    @Column({nullable: false})
     gender: string;
 
-    @Column({nullable: true, type: "date"})
+    @Column({nullable: false, type: "date"})
     birthDate: Date;
+
+    @Column({nullable: false, default: false})
+    isAdmin: boolean;
 }
