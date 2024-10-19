@@ -19,4 +19,12 @@ export class UserRepository implements IUserRepository {
         return `user with username < ${userName} > deleted successfully`
     }
 
+    async get(userName: string): Promise<UserEntity> {
+        const userFromDB = await this.repository.findOneBy({userName: userName});
+        if (!userFromDB) {
+            throw new Error(`user with username < ${userName} > does not exist`)
+        }
+        return userFromDB;
+    }
+
 }
