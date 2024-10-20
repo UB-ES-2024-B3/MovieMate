@@ -1,8 +1,17 @@
 import app from './app';
+import {EnviromentUtils} from "../../context/env";
+import {PostgreTypeOrmDataSource} from "./config/postgreDatabaseTypeOrm";
 
 async function main() {
-    //aqui se deben añadir configuraciones de infra e inversion de dependencias
-    app.listen(3000);
+    try{
+        await PostgreTypeOrmDataSource.initialize();
+        const port = EnviromentUtils.getEnvVar('PORT');
+        app.listen(port);
+        console.log('Server is listening on port', port);
+    }
+    catch(e){
+        console.log(e);
+    }
 }
 
 main();
