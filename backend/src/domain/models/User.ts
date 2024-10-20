@@ -1,11 +1,12 @@
 export class User {
-
     constructor(
         private _id: string,
         private _name: string,
         private _email: string,
         private _birthDate: Date,
-        private _password: string
+        private _password: string,
+        private _gender: string,
+        private _isAdmin: boolean
     ) {
     }
 
@@ -56,4 +57,13 @@ export class User {
     set birthDate(value: Date) {
         this._birthDate = value;
     }
+
+    get isAdmin(): boolean {
+        return this._isAdmin;
+    }
+
+    set isAdmin(value: boolean) {
+        this._isAdmin = value;
+    }
+
 }
