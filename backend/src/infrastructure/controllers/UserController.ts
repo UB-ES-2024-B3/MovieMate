@@ -13,6 +13,17 @@ export class UserController {
 
     private static userService: UserService = container.resolve(UserService);
 
+    static async registerUser(req: Request, res: Response) {
+        try {
+            const userData = req.body;
+            const result = await this.userService.registerUser(userData);
+            return res.status(200).json(result);
+        } catch(e) {
+            return res.status(500).json({message: e.message});
+        }
+
+    }
+
     static async deleteUser(req: Request, res: Response) {
         try {
             const userName = req.params.userName;

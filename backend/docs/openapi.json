@@ -5,7 +5,7 @@
     "description": "Documentation for ES-B3: MovieMate endpoints",
     "version": "1.0.0"
   },
-  "host": "http://localhost:3000",
+  "host": "undefined:undefined",
   "basePath": "/",
   "schemes": [
     "http"
@@ -30,12 +30,44 @@
             "description": "Internal Server Error"
           }
         }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/user/register": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     }
   },
   "serve": [
     {
-      "url": "http://localhost:3000",
+      "url": "undefined:undefined",
       "variables": {
         "port": {
           "default": 3000

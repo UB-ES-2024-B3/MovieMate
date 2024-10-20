@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export class User {
     constructor(
-        private _id: string,
+        private _id: string = uuidv4(),
         private _name: string,
         private _email: string,
         private _birthDate: Date,
