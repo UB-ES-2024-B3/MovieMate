@@ -3,7 +3,8 @@ import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm
 import {IUserRepository} from "../../domain/repositories/IUserRepository";
 import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
-import { createHash } from 'crypto';
+import {createHash} from 'crypto';
+import createError from 'http-errors';
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -16,46 +17,20 @@ export class UserRepository implements IUserRepository {
         return await this.repository.findOne({ where: { email } });
     }
 
-    async register(userData: { name: string, email: string, birthDate: Date, password: string, gender: string}): Promise<string> {
+    async register(user: User): Promise<string> {
 
-        const { name, email, birthDate, password, gender } = userData;
+        const existingUser = await this.getByEmail(user.email);
 
-        // Validate required fields
-        if (!name || !password || !email || !birthDate || !gender) {
-            throw new Error("All fields are required");
-        }
-
-
-        // Check if the email is unique
-        const existingUser = await this.getByEmail(email);
-        if (existingUser) {
-            throw new Error("Email is already registered.");
-        }
-
-        // Validate password complexity
-        const passwordValid = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
-        if (!passwordValid) {
-            throw new Error("Password must be at least 8 characters long and include at least one number and one uppercase letter.");
-        }
+        if (existingUser)
+            throw createError(409, "Email is already registered");
 
         // Hash the password
-        const hashedPassword = createHash('sha256').update(password).digest('hex');
-
-        // Create new user instance
-        const newUser = new User(
-            '',
-            name,
-            email,
-            birthDate,
-            hashedPassword,
-            gender,
-            false // default is false
-        );
+        user.password = createHash('sha256').update(user.password).digest('hex');
 
         // Save user using the repository
-        await this.repository.save(newUser);
+        await this.repository.save(user);
 
-        // Return a success message or the new user's ID
+        // Return a success message
         return "Registration successful";
     }
 
