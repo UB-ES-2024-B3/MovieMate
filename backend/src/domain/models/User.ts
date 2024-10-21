@@ -1,4 +1,3 @@
-
 export class User {
     constructor(
         private _id: number,
@@ -75,4 +74,5 @@ export class User {
     set isAdmin(value: boolean) {
         this._isAdmin = value;
     }
+
 }

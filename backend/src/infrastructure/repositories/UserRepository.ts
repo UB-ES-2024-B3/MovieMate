@@ -14,30 +14,32 @@ export class UserRepository implements IUserRepository {
     }
 
     async getByEmail(email: string): Promise<UserEntity | null> {
-        return await this.repository.findOne({ where: { email } });
+        return await this.repository.findOne({where: {email}});
     }
 
     async register(user: User): Promise<string> {
-
+        // Check if the email is unique
         const existingUser = await this.getByEmail(user.email);
-
-        if (existingUser)
-            throw createError(409, "Email is already registered");
+        if (existingUser) {
+            throw createError(409, "Email is already registered.");
+        }
 
         // Hash the password
-        user.password = createHash('sha256').update(user.password).digest('hex');
+        const hashedPassword = createHash('sha256').update(user.password).digest('hex');
+        user.password = hashedPassword
 
         // Save user using the repository
         await this.repository.save(user);
 
-        // Return a success message
+        // Return a success message or the new user's ID
         return "Registration successful";
     }
+
 
     async delete(userName: string): Promise<string> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
-            throw new Error(`user with username < ${userName} > does not exist`)
+            throw createError(404, `User with username < ${userName} > does not exist`);
         }
         await this.repository.remove(userFromDB)
         return `user with username < ${userName} > deleted successfully`
@@ -46,7 +48,7 @@ export class UserRepository implements IUserRepository {
     async get(userName: string): Promise<User> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
-            throw new Error(`user with username < ${userName} > does not exist`)
+            throw createError(404, `User with username < ${userName} > does not exist`);
         }
         const user: User = new User(
             userFromDB.id,
