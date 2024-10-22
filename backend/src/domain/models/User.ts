@@ -1,7 +1,8 @@
+
 export class User {
     constructor(
-        private _id: string,
-        private _name: string,
+        private _id: number,
+        private _userName: string,
         private _email: string,
         private _birthDate: Date,
         private _password: string,
@@ -10,16 +11,29 @@ export class User {
     ) {
     }
 
-    get id(): string {
+    // Getters y setters
+    get id(): number {
         return this._id;
     }
 
+    set id(value: number) {
+        this._id = value;
+    }
+
+    get userName(): string {
+        return this._userName;
+    }
+
+    set userName(value: string) {
+        this._userName = value;
+    }
+
     get name(): string {
-        return this._name;
+        return this._userName;
     }
 
     set name(value: string) {
-        this._name = value;
+        this._userName = value;
     }
 
     get email(): string {
@@ -28,18 +42,6 @@ export class User {
 
     set email(value: string) {
         this._email = value;
-    }
-
-    public changeEmail(newEmail: string): void {
-        if (!this.isValidEmail(newEmail)) {
-            throw new Error('Invalid email');
-        }
-        this.email = newEmail
-    }
-
-    public isValidEmail(email: string): boolean {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
     }
 
     get password(): string {
@@ -58,6 +60,14 @@ export class User {
         this._birthDate = value;
     }
 
+    get gender(): string {
+        return this._gender;
+    }
+
+    set gender(value: string) {
+        this._gender = value;
+    }
+
     get isAdmin(): boolean {
         return this._isAdmin;
     }
@@ -65,5 +75,4 @@ export class User {
     set isAdmin(value: boolean) {
         this._isAdmin = value;
     }
-
 }
