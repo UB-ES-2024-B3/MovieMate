@@ -7,7 +7,7 @@ import PerfilUsuario from '../components/PerfilUsuario.vue';
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: Login },
-  { path: '/perfilUsuario', component: PerfilUsuario},
+  { path: '/user/:userName', component: PerfilUsuario},
 ];
 
 const router = createRouter({
