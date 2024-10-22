@@ -5,6 +5,7 @@ import {UserRepository} from "../repositories/UserRepository";
 import {User} from "../../domain/models/User";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
+import createError from "http-errors";
 
 container.register(
     "IUserRepository", {
@@ -25,7 +26,7 @@ export class UserController {
 
             if (!isRight(validationResult)) {
                 // Si la validación falla, devolver un error
-                return res.status(400).json({message: "Invalid user data!"});
+                throw createError(400, "Invalid user data!");
             }
 
             // Si la validación es correcta, accedemos a los datos validados
@@ -50,23 +51,23 @@ export class UserController {
 
     }
 
-    static async deleteUser(req: Request, res: Response) {
+    static async deleteUser(req: Request, res: Response, next: NextFunction) {
         try {
             const userName = req.params.userName;
             const result = await this.userService.deleteUser(userName);
             return res.status(200).json(result);
         } catch (e) {
-            return res.status(500).json({message: e.message});
+            next(e);
         }
     }
 
-    static async getUser(req: Request, res: Response) {
+    static async getUser(req: Request, res: Response, next: NextFunction) {
         try {
             const userName = req.params.userName;
             const result = await this.userService.getUser(userName);
             return res.status(200).json(result);
         } catch (e) {
-            return res.status(500).json({message: e.message});
+            next(e);
         }
     }
 }

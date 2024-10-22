@@ -53,9 +53,9 @@ export class UserRepository implements IUserRepository {
         const user: User = new User(
             userFromDB.id,
             userFromDB.userName,
-            userFromDB.password,
-            userFromDB.birthDate,
             userFromDB.email,
+            userFromDB.birthDate,
+            userFromDB.password,
             userFromDB.gender,
             userFromDB.isAdmin
         )
