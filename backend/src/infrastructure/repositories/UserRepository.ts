@@ -18,9 +18,15 @@ export class UserRepository implements IUserRepository {
     }
 
     async register(user: User): Promise<string> {
+        // Check if the username is unique
+        const existingUserName = await this.getByEmail(user.email);
+        if (existingUserName) {
+            throw createError(409, "UserName is already in use.");
+        }
+
         // Check if the email is unique
-        const existingUser = await this.getByEmail(user.email);
-        if (existingUser) {
+        const existingEmail = await this.getByEmail(user.email);
+        if (existingEmail) {
             throw createError(409, "Email is already registered.");
         }
 
