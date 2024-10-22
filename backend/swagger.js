@@ -25,16 +25,13 @@ const doc = {
     basePath: '/',
     schemes: ['http'],
     definitions: {
-        CreateUser: {  // Definición del esquema para crear un usuario
-            type: "object",
-            properties: {
-                userName: "carmen",
-                email: "carmen@example.com",
-                birthDate: "1990-01-01",
-                password: "Password123",
-                gender: "Female"
-            },
-            required: ["userName", "email", "birthDate", "password", "gender"]
+        // Definición del esquema para crear un usuario
+        CreateUser: {
+            userName: "carmen",
+            email: "carmen@example.com",
+            birthDate: "1990-01-01",
+            password: "Password123",
+            gender: "Female"
         }
     }
 };
