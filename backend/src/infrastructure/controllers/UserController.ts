@@ -37,6 +37,27 @@ export class UserController {
 
     }
 
+    static async loginUser(req: Request, res: Response) {
+        try {
+            const userData = req.body;
+            // Creación del objeto User con los datos validados
+            const user: User = new User(
+                userData.id,
+                userData.userName,
+                userData.email,
+                new Date(userData.birthDate),
+                userData.password,
+                userData.gender,
+                userData.isAdmin
+            );
+
+            const result = await this.userService.loginUser(user);
+            return res.status(200).json(result);
+        } catch(e) {
+            return res.status(500).json({message: e.message});
+        }
+    }
+
     static async deleteUser(req: Request, res: Response) {
         try {
             const userName = req.params.userName;
