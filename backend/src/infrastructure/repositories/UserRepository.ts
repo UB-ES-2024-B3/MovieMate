@@ -19,7 +19,7 @@ export class UserRepository implements IUserRepository {
 
     async register(user: User): Promise<string> {
         // Check if the username is unique
-        const existingUserName = await this.getByEmail(user.email);
+        const existingUserName = await this.get(user.userName);
         if (existingUserName) {
             throw createError(409, "UserName is already in use.");
         }
@@ -31,8 +31,7 @@ export class UserRepository implements IUserRepository {
         }
 
         // Hash the password
-        const hashedPassword = createHash('sha256').update(user.password).digest('hex');
-        user.password = hashedPassword
+        user.password = createHash('sha256').update(user.password).digest('hex');
 
         // Save user using the repository
         await this.repository.save(user);
@@ -56,7 +55,7 @@ export class UserRepository implements IUserRepository {
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
-        const user: User = new User(
+        return new User(
             userFromDB.id,
             userFromDB.userName,
             userFromDB.email,
@@ -64,8 +63,7 @@ export class UserRepository implements IUserRepository {
             userFromDB.password,
             userFromDB.gender,
             userFromDB.isAdmin
-        )
-        return user;
+        );
     }
 
 }
