@@ -65,6 +65,10 @@ export class UserController {
                 userData.isAdmin
             );
 
+            if (!userData.email || !userData.password) {
+                return res.status(400).json({ message: "Email and passwords are required" });
+            }
+
             const result = await this.userService.loginUser(user);
             return res.status(200).json(result);
         } catch(e) {
