@@ -1,7 +1,7 @@
 const swaggerAutogen = require('swagger-autogen');
 
 // const outputFile = process.env['OPENAPI_PATH'];
-const outputFile = "./docs/openapi.json"
+const outputFile = "./docs/openapi.json";
 const hostUrl = process.env['HOST'];
 const portUrl = process.env['PORT'];
 
@@ -25,6 +25,14 @@ const doc = {
     basePath: '/',
     schemes: ['http'],
     definitions: {
+        // Definición del esquema para crear un usuario
+        CreateUser: {
+            userName: "carmen",
+            email: "carmen@example.com",
+            birthDate: "1990-01-01",
+            password: "Password123",
+            gender: "Female"
+        }
     }
 };
 

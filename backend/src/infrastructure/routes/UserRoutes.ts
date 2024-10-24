@@ -1,11 +1,19 @@
-import { Router, Request, Response } from "express";
-import { UserController } from "../controllers/UserController";
+import {NextFunction, Request, Response, Router} from "express";
+import {UserController} from "../controllers/UserController";
 
 const router = Router();
 
-router.delete("/:userName", (req: Request, res: Response) => UserController.deleteUser(req, res));
-router.get("/:userName", (req: Request, res: Response) => UserController.getUser(req, res));
-router.post("/register", (req: Request, res:Response) => UserController.registerUser(req, res));
-router.post("/login", (req: Request, res: Response)=> UserController.loginUser(req, res));
+router.delete("/:userName", (req: Request, res: Response, next: NextFunction) => UserController.deleteUser(req, res, next));
+router.get("/:userName", (req: Request, res: Response, next: NextFunction) => UserController.getUser(req, res, next));
+router.post("/register", (req: Request, res: Response, next: NextFunction) => {
+    /* #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'User data.',
+        required: true,
+        schema: { $ref: '#/definitions/CreateUser' }
+    } */
+    UserController.registerUser(req, res, next);
+});
+router.post("/login", (req: Request, res: Response, next: NextFunction)=> UserController.loginUser(req, res, next));
 
 export default router;
