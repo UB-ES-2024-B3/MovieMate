@@ -24,17 +24,17 @@
         <form @submit.prevent="handleSubmit" class="space-y-4 md:space-y-6">
           <!-- USERNAME -->
           <div>
-            <label for="nombre" class="block mb-2 text-sm font-medium form_title_text">Nombre</label>
-            <input type="text" name="userName" v-model="userName" id="nombre" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Tu Nombre" required="">
+            <label for="nombre" class="block mb-2 text-sm font-medium form_title_text">UserName</label>
+            <input type="text" name="userName" v-model="userName" id="nombre" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Your username" required="">
           </div>
           <!-- EMAIL -->
           <div>
             <label for="email" class="block mb-2 text-sm font-medium form_title_text">Email</label>
-            <input type="email" name="email" v-model="email" id="email" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Tu Email" required="">
+            <input type="email" name="email" v-model="email" id="email" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Your email" required="">
           </div>
           <!-- PASSWORD -->
           <div class="relative max-w-sm">
-            <label for="password" class="block mb-2 text-sm font-medium form_title_text">Contraseña</label>
+            <label for="password" class="block mb-2 text-sm font-medium form_title_text">Password</label>
             <div class="relative">
               <input
                 type="password"
@@ -73,12 +73,85 @@
                 :class="['h-2 flex-auto rounded-full mx-1', passwordStrengthClass[n - 1]]"
               ></div>
             </div>
+
+              <ul v-if="passwordFocused" class="space-y-1 text-sm text-gray-500 dark:text-neutral-500">
+                <li :class="{ 'text-teal-500': lengthSufficient, 'text-red-500': !lengthSufficient }" class="flex items-center gap-x-2">
+                  <span v-if="lengthSufficient">
+                    <svg class="shrink-0 size-4 text-teal-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </span>
+                  Minimum number of characters is 8.
+                </li>
+                <li :class="{ 'text-teal-500': hasLowercase, 'text-red-500': !hasLowercase }" class="flex items-center gap-x-2">
+                  <span v-if="hasLowercase">
+                    <svg class="shrink-0 size-4 text-teal-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </span>
+                  Should contain lowercase.
+                </li>
+                <li :class="{ 'text-teal-500': hasUppercase, 'text-red-500': !hasUppercase }" class="flex items-center gap-x-2">
+                  <span v-if="hasUppercase">
+                    <svg class="shrink-0 size-4 text-teal-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </span>
+                  Should contain uppercase.
+                </li>
+                <li :class="{ 'text-teal-500': hasNumbers, 'text-red-500': !hasNumbers }" class="flex items-center gap-x-2">
+                  <span v-if="hasNumbers">
+                    <svg class="shrink-0 size-4 text-teal-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </span>
+                  Should contain numbers.
+                </li>
+                <li :class="{ 'text-teal-500': hasSpecialChars, 'text-red-500': !hasSpecialChars }" class="flex items-center gap-x-2">
+                  <span v-if="hasSpecialChars">
+                    <svg class="shrink-0 size-4 text-teal-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                  <span v-else>
+                    <svg class="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </span>
+                  Should contain special characters.
+                </li>
+              </ul>
           </div>
 
           <!-- PASSWORD REPEAT -->
           <div class="relative max-w-sm">
 
-            <label for="confirm_password" class="block mb-2 text-sm font-medium form_title_text">Repite Contraseña</label>
+            <label for="confirm_password" class="block mb-2 text-sm font-medium form_title_text">Repeat Password</label>
             <div class="relative">
               <input
               type="password"
@@ -113,16 +186,15 @@
 
           <!-- PASSWORD CHECK -->
           <div v-if="confirmPassword.length > 0"  class="text-sm mt-2">
-            <span v-if="passwordsDoNotMatch" class="text-red-500">✘ Las contraseñas no coinciden</span>
-            <span v-else class="text-green-500">✔ Las contraseñas coinciden</span>
+            <span v-if="passwordsDoNotMatch" class="text-red-500">✘ Passwords do not match</span>
+            <span v-else class="text-green-500">✔ Passwords match</span>
           </div>
 
           <!-- BIRTHDAY -->
           <div>
-            <label for="datebirth" class="block mb-2 text-sm font-medium form_title_text">Fecha de Nacimiento</label>
+            <label for="datebirth" class="block mb-2 text-sm font-medium form_title_text">Birthdate</label>
             <div class="relative max-w-sm">
               <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <!-- Ícono de calendario -->
                 <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M6 2a1 1 0 1 1 2 0v1h4V2a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v2H3V5a2 2 0 0 1 2-2h1V2a1 1 0 1 1 2 0v1h4V2zM3 9h14v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/>
                 </svg>
@@ -130,36 +202,37 @@
               <input
                 type="text"
                 id="birthdate"
-                v-model="birthDate"
+                ref="birthdateInput"
                 name="birthdate"
                 datepicker
                 datepicker-autohide
-                datepicker-format="dd/mm/yyyy"
+                datepicker-format="yyyy-mm-dd"
                 :datepicker-max-date="maxDate"
                 class="form_text_input pl-10 p-2.5 text-sm rounded-lg block w-full datepicker_custom"
-                placeholder="Selecciona una fecha"
+                placeholder="Your birthdate"
                 required
+                @paste.prevent
               />
 
             </div>
           </div>
           <!-- GENRE -->
           <div>
-            <label for="gender" class="block mb-2 text-sm font-medium form_title_text">Género</label>
+            <label for="gender" class="block mb-2 text-sm font-medium form_title_text">Gender</label>
             <select id="gender" name="gender" v-model="gender" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
-              <option value="" disabled selected>Seleccione su género</option>
-              <option value="male">Hombre</option>
-              <option value="female">Mujer</option>
-              <option value="other">Otro</option>
+              <option value="" disabled selected>Select a gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <!-- CREATION ACCOUNT -->
-          <button type="submit" class="w-full submit_button font-medium rounded-lg text-sm px-5 py-2.5 text-center">Crear cuenta</button>
+          <button type="submit" class="w-full submit_button font-medium rounded-lg text-sm px-5 py-2.5 text-center">Create Account</button>
         </form>
 
         <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-          ¿Ya tienes una cuenta?
-          <a href="/login" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Login aquí</a>
+          Already have an account?
+          <a href="/login" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
         </p>
       </div>
     </div>
@@ -169,33 +242,55 @@
 
 <script>
 
+import axios from "axios";
+
 export default {
   name: 'RegisterView',
   data() {
     return {
-      maxDate: '',
+      // Data user
       userName: '',
       email: '',
-      password: '',
-      confirmPassword: '',
       birthDate: '',
       gender: '',
+
+      // Password
+      password: '',
+      confirmPassword: '',
       passwordVisible: false,
       confirmPasswordVisible: false,
+      passwordsDoNotMatch: true,
       passwordFocused: false,
       confirmPasswordFocused: false,
-      passwordStrengthClass: '',
-      passwordsDoNotMatch: true,
+
+      // Password validation
       passwordStrength: 0,
+      passwordStrengthClass: '',
+      hasNumbers: false,
+      hasLowercase: false,
+      hasUppercase: false,
+      hasSpecialChars: false,
+      lengthSufficient: false,
+
+      // Max Date for calendar
+      maxDate: '',
+
+      // Toast
       showToast: false,
-      toastMessage: ''
+      toastMessage: '',
     };
   },
   mounted() {
     const today = new Date();
     const sixteenYearsAgo = new Date(today.setFullYear(today.getFullYear() - 16));
 
-    this.maxDate = `${String(sixteenYearsAgo.getDate()).padStart(2, '0')}-${String(sixteenYearsAgo.getMonth() + 1).padStart(2, '0')}-${sixteenYearsAgo.getFullYear()}`;
+    this.maxDate = `${sixteenYearsAgo.getFullYear()}-${String(sixteenYearsAgo.getMonth() + 1).padStart(2, '0')}/${String(sixteenYearsAgo.getDate()).padStart(2, '0')}`;
+
+    const datepickerElement = this.$refs.birthdateInput;
+
+    datepickerElement.addEventListener('changeDate', (event) => {
+      this.birthDate = event.target.value;
+    });
   },
   methods: {
     hideToast() {
@@ -220,25 +315,31 @@ export default {
         this.showToast = false;
       }, 5000);
     },
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
     checkPasswordStrength() {
       if (!this.password) {
         this.passwordStrengthClass = [];
         return;
       }
 
-      const hasNumbers = /\d/.test(this.password);
-      const hasLowercase = /[a-z]/.test(this.password);
-      const hasUppercase = /[A-Z]/.test(this.password);
-      const hasSpecialChars = /[\W_]/.test(this.password);
-      const lengthSufficient = this.password.length >= 6;
+      this.hasNumbers = /\d/.test(this.password);
+      this.hasLowercase = /[a-z]/.test(this.password);
+      this.hasUppercase = /[A-Z]/.test(this.password);
+      this.hasSpecialChars = /[\W_]/.test(this.password);
+      this.lengthSufficient = this.password.length >= 8;
 
       this.passwordStrength = 0;
 
-      if (lengthSufficient) this.passwordStrength++;
-      if (hasNumbers) this.passwordStrength++;
-      if (hasLowercase) this.passwordStrength++;
-      if (hasUppercase) this.passwordStrength++;
-      if (hasSpecialChars) this.passwordStrength++;
+      this.passwordStrength = [
+        this.lengthSufficient,
+        this.hasNumbers,
+        this.hasLowercase,
+        this.hasUppercase,
+        this.hasSpecialChars
+      ].filter(Boolean).length;
 
       switch (this.passwordStrength) {
         case 1:
@@ -281,33 +382,41 @@ export default {
         return;
       }
 
+      if (!this.isValidEmail(this.email)) {
+        this.showToastWithMessage('Incorrect email format');
+        return;
+      }
+
       const data = {
-        userName: this.userName,
-        password: this.password,
-        birthDate: this.birthDate,
-        email: this.email,
-        gender: this.gender,
+        userName: this.userName.toString(),
+        password: this.password.toString(),
+        birthDate: this.birthDate.toString(),
+        email: this.email.toString(),
+        gender: this.gender.toString(),
       };
 
-      console.log(data)
-      try {
-        const response = await fetch('https://ejemplo.com/api/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+      const dataToSend = JSON.stringify(data);
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Éxito:', result);
-        } else {
-          console.error('Error al enviar el formulario:', response.statusText);
+      console.log(dataToSend)
+      try {
+        const response = await axios.post('http://localhost:3000/user/register', data);
+
+        if (response.status === 200) {
+            console.log('Éxito:', response.data);
+            this.showToastWithMessage(
+                response.data.message || 'Registro exitoso.',
+                () => this.$router.push('/login')
+            );
         }
       } catch (error) {
+        if (error.response && error.response.status === 409) {
+            const errorMessage = error.response.data.message;
+            this.showToastWithMessage(errorMessage);
+        } else {
+            this.showToastWithMessage('Error en la solicitud. Intente nuevamente.');
+        }
         console.error('Error en la solicitud:', error);
-      }
+    }
     }
   },
 }
