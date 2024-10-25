@@ -37,6 +37,20 @@ export class UserController {
 
     }
 
+    static async updateUser(req: Request, res:Response) {
+
+        try {
+            const userId = parseInt(req.params.userId);
+            const userData = req.body;
+
+            // Call the updateUser method in the UserService
+            const result = await this.userService.updateUser(userId, userData);
+            return res.status(200).json({ message: result });
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+
     static async deleteUser(req: Request, res: Response) {
         try {
             const userName = req.params.userName;

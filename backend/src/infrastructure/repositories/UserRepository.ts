@@ -5,6 +5,7 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
+import {UserUpdateData} from "../../interfaces/UserUpdateData";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -32,6 +33,28 @@ export class UserRepository implements IUserRepository {
 
         // Return a success message
         return "Registration successful";
+    }
+
+    async update(userId: number, userData: UserUpdateData): Promise<string> {
+        // Fetch the existing user
+        const user = await this.repository.findOneBy({id:userId});
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Update the user's data
+        if (userData.name) user.userName = userData.name;
+
+        if (userData.password) {
+            user.password = createHash('sha256').update(userData.password).digest('hex');
+        }
+        if (userData.gender) user.gender = userData.gender;
+
+        // Save the updated user
+        await this.repository.save(user);
+
+        return 'User updated successfully';
+
     }
 
     async delete(userName: string): Promise<string> {
