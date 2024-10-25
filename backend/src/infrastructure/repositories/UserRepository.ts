@@ -19,7 +19,7 @@ export class UserRepository implements IUserRepository {
 
     async register(user: User): Promise<string> {
         // Check if the username is unique
-        const existingUserName = await this.get(user.userName);
+        const existingUserName = await this.repository.findOneBy({userName: user.name});
         if (existingUserName) {
             throw createError(409, "UserName is already in use.");
         }
@@ -39,7 +39,6 @@ export class UserRepository implements IUserRepository {
         // Return a success message or the new user's ID
         return "Registration successful";
     }
-
 
     async delete(userName: string): Promise<string> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
