@@ -13,7 +13,7 @@ const Email = t.brand(
 const Password = t.brand(
     t.string,
     (password): password is t.Branded<string, { readonly Password: unique symbol }> =>
-        /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password),
+        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password),
     'Password'
 );
 

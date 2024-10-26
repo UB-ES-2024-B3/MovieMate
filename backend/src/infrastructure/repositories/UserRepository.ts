@@ -5,7 +5,6 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UserUpdateData} from "../../interfaces/UserUpdateData";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -41,42 +40,6 @@ export class UserRepository implements IUserRepository {
         return "Registration successful";
     }
 
-    async update(userId: number, userData: UserUpdateData): Promise<string> {
-        // Fetch the existing user
-        const userFromBD = await this.repository.findOneBy({id: userId});
-        if (!userFromBD) {
-            throw createError(404, `User with Id < ${userId} > does not exist`);
-        }
-        if (userData.email) {// Check if the email is unique
-            const existingEmail = await this.repository.findOneBy({email: userData.email});
-            if (existingEmail && existingEmail.id != userId) {
-                throw createError(409, "Email is already registered.");
-            }
-        }
-        if (userData.userName) {
-            // Check if the username is unique
-            const existingUserName = await this.repository.findOneBy({userName: userData.userName});
-            if (existingUserName) {
-                throw createError(409, "UserName is already in use.");
-            }
-        }
-        if (userData.password) {
-            // Hash the password
-            userData.password = createHash('sha256').update(userData.password).digest('hex');
-        }
-        userFromBD.userName = userData.userName || userFromBD.userName
-        userFromBD.description = userData.description || userFromBD.description
-        userFromBD.gender = userData.gender || userFromBD.gender
-        userFromBD.password = userData.password || userFromBD.password
-        userFromBD.email = userData.email || userFromBD.email
-
-        // Save the updated user
-        await this.repository.save(userFromBD);
-
-        return 'User updated successfully';
-
-    }
-
     async delete(userName: string): Promise<string> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
@@ -98,8 +61,7 @@ export class UserRepository implements IUserRepository {
             userFromDB.birthDate,
             userFromDB.password,
             userFromDB.gender,
-            userFromDB.description,
-            userFromDB.isAdmin,
+            userFromDB.isAdmin
         );
     }
 
