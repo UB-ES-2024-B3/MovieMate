@@ -5,7 +5,7 @@
     "description": "Documentation for ES-B3: MovieMate endpoints",
     "version": "1.0.0"
   },
-  "host": "undefined:undefined",
+  "host": "localhost:3000",
   "basePath": "/",
   "schemes": [
     "http"
@@ -25,9 +25,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       },
@@ -44,9 +41,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -54,20 +48,55 @@
     "/user/register": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User data.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateUser"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CreateUser": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "example": "carmen"
+        },
+        "email": {
+          "type": "string",
+          "example": "carmen@example.com"
+        },
+        "birthDate": {
+          "type": "string",
+          "example": "1990-01-01"
+        },
+        "password": {
+          "type": "string",
+          "example": "Password123"
+        },
+        "gender": {
+          "type": "string",
+          "example": "Female"
         }
       }
     }
   },
   "serve": [
     {
-      "url": "undefined:undefined",
+      "url": "localhost:3000",
       "variables": {
         "port": {
           "default": 3000
