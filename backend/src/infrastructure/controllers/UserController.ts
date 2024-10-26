@@ -6,7 +6,7 @@ import {User} from "../../domain/models/User";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
-import {UserUpdateData} from "../../interfaces/UserUpdateData";
+import {UpdateUserData} from "../../interfaces/Interfaces";
 
 container.register(
     "IUserRepository", {
@@ -81,7 +81,7 @@ export class UserController {
             const validatedData = validationResult.right;
 
             // Creación del objeto User con los datos validados
-            const userData: UserUpdateData = {
+            const userData: UpdateUserData = {
                 userName: validatedData.userName,
                 password: validatedData.password,
                 gender: validatedData.gender,

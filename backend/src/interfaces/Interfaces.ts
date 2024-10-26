@@ -1,5 +1,4 @@
-// UserUpdateData.ts
-export interface UserUpdateData {
+export interface UpdateUserData {
     userName?: string;
     password?: string;
     gender?: string;
