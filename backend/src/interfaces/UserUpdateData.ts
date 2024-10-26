@@ -1,6 +1,8 @@
 // UserUpdateData.ts
 export interface UserUpdateData {
-    name?: string;
+    userName?: string;
     password?: string;
     gender?: string;
+    description?: string;
+    email?: string;
 }

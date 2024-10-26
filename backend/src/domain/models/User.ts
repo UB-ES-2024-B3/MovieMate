@@ -7,6 +7,7 @@ export class User {
         private _birthDate: Date,
         private _password: string,
         private _gender: string,
+        private _description: string,
         private _isAdmin: boolean
     ) {
     }
@@ -74,5 +75,13 @@ export class User {
 
     set isAdmin(value: boolean) {
         this._isAdmin = value;
+    }
+
+    get description(): string {
+        return this._description;
+    }
+
+    set description(value: string) {
+        this._description = value;
     }
 }
