@@ -1,0 +1,151 @@
+/* BACKGROUND */
+body {
+  background-color: #222222;
+}
+
+/* FORMULARIO */
+.form_background_input {
+  background-color: #5ce1e6 !important;
+}
+
+/* TITULO */
+.form_title_text {
+  color: #545454 !important;
+}
+
+/* INPUTS */
+.form_text_input {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border-color: #5ce1e6 !important;
+}
+
+
+/* CREAR CUENTA BOTON */
+.submit_button {
+  background-color: #5ce1e6 !important;
+  color: #545454 !important;
+  border: 2px solid #545454 !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-top: 2rem
+}
+
+.submit_button:hover {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border: 2px solid #5ce1e6 !important;
+}
+
+/* TERMINOS Y CONDICIONES */
+.terms_text {
+  color: #545454 !important;
+}
+
+/* DATEPICKER DESIGN: */
+.datepicker_custom {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border-color: #5ce1e6 !important;
+}
+
+
+.datepicker-picker {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border-color: #5ce1e6 !important;
+}
+
+.datepicker-picker .datepicker-cell {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border-radius: 0.375rem;
+}
+
+.datepicker-picker .datepicker-cell:hover {
+  background-color: #5ce1e6 !important;
+  color: #222222 !important;
+}
+
+.datepicker-picker .datepicker-cell.selected,
+.datepicker-picker .datepicker-cell.selected:hover {
+  background-color: #5ce1e6 !important;
+  color: #222222 !important;
+}
+
+.datepicker-picker .days-of-week {
+  background-color: transparent;
+  color: #545454 !important;
+}
+
+.datepicker-header {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+}
+
+.datepicker-controls .prev-btn,
+.datepicker-controls .next-btn {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border-radius: 0.375rem;
+}
+
+.datepicker-controls .prev-btn:hover,
+.datepicker-controls .next-btn:hover {
+  background-color: #5ce1e6 !important;
+  color: #545454 !important;
+}
+
+.datepicker-controls .view-switch {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem !important;
+  font-weight: bold !important;
+}
+
+.datepicker-controls .view-switch:hover {
+  background-color: #5ce1e6 !important;
+  color: #545454 !important;
+}
+
+.datepicker-picker .datepicker-footer {
+  background-color: #545454 !important;
+  color: #5ce1e6 !important;
+}
+
+.datepicker-picker .datepicker-cell.disabled,
+.datepicker-picker .datepicker-cell.disabled:hover {
+  color: #777777 !important;
+  cursor: not-allowed;
+}
+
+/* PLACEHOLDERS DESIGN: */
+#nombre::placeholder {
+  color: #5ce1e6 !important;
+  content: "Tu nombre";
+}
+
+#email::placeholder {
+  color: #5ce1e6 !important;
+  content: "Tu nombre";
+}
+
+#confirm_password::placeholder {
+  color: #5ce1e6 !important;
+  content: "Tu nombre";
+}
+
+#password::placeholder {
+  color: #5ce1e6 !important;
+  content: "Tu nombre";
+}
+
+#birthdate::placeholder {
+  color: #5ce1e6 !important;
+  content: "Selecciona una fecha";
+}
+
+#datebirth::placeholder {
+  color: #5ce1e6 !important;
+  content: "Selecciona una fecha";
+}
