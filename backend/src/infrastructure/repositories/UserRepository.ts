@@ -6,6 +6,7 @@ import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
 import {UpdateUserData} from "../../interfaces/Interfaces";
+import jwt from 'jsonwebtoken';
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -75,6 +76,20 @@ export class UserRepository implements IUserRepository {
 
         return 'User updated successfully';
 
+    }
+
+    async login(user: User): Promise<string> {
+        const existingUser = await this.getByEmail(user.email);
+
+        const hashedPassword = createHash('sha256').update(user.password).digest('hex');
+
+        if (!existingUser || existingUser.password != hashedPassword) {
+            throw createError(401, "Email or password are incorrect");
+        }
+        const secretKey = 'ES-UB-B3'
+        const token = jwt.sign({email: existingUser.email}, secretKey);
+
+        return token;
     }
 
     async delete(userName: string): Promise<string> {
