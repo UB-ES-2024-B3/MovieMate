@@ -95,7 +95,7 @@
                       <path d="m6 6 12 12"></path>
                     </svg>
                   </span>
-                  Minimum number of characters is 8.
+                  Minimum number of characters is 6.
                 </li>
                 <li :class="{ 'text-teal-500': hasLowercase, 'text-red-500': !hasLowercase }" class="flex items-center gap-x-2">
                   <span v-if="hasLowercase">
@@ -340,7 +340,7 @@ export default {
       this.hasLowercase = /[a-z]/.test(this.password);
       this.hasUppercase = /[A-Z]/.test(this.password);
       this.hasSpecialChars = /[\W_]/.test(this.password);
-      this.lengthSufficient = this.password.length >= 8;
+      this.lengthSufficient = this.password.length >= 6;
 
       this.passwordStrength = 0;
 
