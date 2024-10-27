@@ -5,7 +5,7 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData} from "../../interfaces/Interfaces";
+import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 
 export class UserRepository implements IUserRepository {
@@ -87,7 +87,7 @@ export class UserRepository implements IUserRepository {
             throw createError(401, "Email or password are incorrect");
         }
         const secretKey = 'ES-UB-B3'
-        const token = jwt.sign({email: existingUser.email}, secretKey);
+        const token = jwt.sign({userName: existingUser.userName}, secretKey);
 
         return token;
     }
@@ -101,12 +101,13 @@ export class UserRepository implements IUserRepository {
         return `user with username < ${userName} > deleted successfully`
     }
 
-    async get(userName: string): Promise<User> {
+    async get(userName: string, auth_token: string): Promise<UserWithProfileInfo> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
-        return new User(
+
+        const user = new User(
             userFromDB.id,
             userFromDB.userName,
             userFromDB.email,
@@ -116,6 +117,16 @@ export class UserRepository implements IUserRepository {
             userFromDB.description,
             userFromDB.isAdmin,
         );
+
+        const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
+
+        let isOwnProfile = false;
+
+        if (decoded != null && decoded.userName == user.userName) {
+            isOwnProfile = true;
+        }
+
+        return {user, isOwnProfile};
     }
 
 }

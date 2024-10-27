@@ -14,6 +14,7 @@ export class UserService {
 
     async updateUser(userId: number, userData: UpdateUserData): Promise<string> {
         return await this.userRepository.update(userId, userData);
+    }
 
     async loginUser(user: User): Promise<string> {
         return await this.userRepository.login(user);
@@ -23,7 +24,7 @@ export class UserService {
         return await this.userRepository.delete(userId);
     }
 
-    async getUser(userId: string) {
-        return await this.userRepository.get(userId);
+    async getUser(userId: string, auth_token: string) {
+        return await this.userRepository.get(userId, auth_token);
     }
 }

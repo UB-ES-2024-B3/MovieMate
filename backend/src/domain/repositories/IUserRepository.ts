@@ -1,5 +1,5 @@
 import {User} from "../models/User";
-import {UpdateUserData} from "../../interfaces/Interfaces";
+import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
 
 export interface IUserRepository {
     register(user: User): Promise<string>;
@@ -10,5 +10,5 @@ export interface IUserRepository {
 
     delete(userName: string): Promise<string>;
 
-    get(userName: string): Promise<User>;
+    get(userName: string, auth_token: string): Promise<UserWithProfileInfo>;
 }

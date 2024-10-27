@@ -64,7 +64,9 @@ export class UserController {
                 new Date(userData.birthDate),
                 userData.password,
                 userData.gender,
+                userData.description,
                 userData.isAdmin
+
             );
 
             if (!userData.email || !userData.password) {
@@ -125,7 +127,8 @@ export class UserController {
     static async getUser(req: Request, res: Response, next: NextFunction) {
         try {
             const userName = req.params.userName;
-            const result = await this.userService.getUser(userName);
+            const auth_token = req.headers.authorization?.split(" ")[1];
+            const result = await this.userService.getUser(userName, auth_token);
             return res.status(200).json(result);
         } catch (e) {
             next(e);
