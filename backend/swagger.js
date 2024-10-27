@@ -2,8 +2,8 @@ const swaggerAutogen = require('swagger-autogen');
 
 // const outputFile = process.env['OPENAPI_PATH'];
 const outputFile = "./docs/openapi.json";
-const hostUrl = process.env['HOST'];
-const portUrl = process.env['PORT'];
+const hostUrl = process.env['HOST'] || 'localhost';
+const portUrl = process.env['PORT'] || '3000';
 
 const doc = {
     info: {
@@ -30,9 +30,16 @@ const doc = {
             userName: "carmen",
             email: "carmen@example.com",
             birthDate: "1990-01-01",
-            password: "Password123",
+            password: "A1b#cd",
             gender: "Female"
+        },
+
+        UpdateUser: {
+            userName: "updatedCarmen",
+            email: "updatedCarmen@example.com",
+            password: "NewPass1#"
         }
+
     }
 };
 

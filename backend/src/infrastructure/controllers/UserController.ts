@@ -6,6 +6,7 @@ import {User} from "../../domain/models/User";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
+import {UpdateUserData} from "../../interfaces/Interfaces";
 
 container.register(
     "IUserRepository", {
@@ -40,7 +41,8 @@ export class UserController {
                 new Date(validatedData.birthDate),
                 validatedData.password,
                 validatedData.gender,
-                validatedData.isAdmin
+                null,
+                validatedData.isAdmin,
             );
 
             const result = await this.userService.registerUser(user);
@@ -80,6 +82,40 @@ export class UserController {
         try {
             const userName = req.params.userName;
             const result = await this.userService.deleteUser(userName);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async updateUser(req: Request, res: Response, next: NextFunction) {
+
+        try {
+            const userId = parseInt(req.params.userId)
+            const userDataFromReq = req.body;
+
+            // Validar los datos con la clase DtoIn
+            const validationResult = DtoInValidation.validateUpdateUserDto(userDataFromReq);
+
+            if (!isRight(validationResult)) {
+                // Si la validación falla, devolver un error
+                throw createError(400, "Invalid user data!");
+            }
+
+            // Si la validación es correcta, accedemos a los datos validados
+            const validatedData = validationResult.right;
+
+            // Creación del objeto User con los datos validados
+            const userData: UpdateUserData = {
+                userName: validatedData.userName,
+                password: validatedData.password,
+                gender: validatedData.gender,
+                description: validatedData.description,
+                email: validatedData.email
+            };
+
+            // Call the updateUser method in the UserService
+            const result = await this.userService.updateUser(userId, userData);
             return res.status(200).json(result);
         } catch (e) {
             next(e);
