@@ -31,7 +31,7 @@
         </aside>
 
         <!-- Flecha retorno -->
-        <button @click="retrourn" class="absolute left-[20rem] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
+        <button @click="retourn" class="absolute left-[20rem] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
             <img src="@/assets/flecha.png" alt="Flecha de retorno" class="w-12 h-12">
         </button>
 
@@ -141,7 +141,7 @@ export default {
             }
         },
 
-        async retrourn(){
+        async retourn(){
             this.$router.go(-1);
         }
     }
