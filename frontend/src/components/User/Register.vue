@@ -436,5 +436,5 @@ export default {
 
 
 <style scoped>
-@import '../style/form.css';
+@import '../../style/form.css';
 </style>
