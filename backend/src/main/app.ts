@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors<Request>({
-    origin: true, // This disables the 'Access-Control-Allow-Origin' header
+    origin: false, // This disables the 'Access-Control-Allow-Origin' header
 }));
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
