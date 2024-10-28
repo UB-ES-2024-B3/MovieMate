@@ -74,7 +74,9 @@ export default {
       if (response.status === 200) {
           // usamos sessionStorage como temporal
         sessionStorage.setItem("auth_token", response.data);
-        this.$router.push(`/`);
+        sessionStorage.setItem("username", this.username.toString());
+        //this.$router.push(`/user/${this.username}`); // Si dona problemas fer-ho així
+        window.location.href = '/user/${this.username}';
       } else {
         this.error = 'Wrong user or password buddy!';
       }

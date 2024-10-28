@@ -28,22 +28,29 @@
 export default {
   data() {
     return {
-      isAuthenticated: false, // iniciaremos el token como false al inciar la app
+      isAuthenticated: false,
       username: ''
     };
   },
-  mounted() {
-    // Verificamos si el token existe en sessionStorage
+  created() {
+    // Verificamos si el token y el nombre de usuario están en sessionStorage
     const token = sessionStorage.getItem("auth_token");
+    console.log(token)
     this.isAuthenticated = !!token;
 
-    // Almacenar en session storage después del Login
     if (this.isAuthenticated) {
-      this.username = 'username'; // Este valor se debe actualizar después del login (N6)
+      this.username = sessionStorage.getItem('username');
+      console.log(this.username)
     }
   },
+  watch: {
+    isAuthenticated(newVal) {
+      if (newVal && this.username) {
+        // Redirige a la página del usuario cuando se autentique
+        this.$router.push(`/user/${this.username}`);
+      }
+    }
+  }
 };
 </script>
-
-
 
