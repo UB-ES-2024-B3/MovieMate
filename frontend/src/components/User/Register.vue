@@ -224,7 +224,7 @@
 
             </div>
           </div>
-          <!-- GENRE -->
+          <!-- GENDER -->
           <div>
             <label for="gender" class="block mb-2 text-sm font-medium form_title_text">Gender</label>
             <select id="gender" name="gender" v-model="gender" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5">
@@ -406,14 +406,10 @@ export default {
         gender: this.gender.toString(),
       };
 
-      const dataToSend = JSON.stringify(data);
-
-      console.log(dataToSend)
       try {
         const response = await axios.post('http://localhost:3000/user/register', data);
 
         if (response.status === 200) {
-            console.log('Éxito:', response.data);
             this.showToastWithMessage(
               response.data.message || 'Registration successful.',
               false,
@@ -436,5 +432,5 @@ export default {
 
 
 <style scoped>
-@import '../style/form.css';
+@import '../../style/form.css';
 </style>

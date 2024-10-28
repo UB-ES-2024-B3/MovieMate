@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white flex flex-col">
-    <header class="bg-header-color flex items-center justify-between p-4">
+    <header class="bg-header-color flex items-center justify-between p-4 border-gray-200">
       <router-link to="/" class="self-center text-2xl font-semibold whitespace-nowrap dark:text-black">
         <h1>MovieMate</h1>
       </router-link>
@@ -35,12 +35,11 @@ export default {
   created() {
     // Verificamos si el token y el nombre de usuario están en sessionStorage
     const token = sessionStorage.getItem("auth_token");
-    console.log(token)
+
     this.isAuthenticated = !!token;
 
     if (this.isAuthenticated) {
       this.username = sessionStorage.getItem('username');
-      console.log(this.username)
     }
   },
   watch: {

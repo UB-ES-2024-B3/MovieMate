@@ -149,3 +149,8 @@ body {
   color: #5ce1e6 !important;
   content: "Selecciona una fecha";
 }
+
+#description::placeholder {
+  color: #5ce1e6 !important;
+  content: "Selecciona una fecha";
+}
