@@ -19,6 +19,10 @@ export class UserRepository implements IUserRepository {
         return await this.repository.findOne({where: {email}});
     }
 
+    async getByUsername(userName: string): Promise<UserEntity | null> {
+        return await this.repository.findOne({where: {userName}});
+    }
+
     async register(user: User): Promise<string> {
         // Check if the username is unique
         const existingUserName = await this.repository.findOneBy({userName: user.name});
@@ -79,12 +83,12 @@ export class UserRepository implements IUserRepository {
     }
 
     async login(user: User): Promise<string> {
-        const existingUser = await this.getByEmail(user.email);
+        const existingUser = await this.getByUsername(user.userName);
 
         const hashedPassword = createHash('sha256').update(user.password).digest('hex');
 
         if (!existingUser || existingUser.password != hashedPassword) {
-            throw createError(401, "Email or password are incorrect");
+            throw createError(401, "Username or password are incorrect");
         }
         const secretKey = 'ES-UB-B3'
         const token = jwt.sign({userName: existingUser.userName}, secretKey);
