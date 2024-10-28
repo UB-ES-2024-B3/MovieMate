@@ -61,7 +61,7 @@ export class UserRepository implements IUserRepository {
         if (userData.userName) {
             // Check if the username is unique
             const existingUserName = await this.repository.findOneBy({userName: userData.userName});
-            if (existingUserName) {
+            if (existingUserName && existingUserName.id != userId) {
                 throw createError(409, "UserName is already in use.");
             }
         }
