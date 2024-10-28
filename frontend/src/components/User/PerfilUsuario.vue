@@ -56,7 +56,10 @@
 
                         <!-- Información del perfil -->
                         <div class="text-left">
-                            <h3 class="text-3xl font-bold text-cyan-400">@{{ user.userName }}</h3>
+                            <router-link :to="`/user/${user.userName}`" class="text-3xl font-bold text-cyan-400">
+                              <h3>@{{ user.userName }}</h3>
+                            </router-link>
+
                             <p class="text-cyan-400 mt-1">{{ user.description }}</p>
 
                             <!-- Contenedor para botones de seguidores/seguidos -->
@@ -86,7 +89,7 @@
 
         <!-- Botón de editar -->
         <router-link to="/editar">
-            <button class="absolute right-[20%] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
+            <button v-if="isLogged" class="absolute right-[20%] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
                 <img src="../../assets/editar.png" alt="Editar perfil" class="w-12 h-12">
             </button>
         </router-link>
@@ -119,20 +122,23 @@ export default {
         ...mapActions(['setUserData']),
         async fetchUserData() {
             try {
-                const response = await axios.get(`http://localhost:3000/user/${this.$route.params.userName}`);
-                console.log(response.data)
+                const token = sessionStorage.getItem("auth_token");
 
+                const response = await axios.get(`http://localhost:3000/user/${this.$route.params.userName}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                });
                 const {user, isOwnProfile} = response.data;
                 this.user = {
+                    id: user._id,
                     userName: user._userName,
                     email: user._email,
                     gender: user._gender,
                     description: user._description,
                     isAdmin: user._isAdmin,
                 };
-
                 this.isLogged = isOwnProfile;
-                console.log(this.user)
                 await this.setUserData(this.user);
 
             } catch (error) {
