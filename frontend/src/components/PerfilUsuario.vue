@@ -19,7 +19,7 @@
             </div>
 
             <div></div>
-            <button v-if="isLogged" class="flex items-center justify-center text-red-500 rounded-md px-4 py-2 border-2 border-red-500 hover:bg-red-500 hover:text-white transition duration-200">
+            <button v-if="isLogged" @click="comfirmDeleteAccount" class="flex items-center justify-center text-red-500 rounded-md px-4 py-2 border-2 border-red-500 hover:bg-red-500 hover:text-white transition duration-200">
                 <img src="@/assets/papelera.png" class="w-12 h-12">
                 <span class="font-bold text-lg">BORRAR CUENTA</span>
             </button>
@@ -31,7 +31,7 @@
         </aside>
 
         <!-- Flecha retorno -->
-        <button class="absolute left-[20rem] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
+        <button @click="retrourn" class="absolute left-[20rem] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
             <img src="@/assets/flecha.png" alt="Flecha de retorno" class="w-12 h-12">
         </button>
 
@@ -91,7 +91,7 @@ export default {
         return {
             user: null,
             error: null,
-            isLogged: true,
+            isLogged: null,
         };
     },
 
@@ -121,6 +121,28 @@ export default {
                 this.error = 'No se puede cargar la información del usuario';
                 console.error("Error al obtener los datos del usuario:", error);
             }
+        },
+
+        async comfirmDeleteAccount() {
+            const confirmacion = window.confirm("¿Estás seguro de querer eliminar tu cuenta?");
+
+            if(confirmacion){
+                this.deleteAccount();
+            }
+        },
+
+        async deleteAccount(){
+            try{
+                await axios.delete(`http://localhost:3000/user/${this.$route.params.userName}`);
+
+                this.$router.push('/login');
+            }catch (error){
+                console.error('Error al eliminar la cuenta: ', error);
+            }
+        },
+
+        async retrourn(){
+            this.$router.go(-1);
         }
     }
 };
