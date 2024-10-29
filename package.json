@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "express-http-errors": "^0.0.3",
-    "fp-ts": "^2.16.9",
-    "http-errors": "^2.0.0",
-    "io-ts": "^2.2.21"
-  }
-}

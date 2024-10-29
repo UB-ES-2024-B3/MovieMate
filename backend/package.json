@@ -15,6 +15,10 @@
   "author": "Group B3",
   "license": "ISC",
   "dependencies": {
+    "express-http-errors": "^0.0.3",
+    "fp-ts": "^2.16.9",
+    "http-errors": "^2.0.0",
+    "io-ts": "^2.2.21",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
     "axios": "^1.7.2",
