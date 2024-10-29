@@ -1,6 +1,10 @@
 import {NextFunction, Request, Response, Router} from "express";
 import {UserController} from "../controllers/UserController";
 
+const multer = require("multer")
+const storage = multer.memoryStorage();
+const upload = multer({storage});
+
 const router = Router();
 
 router.put('/update/:userId', (req: Request, res: Response, next: NextFunction) => {
@@ -13,6 +17,10 @@ router.put('/update/:userId', (req: Request, res: Response, next: NextFunction) 
 
     UserController.updateUser(req, res, next)
  });
+
+router.put('/update-image/:userId', upload.single('image'), (req: Request, res: Response, next: NextFunction) =>
+    UserController.updateUserImage(req, res, next)
+);
 router.delete("/:userName", (req: Request, res: Response, next: NextFunction) => UserController.deleteUser(req, res, next));
 router.get("/:userName", (req: Request, res: Response, next: NextFunction) => UserController.getUser(req, res, next));
 router.post("/register", (req: Request, res: Response, next: NextFunction) => {

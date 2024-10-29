@@ -11,7 +11,7 @@
         "experimentalDecorators": true,
         "strictPropertyInitialization": false,
         "emitDecoratorMetadata": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
     },
-    "include": ["src", "context","./package.json"]
+    "include": ["src", "context","./package.json", "types"]
 }

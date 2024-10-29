@@ -11,4 +11,6 @@ export interface IUserRepository {
     delete(userName: string): Promise<string>;
 
     get(userName: string, auth_token: string): Promise<UserWithProfileInfo>;
+
+    updateUserImage(image: Buffer, userId: number): Promise<string>;
 }

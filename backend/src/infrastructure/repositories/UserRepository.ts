@@ -5,7 +5,7 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {UpdateUserData, UserDtoOut, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 
 export class UserRepository implements IUserRepository {
@@ -77,9 +77,7 @@ export class UserRepository implements IUserRepository {
 
         // Save the updated user
         await this.repository.save(userFromBD);
-
         return 'User updated successfully';
-
     }
 
     async login(userName: string, password: string): Promise<string> {
@@ -111,16 +109,17 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
 
-        const user = new User(
-            userFromDB.id,
-            userFromDB.userName,
-            userFromDB.email,
-            userFromDB.birthDate,
-            userFromDB.password,
-            userFromDB.gender,
-            userFromDB.description,
-            userFromDB.isAdmin,
-        );
+        const user: UserDtoOut = {
+            id: userFromDB.id,
+            userName: userFromDB.userName,
+            email: userFromDB.email,
+            birthDate: userFromDB.birthDate, // Convertir a cadena (YYYY-MM-DD)
+            password: userFromDB.password,
+            gender: userFromDB.gender,
+            description: userFromDB.description,
+            isAdmin: userFromDB.isAdmin,
+            image: this.imageToBase64(userFromDB.image) // Convertir la imagen a base64 o null
+        };
 
         const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
 
@@ -129,8 +128,25 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-
         return {user, isOwnProfile};
+    }
+
+    async updateUserImage(image: Buffer, userId: number): Promise<string> {
+        const userFromBD = await this.repository.findOneBy({id: userId});
+        if (!userFromBD) {
+            throw createError(404, `User with Id < ${userId} > does not exist`);
+        }
+        // Verificar que es un Buffer antes de asignar
+        if (image && Buffer.isBuffer(image)) {
+            userFromBD.image = image;  // Asigna el buffer de la imagen si es válido
+        }
+        // Save the updated user
+        await this.repository.save(userFromBD);
+        return this.imageToBase64(userFromBD.image);
+    }
+
+    imageToBase64(image: Buffer | null): string | null {
+        return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
     }
 
 }
