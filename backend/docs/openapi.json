@@ -1,0 +1,150 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ES-B3: MovieMate",
+    "description": "Documentation for ES-B3: MovieMate endpoints",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/user/update/{userId}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User update data.",
+            "schema": {
+              "$ref": "#/definitions/UpdateUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/user/{userName}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/user/register": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User data.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CreateUser": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "example": "carmen"
+        },
+        "email": {
+          "type": "string",
+          "example": "carmen@example.com"
+        },
+        "birthDate": {
+          "type": "string",
+          "example": "1990-01-01"
+        },
+        "password": {
+          "type": "string",
+          "example": "A1b#cd"
+        },
+        "gender": {
+          "type": "string",
+          "example": "Female"
+        }
+      }
+    },
+    "UpdateUser": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "example": "updatedCarmen"
+        },
+        "email": {
+          "type": "string",
+          "example": "updatedCarmen@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "NewPass1#"
+        }
+      }
+    }
+  },
+  "serve": [
+    {
+      "url": "localhost:3000",
+      "variables": {
+        "port": {
+          "default": 3000
+        }
+      }
+    }
+  ]
+}
