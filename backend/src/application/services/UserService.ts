@@ -16,8 +16,8 @@ export class UserService {
         return await this.userRepository.update(userId, userData);
     }
 
-    async loginUser(user: User): Promise<string> {
-        return await this.userRepository.login(user);
+    async loginUser(userName: string, password: string): Promise<string> {
+        return await this.userRepository.login(userName, password);
     }
 
     async deleteUser(userId: string) {

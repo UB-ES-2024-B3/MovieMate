@@ -55,25 +55,14 @@ export class UserController {
 
     static async loginUser(req: Request, res: Response, next: NextFunction) {
         try {
-            const userData = req.body;
-            // Creación del objeto User con los datos validados
-            const user: User = new User(
-                userData.id,
-                userData.userName,
-                userData.email,
-                new Date(userData.birthDate),
-                userData.password,
-                userData.gender,
-                userData.description,
-                userData.isAdmin
+            const userName = String(req.body.userName);
+            const password = String(req.body.password);
 
-            );
-
-            if (!userData.userName || !userData.password) {
+            if (!userName || !password) {
                 return res.status(400).json({ message: "Username and passwords are required" });
             }
 
-            const result = await this.userService.loginUser(user);
+            const result = await this.userService.loginUser(userName, password);
             return res.status(200).json(result);
         } catch(e) {
             return next(e);

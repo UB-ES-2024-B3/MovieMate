@@ -82,10 +82,10 @@ export class UserRepository implements IUserRepository {
 
     }
 
-    async login(user: User): Promise<string> {
-        const existingUser = await this.getByUsername(user.userName);
+    async login(userName: string, password: string): Promise<string> {
+        const existingUser = await this.getByUsername(userName);
 
-        const hashedPassword = createHash('sha256').update(user.password).digest('hex');
+        const hashedPassword = createHash('sha256').update(password).digest('hex');
 
         if (!existingUser || existingUser.password != hashedPassword) {
             throw createError(401, "Username or password are incorrect");
