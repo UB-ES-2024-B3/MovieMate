@@ -78,7 +78,11 @@ export class UserRepository implements IUserRepository {
         // Save the updated user
         await this.repository.save(userFromBD);
 
-        return 'User updated successfully';
+        // Update token
+        const secretKey = 'ES-UB-B3'
+        const token = jwt.sign({userName: userFromBD.userName}, secretKey);
+
+        return token;
 
     }
 
