@@ -134,4 +134,30 @@ export class UserController {
             next(e);
         }
     }
+
+    static async recoverPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = req.body;
+            const token = req.headers.authorization?.split(" ")[1];
+
+            const validationResult = DtoInValidation.validateRecoverPasswordDto(data);
+
+            if (!isRight(validationResult)) {
+                throw createError(400, "Invalid password format!");
+            }
+
+            const validatedData = validationResult.right;
+
+            if (validatedData.password != validatedData.confirmPassword) {
+                throw createError(400, "Password confirmation does not match!");
+            }
+
+            const result = await this.userService.recoverPassword(validatedData.password, token);
+
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }

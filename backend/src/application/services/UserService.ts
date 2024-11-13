@@ -31,4 +31,8 @@ export class UserService {
     async sendRecoveryEmail(email: string): Promise<string> {
         return await this.userRepository.sendRecoveryEmail(email);
     }
+
+    async recoverPassword(password: string, token: string): Promise<string> {
+        return await this.userRepository.recoverPassword(password, token);
+    }
 }
