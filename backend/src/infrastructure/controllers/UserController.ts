@@ -8,6 +8,7 @@ import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
 import {UpdateUserData} from "../../interfaces/Interfaces";
 
+
 container.register(
     "IUserRepository", {
         useClass: UserRepository

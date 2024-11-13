@@ -171,19 +171,20 @@ export class UserRepository implements IUserRepository {
 
     async recoverPassword(password: string, token: string): Promise<string> {
         const secretKey = 'ES-UB-B3'
-        const decoded = jwt.verify(token, secretKey) as jwt.JwtPayload;
+        try {
+            const decoded = jwt.verify(token, secretKey) as jwt.JwtPayload;
 
-        if (decoded == null) {
+            const userFromDB = await this.repository.findOneBy({email: decoded.email});
+
+            const newPassword = createHash('sha256').update(password).digest('hex');
+
+            userFromDB.password = newPassword;
+
+            await this.repository.save(userFromDB);
+
+        } catch (e) {
             throw createError(404, `The token is invalid or has expired`);
         }
-
-        const userFromDB = await this.repository.findOneBy({email: decoded.email});
-
-        const newPassword = createHash('sha256').update(password).digest('hex');
-
-        userFromDB.password = newPassword;
-
-        await this.repository.save(userFromDB);
 
         return 'Password changed successfully';
     }
