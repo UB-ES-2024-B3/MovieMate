@@ -25,5 +25,6 @@ router.post("/register", (req: Request, res: Response, next: NextFunction) => {
     UserController.registerUser(req, res, next);
 });
 router.post("/login", (req: Request, res: Response, next: NextFunction)=> UserController.loginUser(req, res, next));
+router.post("/requestPasswordRecovery", (req: Request, res: Response, next: NextFunction) => UserController.sendRecoveryEmail(req, res, next));
 
 export default router;

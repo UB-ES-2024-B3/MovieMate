@@ -7,6 +7,7 @@ import {createHash} from 'crypto';
 import createError from 'http-errors';
 import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -135,6 +136,34 @@ export class UserRepository implements IUserRepository {
         }
 
         return {user, isOwnProfile};
+    }
+
+    async sendRecoveryEmail(email: string): Promise<string> {
+        const userFromDB = await this.repository.findOneBy({email: email});
+        if (!userFromDB) {
+            throw createError(404, "User with email < ${email} > does not exist");
+        }
+        const secretKey = 'ES-UB-B3'
+        const token = jwt.sign({email: userFromDB.email}, secretKey, {expiresIn: '1h'});
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.zoho.eu',
+            port:587,
+            secure: false,
+            auth: {
+                user: 'moviemate@zohomail.eu',
+                pass: 'Movie#1234ADJLMN'
+            }
+        });
+
+        await transporter.sendMail({
+            from: 'moviemate@zohomail.eu',
+            to: email,
+            subject: 'Password Recovery',
+            html: '<p> Click<a href="http://localhost:3000/user/passwordRecovery?token=${token}">here</a> to reset your password.</p>'
+        });
+
+        return 'Email enviat';
     }
 
 }

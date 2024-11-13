@@ -27,4 +27,8 @@ export class UserService {
     async getUser(userId: string, auth_token: string) {
         return await this.userRepository.get(userId, auth_token);
     }
+
+    async sendRecoveryEmail(email: string): Promise<string> {
+        return await this.userRepository.sendRecoveryEmail(email);
+    }
 }

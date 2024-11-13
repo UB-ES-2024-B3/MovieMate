@@ -123,4 +123,15 @@ export class UserController {
             next(e);
         }
     }
+
+    static async sendRecoveryEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const email = req.body.email;
+
+            const result = await this.userService.sendRecoveryEmail(email);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
 }
