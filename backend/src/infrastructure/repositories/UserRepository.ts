@@ -156,11 +156,14 @@ export class UserRepository implements IUserRepository {
             }
         });
 
+        const baseUrl = "http://localhost:3000/user/passwordRecovery?token="
+        const url = `${baseUrl}${token}`;
+
         await transporter.sendMail({
             from: 'moviemate@zohomail.eu',
             to: email,
             subject: 'Password Recovery',
-            html: '<p> Click<a href="http://localhost:3000/user/passwordRecovery?token=${token}">here</a> to reset your password.</p>'
+            html: `<p> Click <a href="${url}">here</a> to reset your password.</p>`
         });
 
         return 'Email enviat';
