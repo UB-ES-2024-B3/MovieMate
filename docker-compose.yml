@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:latest
     container_name: db_postgres
-    env_file: .env.base
+    env_file: .env
     command: ["postgres", "-c", "maintenance_work_mem=512MB"]
     ports:
       - "5432:5432"
@@ -13,7 +13,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend_sprint1
-    env_file: .env.base
+    env_file: .env
     ports:
       - "3000:3000"
     depends_on:
@@ -25,7 +25,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend_sprint1
-    env_file: .env.base
+    env_file: .env
     ports:
       - "8000:8000"
     depends_on:
