@@ -106,6 +106,14 @@ import axios from 'axios';
 import { mapActions } from 'vuex';
 
 export default {
+    name: 'PerfilUsuario',
+    created() {
+        const authToken = sessionStorage.getItem("auth_token");
+        if (!authToken) {
+            this.$router.push('/login');
+        }
+    },
+
     data() {
         return {
             user: null,
@@ -158,8 +166,18 @@ export default {
         async deleteAccount(){
             try{
                 await axios.delete(`http://localhost:3000/user/${this.$route.params.userName}`);
+                //sessionStorage.setItem("auth_token", null);
+                //sessionStorage.setItem("username", null);
+                sessionStorage.removeItem("auth_token");
+                sessionStorage.removeItem("username");
+                //localStorage.removeItem("auth_token");
+                //localStorage.removeItem("username");
 
-                this.$router.push('/login');
+                // Redirige al login y recarga la página
+                this.$router.replace('/login').then(() => {
+                    window.location.reload();
+                });
+                //this.$router.push('/login');
             }catch (error){
                 console.error('Error al eliminar la cuenta: ', error);
             }
