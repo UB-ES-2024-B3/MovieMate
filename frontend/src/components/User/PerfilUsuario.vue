@@ -40,7 +40,7 @@
         </aside>
 
         <!-- Flecha retorno -->
-        <button @click="retourn" class="absolute left-[20rem] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
+        <button @click="goBack" class="absolute left-[20rem] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
             <img src="../../assets/flecha.png" alt="Flecha de retorno" class="w-12 h-12">
         </button>
 
@@ -104,23 +104,33 @@
 <script>
 import axios from 'axios';
 import { mapActions } from 'vuex';
+//import { EventBus } from '@/eventBus';
 
 export default {
-    name: 'PerfilUsuario',
+    /*name: 'PerfilUsuario',
     created() {
         const authToken = sessionStorage.getItem("auth_token");
         if (!authToken) {
             this.$router.push('/login');
         }
-    },
+    },*/
 
     data() {
         return {
             user: null,
             error: null,
             isLogged: null,
+            isAuthenticated: false,
+            username: "",
         };
     },
+
+    created() {
+        this.checkAuthStatus();
+
+        window.addEventListener('storage', this.checkAuthStatus);
+    },
+
 
     mounted() {
         this.fetchUserData();
@@ -166,26 +176,30 @@ export default {
         async deleteAccount(){
             try{
                 await axios.delete(`http://localhost:3000/user/${this.$route.params.userName}`);
-                //sessionStorage.setItem("auth_token", null);
-                //sessionStorage.setItem("username", null);
+
                 sessionStorage.removeItem("auth_token");
                 sessionStorage.removeItem("username");
-                //localStorage.removeItem("auth_token");
-                //localStorage.removeItem("username");
 
-                // Redirige al login y recarga la página
+                this.checkAuthStatus();
+                this.isAuthenticated = false;
+
                 this.$router.replace('/login').then(() => {
                     window.location.reload();
                 });
-                //this.$router.push('/login');
             }catch (error){
                 console.error('Error al eliminar la cuenta: ', error);
             }
         },
 
-        async retourn(){
+        async goBack(){
             this.$router.go(-1);
-        }
+        },
+
+        checkAuthStatus(){
+            const token = sessionStorage.getItem("auth_token");
+            this.isAuthenticated = !!token;
+            this.username = token ? sessionStorage.getItem('username'):'';
+        },
     }
 };
 </script>
