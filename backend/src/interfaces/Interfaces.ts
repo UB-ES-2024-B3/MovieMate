@@ -12,3 +12,8 @@ export interface UserWithProfileInfo {
     user: User;
     isOwnProfile: boolean;
 }
+
+export interface UsersList {
+    userName: string;
+    description: string;
+}

@@ -1,11 +1,11 @@
-import {Repository} from "typeorm";
+import {ILike, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IUserRepository} from "../../domain/repositories/IUserRepository";
 import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {UpdateUserData, UsersList, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
@@ -186,6 +186,21 @@ export class UserRepository implements IUserRepository {
         }
 
         return 'Password changed successfully';
+    }
+
+    async search(query: string): Promise<UsersList[]> {
+        const users = await this.repository.find({
+            where: [{ userName: ILike(`%${query}%`) }], order: {userName: 'ASC'},
+        });
+
+        if (users.length === 0) {
+            throw createError(404, "Users not found");
+        }
+
+        return users.map(user => ({
+            userName: user.userName,
+            description: user.description || "No description available",
+        }));
     }
 
 }

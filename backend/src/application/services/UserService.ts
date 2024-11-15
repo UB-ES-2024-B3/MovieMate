@@ -1,7 +1,7 @@
 import {User} from "../../domain/models/User";
 import {inject, injectable} from "tsyringe";
 import {IUserRepository} from "../../domain/repositories/IUserRepository";
-import {UpdateUserData} from '../../interfaces/Interfaces';
+import {UpdateUserData, UsersList} from '../../interfaces/Interfaces';
 
 @injectable()
 export class UserService {
@@ -34,5 +34,9 @@ export class UserService {
 
     async recoverPassword(password: string, token: string): Promise<string> {
         return await this.userRepository.recoverPassword(password, token);
+    }
+
+    async searchUsers(query: string): Promise<UsersList[]> {
+        return await this.userRepository.search(query);
     }
 }
