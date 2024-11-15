@@ -46,7 +46,7 @@ export class UserController {
                 validatedData.password,
                 validatedData.gender,
                 null,
-                validatedData.isAdmin
+                validatedData.isAdmin,
             );
 
             const result = await this.userService.registerUser(user);
@@ -63,12 +63,12 @@ export class UserController {
             const password = String(req.body.password);
 
             if (!userName || !password) {
-                return res.status(400).json({message: "Username and passwords are required"});
+                return res.status(400).json({ message: "Username and passwords are required" });
             }
 
             const result = await this.userService.loginUser(userName, password);
             return res.status(200).json(result);
-        } catch (e) {
+        } catch(e) {
             return next(e);
         }
     }
@@ -106,7 +106,7 @@ export class UserController {
                 password: validatedData.password,
                 gender: validatedData.gender,
                 description: validatedData.description,
-                email: validatedData.email,
+                email: validatedData.email
             };
 
             // Call the updateUser method in the UserService
@@ -152,4 +152,41 @@ export class UserController {
             next(e);
         }
     }
+
+    static async sendRecoveryEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const email = req.body.email;
+
+            const result = await this.userService.sendRecoveryEmail(email);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async recoverPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = req.body;
+            const token = req.headers.authorization?.split(" ")[1];
+
+            const validationResult = DtoInValidation.validateRecoverPasswordDto(data);
+
+            if (!isRight(validationResult)) {
+                throw createError(400, "Invalid password format!");
+            }
+
+            const validatedData = validationResult.right;
+
+            if (validatedData.password != validatedData.confirmPassword) {
+                throw createError(400, "Password confirmation does not match!");
+            }
+
+            const result = await this.userService.recoverPassword(validatedData.password, token);
+
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }

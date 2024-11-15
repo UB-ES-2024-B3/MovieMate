@@ -7,6 +7,8 @@ import {createHash} from 'crypto';
 import createError from 'http-errors';
 import {UpdateUserData, UserDtoOut, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import {env} from "../../config/env";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -77,7 +79,13 @@ export class UserRepository implements IUserRepository {
 
         // Save the updated user
         await this.repository.save(userFromBD);
-        return 'User updated successfully';
+
+        // Update token
+        const secretKey = 'ES-UB-B3'
+        const token = jwt.sign({userName: userFromBD.userName}, secretKey);
+
+        return token;
+
     }
 
     async login(userName: string, password: string): Promise<string> {
@@ -88,8 +96,8 @@ export class UserRepository implements IUserRepository {
         if (!existingUser || existingUser.password != hashedPassword) {
             throw createError(401, "Username or password are incorrect");
         }
-        const secretKey = 'ES-UB-B3'
-        const token = jwt.sign({userName: existingUser.userName}, secretKey);
+
+        const token = jwt.sign({userName: existingUser.userName}, env.SECRET_KEY);
 
         return token;
     }
@@ -128,7 +136,58 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
+
         return {user, isOwnProfile};
+    }
+
+    async sendRecoveryEmail(email: string): Promise<string> {
+        const userFromDB = await this.repository.findOneBy({email: email});
+        if (!userFromDB) {
+            throw createError(404, "User with email < ${email} > does not exist");
+        }
+
+        const token = jwt.sign({email: userFromDB.email}, env.SECRET_KEY, {expiresIn: '1h'});
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.zoho.eu',
+            port:587,
+            secure: false,
+            auth: {
+                user: env.MAIL_USER,
+                pass: env.MAIL_PASS,
+            }
+        });
+
+        const baseUrl = "http://localhost:3000/user/passwordRecovery?token="
+        const url = `${baseUrl}${token}`;
+
+        await transporter.sendMail({
+            from: env.MAIL_USER,
+            to: email,
+            subject: 'Password Recovery',
+            html: `<p> Click <a href="${url}">here</a> to reset your password.</p>`
+        });
+
+        return 'Email sent';
+    }
+
+    async recoverPassword(password: string, token: string): Promise<string> {
+        try {
+            const decoded = jwt.verify(token, env.SECRET_KEY) as jwt.JwtPayload;
+
+            const userFromDB = await this.repository.findOneBy({email: decoded.email});
+
+            const newPassword = createHash('sha256').update(password).digest('hex');
+
+            userFromDB.password = newPassword;
+
+            await this.repository.save(userFromDB);
+
+        } catch (e) {
+            throw createError(404, `The token is invalid or has expired`);
+        }
+
+        return 'Password changed successfully';
     }
 
     async updateUserImage(image: Buffer, userId: number): Promise<string> {

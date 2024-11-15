@@ -1,0 +1,15 @@
+FROM node:16
+
+# DIRECTORIO DE TRABAJO
+WORKDIR /app
+
+COPY . .
+
+# INSTALAR DEPENDENCIAS
+RUN npm install
+
+# PORT 3000
+EXPOSE 3000
+
+# EJECUTAR
+CMD ["npm", "run", "dev"]
