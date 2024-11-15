@@ -40,6 +40,11 @@ export class DtoInValidation {
         email: t.union([Email, t.undefined, t.null])
     });
 
+    static RecoverPasswordDtoCodec = t.type({
+        password: Password,
+        confirmPassword: Password
+    })
+
 
     // Método para validar los datos de la solicitud
     static validateUserDto(data: any) {
@@ -49,5 +54,10 @@ export class DtoInValidation {
     // Método para validar los datos de la solicitud para UpdateUserDto
     static validateUpdateUserDto(data: any) {
         return DtoInValidation.UpdateUserDtoCodec.decode(data);
+    }
+
+    // Método para validar los datos de la solicitud para RecoverPasswordDto
+    static validateRecoverPasswordDto(data: any) {
+        return DtoInValidation.RecoverPasswordDtoCodec.decode(data);
     }
 }
