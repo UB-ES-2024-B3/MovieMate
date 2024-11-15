@@ -141,7 +141,7 @@ export class UserRepository implements IUserRepository {
     async sendRecoveryEmail(email: string): Promise<string> {
         const userFromDB = await this.repository.findOneBy({email: email});
         if (!userFromDB) {
-            throw createError(404, "User with email < ${email} > does not exist");
+            throw createError(404, `User with email < ${email} > does not exist`);
         }
 
         const token = jwt.sign({email: userFromDB.email}, EnviromentUtils.getEnvVar('SECRET_KEY'), {expiresIn: '1h'});
