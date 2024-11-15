@@ -8,7 +8,7 @@ import createError from 'http-errors';
 import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-import {env} from "../../config/env";
+import {EnviromentUtils} from "../../../context/env";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -81,8 +81,7 @@ export class UserRepository implements IUserRepository {
         await this.repository.save(userFromBD);
 
         // Update token
-        const secretKey = 'ES-UB-B3'
-        const token = jwt.sign({userName: userFromBD.userName}, secretKey);
+        const token = jwt.sign({userName: userFromBD.userName}, EnviromentUtils.getEnvVar('SECRET_KEY'));
 
         return token;
 
@@ -97,7 +96,7 @@ export class UserRepository implements IUserRepository {
             throw createError(401, "Username or password are incorrect");
         }
 
-        const token = jwt.sign({userName: existingUser.userName}, env.SECRET_KEY);
+        const token = jwt.sign({userName: existingUser.userName}, EnviromentUtils.getEnvVar('SECRET_KEY'));
 
         return token;
     }
@@ -145,15 +144,15 @@ export class UserRepository implements IUserRepository {
             throw createError(404, "User with email < ${email} > does not exist");
         }
 
-        const token = jwt.sign({email: userFromDB.email}, env.SECRET_KEY, {expiresIn: '1h'});
+        const token = jwt.sign({email: userFromDB.email}, EnviromentUtils.getEnvVar('SECRET_KEY'), {expiresIn: '1h'});
 
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
             port:587,
             secure: false,
             auth: {
-                user: env.MAIL_USER,
-                pass: env.MAIL_PASS,
+                user: EnviromentUtils.getEnvVar('MAIL_USER'),
+                pass: EnviromentUtils.getEnvVar('MAIL_PASS'),
             }
         });
 
@@ -161,7 +160,7 @@ export class UserRepository implements IUserRepository {
         const url = `${baseUrl}${token}`;
 
         await transporter.sendMail({
-            from: env.MAIL_USER,
+            from: EnviromentUtils.getEnvVar('MAIL_USER'),
             to: email,
             subject: 'Password Recovery',
             html: `<p> Click <a href="${url}">here</a> to reset your password.</p>`
@@ -172,7 +171,7 @@ export class UserRepository implements IUserRepository {
 
     async recoverPassword(password: string, token: string): Promise<string> {
         try {
-            const decoded = jwt.verify(token, env.SECRET_KEY) as jwt.JwtPayload;
+            const decoded = jwt.verify(token, EnviromentUtils.getEnvVar('SECRET_KEY')) as jwt.JwtPayload;
 
             const userFromDB = await this.repository.findOneBy({email: decoded.email});
 
