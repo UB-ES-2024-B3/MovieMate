@@ -136,7 +136,6 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-
         return {user, isOwnProfile};
     }
 
@@ -150,7 +149,7 @@ export class UserRepository implements IUserRepository {
 
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
-            port:587,
+            port: 587,
             secure: false,
             auth: {
                 user: env.MAIL_USER,
