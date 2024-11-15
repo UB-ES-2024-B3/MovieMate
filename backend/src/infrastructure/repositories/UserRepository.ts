@@ -8,6 +8,7 @@ import createError from 'http-errors';
 import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import {env} from "../../config/env";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -95,8 +96,8 @@ export class UserRepository implements IUserRepository {
         if (!existingUser || existingUser.password != hashedPassword) {
             throw createError(401, "Username or password are incorrect");
         }
-        const secretKey = 'ES-UB-B3'
-        const token = jwt.sign({userName: existingUser.userName}, secretKey);
+
+        const token = jwt.sign({userName: existingUser.userName}, env.SECRET_KEY);
 
         return token;
     }
@@ -143,16 +144,16 @@ export class UserRepository implements IUserRepository {
         if (!userFromDB) {
             throw createError(404, "User with email < ${email} > does not exist");
         }
-        const secretKey = 'ES-UB-B3'
-        const token = jwt.sign({email: userFromDB.email}, secretKey, {expiresIn: '1h'});
+
+        const token = jwt.sign({email: userFromDB.email}, env.SECRET_KEY, {expiresIn: '1h'});
 
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
             port:587,
             secure: false,
             auth: {
-                user: 'moviemate@zohomail.eu',
-                pass: 'Movie#1234ADJLMN'
+                user: env.MAIL_USER,
+                pass: env.MAIL_PASS,
             }
         });
 
@@ -160,7 +161,7 @@ export class UserRepository implements IUserRepository {
         const url = `${baseUrl}${token}`;
 
         await transporter.sendMail({
-            from: 'moviemate@zohomail.eu',
+            from: env.MAIL_USER,
             to: email,
             subject: 'Password Recovery',
             html: `<p> Click <a href="${url}">here</a> to reset your password.</p>`
@@ -170,9 +171,8 @@ export class UserRepository implements IUserRepository {
     }
 
     async recoverPassword(password: string, token: string): Promise<string> {
-        const secretKey = 'ES-UB-B3'
         try {
-            const decoded = jwt.verify(token, secretKey) as jwt.JwtPayload;
+            const decoded = jwt.verify(token, env.SECRET_KEY) as jwt.JwtPayload;
 
             const userFromDB = await this.repository.findOneBy({email: decoded.email});
 
