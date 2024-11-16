@@ -157,7 +157,7 @@ export class UserRepository implements IUserRepository {
             }
         });
 
-        const baseUrl = "http://localhost:8080/recovery/"
+        const baseUrl = "http://localhost:8000/recovery/"
         const url = `${baseUrl}${token}`;
 
         await transporter.sendMail({
