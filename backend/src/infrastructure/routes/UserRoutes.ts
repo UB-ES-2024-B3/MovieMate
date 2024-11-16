@@ -13,6 +13,7 @@ router.put('/update/:userId', (req: Request, res: Response, next: NextFunction) 
 
     UserController.updateUser(req, res, next)
  });
+router.get("/search", (req: Request, res: Response, next: NextFunction) => UserController.searchUsers(req, res, next));
 router.delete("/:userName", (req: Request, res: Response, next: NextFunction) => UserController.deleteUser(req, res, next));
 router.get("/:userName", (req: Request, res: Response, next: NextFunction) => UserController.getUser(req, res, next));
 router.post("/register", (req: Request, res: Response, next: NextFunction) => {
@@ -27,5 +28,6 @@ router.post("/register", (req: Request, res: Response, next: NextFunction) => {
 router.post("/login", (req: Request, res: Response, next: NextFunction)=> UserController.loginUser(req, res, next));
 router.post("/requestPasswordRecovery", (req: Request, res: Response, next: NextFunction) => UserController.sendRecoveryEmail(req, res, next));
 router.put("/passwordRecovery", (req: Request, res: Response, next: NextFunction) => UserController.recoverPassword(req, res, next));
+
 
 export default router;
