@@ -129,8 +129,9 @@ export default {
   methods: {
     async updateUserProfile() {
       try {
+        const BASE_URL = process.env['VUE_APP_API_BASE_URL']
         const response = await axios.put(
-            `http://localhost:3000/user/update/${this.formData.id}`,
+            `${BASE_URL}/user/update/${this.formData.id}`,
             this.formData
         );
         if (response.status === 200) {

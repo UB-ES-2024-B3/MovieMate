@@ -204,6 +204,7 @@ export class UserRepository implements IUserRepository {
 
     imageToBase64(image: Buffer | null): string | null {
         return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
+    }
 
     async search(query: string): Promise<UsersList[]> {
         const users = await this.repository.find({

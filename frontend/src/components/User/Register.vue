@@ -427,7 +427,8 @@ export default {
       };
 
       try {
-        const response = await axios.post('http://localhost:3000/user/register', data);
+        const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+        const response = await axios.post(`${BASE_URL}/user/register`, data);
 
         if (response.status === 200) {
             this.showToastWithMessage(
