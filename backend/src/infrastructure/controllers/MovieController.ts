@@ -23,4 +23,12 @@ export class MovieController {
             next(e);
         }
     }
+    static async getAllMovies(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.movieService.getAllMovies();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
 }

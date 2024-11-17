@@ -12,7 +12,7 @@ export class MovieRepository implements IMovieRepository {
         this.repository = PostgreTypeOrmDataSource.getRepository(MovieEntity);
     }
 
-    async get(title:string): Promise<Movie> {
+    async get(title: string): Promise<Movie> {
         const movieFromDB = await this.repository.findOneBy({title: title});
         if (!movieFromDB) {
             throw createError(404, `Movie with title < ${title} > does not exist`);
@@ -31,5 +31,26 @@ export class MovieRepository implements IMovieRepository {
         );
 
         return movie;
+    }
+
+    async getAll(): Promise<Movie[]> {
+        const moviesFromDB = await this.repository.find();
+        if (!moviesFromDB) {
+            throw createError(404, `No movies found`);
+        }
+        const allMovies = moviesFromDB.map((moviesFromDB: MovieEntity) => {
+            return new Movie(
+                moviesFromDB.id,
+                moviesFromDB.title,
+                moviesFromDB.description,
+                moviesFromDB.genres,
+                moviesFromDB.directors,
+                moviesFromDB.actors,
+                moviesFromDB.premiereDate,
+                moviesFromDB.duration,
+                moviesFromDB.classification
+            );
+        })
+        return allMovies;
     }
 }

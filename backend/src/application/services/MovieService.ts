@@ -10,4 +10,8 @@ export class MovieService {
     async getMovie(title: string): Promise<Movie> {
         return await this.movieRepository.get(title);
     }
+
+    async getAllMovies() {
+        return await this.movieRepository.getAll();
+    }
 }
