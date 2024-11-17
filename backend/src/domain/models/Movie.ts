@@ -1,4 +1,5 @@
-export class Movie{
+export class Movie {
+
     constructor(
         private _id: number,
         private _title: string,
@@ -8,7 +9,8 @@ export class Movie{
         private _actors: string,
         private _premiereDate: Date,
         private _duration: number,
-        private _classification: string
+        private _classification: string,
+        private _score: number
     ) {
     }
 
@@ -83,5 +85,13 @@ export class Movie{
 
     set classification(value: string) {
         this._classification = value;
+    }
+
+    get score(): number {
+        return this._score;
+    }
+
+    set score(value: number) {
+        this._score = value;
     }
 }
