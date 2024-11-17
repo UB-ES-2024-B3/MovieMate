@@ -140,12 +140,12 @@ export default {
                 });
                 const {user, isOwnProfile} = response.data;
                 this.user = {
-                    id: user._id,
-                    userName: user._userName,
-                    email: user._email,
-                    gender: user._gender,
-                    description: user._description,
-                    isAdmin: user._isAdmin,
+                    id: user.id,
+                    userName: user.userName,
+                    email: user.email,
+                    gender: user.gender,
+                    description: user.description,
+                    isAdmin: user.isAdmin,
                 };
                 this.isLogged = isOwnProfile;
                 await this.setUserData(this.user);
