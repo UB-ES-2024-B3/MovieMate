@@ -7,7 +7,8 @@ export class User {
         private _password: string,
         private _gender: string,
         private _description: string,
-        private _isAdmin: boolean
+        private _isAdmin: boolean,
+        private _image?: Buffer
     ) {
     }
 
@@ -83,4 +84,19 @@ export class User {
     set description(value: string) {
         this._description = value;
     }
+
+    get image(): Buffer | undefined {
+        // image como Buffer para ser compatible con UserEntity
+        return this._image;
+    }
+
+    set image(value: Buffer | null) {
+        this._image = value ?? undefined;
+    }
+
+    // Función para convertir la imagen a base64
+    imageToBase64(): string | null {
+        return this._image ? `data:image/jpeg;base64,${this._image.toString('base64')}` : null;
+    }
+
 }

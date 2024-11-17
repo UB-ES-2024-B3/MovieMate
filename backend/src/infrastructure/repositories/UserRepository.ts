@@ -5,7 +5,7 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UsersList, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {UpdateUserData, UsersList, UserDtoOut, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
@@ -116,16 +116,17 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
 
-        const user = new User(
-            userFromDB.id,
-            userFromDB.userName,
-            userFromDB.email,
-            userFromDB.birthDate,
-            userFromDB.password,
-            userFromDB.gender,
-            userFromDB.description,
-            userFromDB.isAdmin,
-        );
+        const user: UserDtoOut = {
+            id: userFromDB.id,
+            userName: userFromDB.userName,
+            email: userFromDB.email,
+            birthDate: userFromDB.birthDate, // Convertir a cadena (YYYY-MM-DD)
+            password: userFromDB.password,
+            gender: userFromDB.gender,
+            description: userFromDB.description,
+            isAdmin: userFromDB.isAdmin,
+            image: this.imageToBase64(userFromDB.image) // Convertir la imagen a base64 o null
+        };
 
         const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
 
@@ -134,7 +135,6 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-
         return {user, isOwnProfile};
     }
 
@@ -148,7 +148,7 @@ export class UserRepository implements IUserRepository {
 
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
-            port:587,
+            port: 587,
             secure: false,
             auth: {
                 user: EnviromentUtils.getEnvVar('MAIL_USER'),
@@ -188,6 +188,23 @@ export class UserRepository implements IUserRepository {
         return 'Password changed successfully';
     }
 
+    async updateUserImage(image: Buffer, userId: number): Promise<string> {
+        const userFromBD = await this.repository.findOneBy({id: userId});
+        if (!userFromBD) {
+            throw createError(404, `User with Id < ${userId} > does not exist`);
+        }
+        // Verificar que es un Buffer antes de asignar
+        if (image && Buffer.isBuffer(image)) {
+            userFromBD.image = image;  // Asigna el buffer de la imagen si es válido
+        }
+        // Save the updated user
+        await this.repository.save(userFromBD);
+        return this.imageToBase64(userFromBD.image);
+    }
+
+    imageToBase64(image: Buffer | null): string | null {
+        return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
+
     async search(query: string): Promise<UsersList[]> {
         const users = await this.repository.find({
             where: [{ userName: ILike(`%${query}%`) }], order: {userName: 'ASC'},
@@ -201,6 +218,7 @@ export class UserRepository implements IUserRepository {
             userName: user.userName,
             description: user.description || "No description available",
         }));
+
     }
 
 }
