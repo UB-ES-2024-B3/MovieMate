@@ -31,4 +31,13 @@ export class MovieController {
             next(e);
         }
     }
+
+    static async getTop10(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.movieService.getTop10();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
 }

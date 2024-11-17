@@ -28,4 +28,7 @@ export class MovieEntity extends BaseEntity {
 
     @Column({nullable: true})
     classification: string;
+
+    @Column({nullable: true, type: "float"})
+    score: number;
 }

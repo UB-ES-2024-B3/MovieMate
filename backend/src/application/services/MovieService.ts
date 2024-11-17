@@ -14,4 +14,8 @@ export class MovieService {
     async getAllMovies() {
         return await this.movieRepository.getAll();
     }
+
+    async getTop10() {
+        return await this.movieRepository.getTop10();
+    }
 }

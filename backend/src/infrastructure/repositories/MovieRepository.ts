@@ -27,7 +27,8 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.actors,
             movieFromDB.premiereDate,
             movieFromDB.duration,
-            movieFromDB.classification
+            movieFromDB.classification,
+            movieFromDB.score
         );
 
         return movie;
@@ -48,9 +49,38 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.actors,
                 moviesFromDB.premiereDate,
                 moviesFromDB.duration,
-                moviesFromDB.classification
+                moviesFromDB.classification,
+                moviesFromDB.score
             );
         })
         return allMovies;
+    }
+
+    async getTop10(): Promise<Movie[]> {
+        const top10FromDB = await this.repository.find({
+            order: {score: 'DESC'},
+            take: 10
+        });
+
+        if (!top10FromDB || top10FromDB.length === 0) {
+            throw createError('404, No top 10 movies found');
+        }
+
+        const top10movies = top10FromDB.map((movieEntity: MovieEntity) => {
+            return new Movie(
+                movieEntity.id,
+                movieEntity.title,
+                movieEntity.description,
+                movieEntity.genres,
+                movieEntity.directors,
+                movieEntity.actors,
+                movieEntity.premiereDate,
+                movieEntity.duration,
+                movieEntity.classification,
+                movieEntity.score
+            );
+        });
+
+        return top10movies;
     }
 }
