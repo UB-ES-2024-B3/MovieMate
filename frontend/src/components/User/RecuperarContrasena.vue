@@ -345,7 +345,8 @@ export default {
                 }
 
                 // Realizar la solicitud al endpoint
-                const response = await axios.put('http://localhost:3000/user/passwordRecovery', data, {
+                const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+                const response = await axios.put(`${BASE_URL}/user/passwordRecovery`, data, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

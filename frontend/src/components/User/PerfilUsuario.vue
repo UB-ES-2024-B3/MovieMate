@@ -132,20 +132,20 @@ export default {
         async fetchUserData() {
             try {
                 const token = sessionStorage.getItem("auth_token");
-
-                const response = await axios.get(`http://localhost:3000/user/${this.$route.params.userName}`, {
+                const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+                const response = await axios.get(`${BASE_URL}/user/${this.$route.params.userName}`, {
                   headers: {
                     Authorization: `Bearer ${token}`
                   }
                 });
                 const {user, isOwnProfile} = response.data;
                 this.user = {
-                    id: user._id,
-                    userName: user._userName,
-                    email: user._email,
-                    gender: user._gender,
-                    description: user._description,
-                    isAdmin: user._isAdmin,
+                    id: user.id,
+                    userName: user.userName,
+                    email: user.email,
+                    gender: user.gender,
+                    description: user.description,
+                    isAdmin: user.isAdmin,
                 };
                 this.isLogged = isOwnProfile;
                 await this.setUserData(this.user);
@@ -166,7 +166,8 @@ export default {
 
         async deleteAccount(){
             try{
-                await axios.delete(`http://localhost:3000/user/${this.$route.params.userName}`);
+                const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+                await axios.delete(`${BASE_URL}/user/${this.$route.params.userName}`);
 
                 sessionStorage.removeItem("auth_token");
                 sessionStorage.removeItem("username");
