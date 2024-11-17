@@ -104,17 +104,8 @@
 <script>
 import axios from 'axios';
 import { mapActions } from 'vuex';
-//import { EventBus } from '@/eventBus';
 
 export default {
-    /*name: 'PerfilUsuario',
-    created() {
-        const authToken = sessionStorage.getItem("auth_token");
-        if (!authToken) {
-            this.$router.push('/login');
-        }
-    },*/
-
     data() {
         return {
             user: null,

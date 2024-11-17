@@ -42,9 +42,47 @@
           >
             Log in
           </button>
+
+            <!-- Botón recuperar contraseña -->
+            <button
+                    type="button"
+                    class="text-sm font-light text-gray-500 dark:text-gray-400 hover:underline"
+                    @click="openModal"
+            >
+                Forgot your password?
+                <span class="font-medium text-primary-600 dark:text-primary-500">Recover here</span>
+            </button>
+
         </form>
       </div>
     </div>
+
+      <!-- Modal recuperación contraseña -->
+      <div v-if="isModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="form_background_input rounded-lg shadow-lg w-full max-w-md p-6">
+              <h2 class="text-lg font-bold text-center form_title_text mb-4">Recover Password</h2>
+              <input
+                      type="email"
+                      v-model="email"
+                      placeholder="Enter your email address"
+                      class="form_text_input text-sm rounded-lg w-full p-2.5 mb-4"
+              />
+              <!-- Mensaje de error -->
+              <div v-if="messageType=='error'" class="text-red-500 text-sm mb-4">{{ message }}</div>
+              <div v-if="messageType=='success'" class="text-gray-500 text-sm mb-4">{{message}}</div>
+
+              <div class="flex space-x-4">
+                  <button
+                          class="w-1/2 text-red-500 font-medium rounded-lg px-5 py-2.5 border-2 border-red-500 hover:bg-red-500 hover:text-white transition duration-200"
+                          @click="closeModal"
+                  > Cancelar </button>
+                  <button
+                          class="w-1/2 text-black font-medium rounded-lg px-5 py-2.5 border-2 border-black hover:bg-black hover:text-white transition duration-200"
+                          @click="recoverPassword"
+                  >Recover</button>
+              </div>
+          </div>
+      </div>
   </div>
 </template>
 
@@ -58,6 +96,10 @@ export default {
       username: '',
       password: '',
       error: null,
+        isModal: false,
+        email: '',
+        message:'',
+        messageType:'',
     };
   },
   methods: {
@@ -83,6 +125,44 @@ export default {
       this.error = 'Please, try again later';
     }
     },
+      openModal(){
+        this.isModal=true;
+        this.message='';
+        this.email='';
+        this.messageType='';
+      },
+
+      closeModal(){
+        this.isModal=false;
+        this.message='';
+        this.messageType='';
+      },
+
+      async recoverPassword(){
+        if(!this.email){
+            this.message = 'Please enter your email address';
+            this.messageType='error';
+            return;
+        }
+
+        try{
+            // eslint-disable-next-line no-unused-vars
+            const  response = await  axios.post('http://localhost:3000/user/requestPasswordRecovery', {email: this.email});
+
+            this.message = 'Email sent';
+            this.messageType = 'success';
+        }catch(error){
+            console.error("Error response:", error);
+            if(error.response && error.response.data && error.response.status == 404){
+                this.message = 'User with email does not exist';
+                this.messageType = 'error';
+            } else{
+                this.message = 'An unexpected error occurred. Please try again later';
+                this.messageType = 'error'
+            }
+
+        }
+      }
   },
 };
 </script>

@@ -289,19 +289,39 @@ export default {
       toastError: false
     };
   },
+  beforeMount() {
+    if (!window.Datepicker) {
+      const script = document.createElement('script');
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/flowbite-datepicker/1.0.0/js/datepicker.min.js";
+      script.onload = this.initializeDatepicker;
+      document.head.appendChild(script);
+    } else {
+      this.initializeDatepicker();
+    }
+  },
   mounted() {
     const today = new Date();
     const sixteenYearsAgo = new Date(today.setFullYear(today.getFullYear() - 16));
-
-    this.maxDate = `${sixteenYearsAgo.getFullYear()}-${String(sixteenYearsAgo.getMonth() + 1).padStart(2, '0')}/${String(sixteenYearsAgo.getDate()).padStart(2, '0')}`;
-
-    const datepickerElement = this.$refs.birthdateInput;
-
-    datepickerElement.addEventListener('changeDate', (event) => {
-      this.birthDate = event.target.value;
-    });
+    this.maxDate = `${sixteenYearsAgo.getFullYear()}-${String(sixteenYearsAgo.getMonth() + 1).padStart(2, '0')}-${String(sixteenYearsAgo.getDate()).padStart(2, '0')}`;
   },
   methods: {
+    initializeDatepicker() {
+      this.$nextTick(() => {
+        const datepickerElement = this.$refs.birthdateInput;
+        if (window.Datepicker) {
+          new window.Datepicker(datepickerElement, {
+            autohide: true,
+            format: 'yyyy-mm-dd',
+            maxDate: this.maxDate,
+          });
+          datepickerElement.addEventListener('changeDate', (event) => {
+            this.birthDate = event.target.value;
+          });
+        } else {
+          console.error("Datepicker no está disponible.");
+        }
+      });
+    },
     hideToast() {
       this.showToast = false;
     },

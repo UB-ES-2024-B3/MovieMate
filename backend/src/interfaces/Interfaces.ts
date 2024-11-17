@@ -25,3 +25,9 @@ export interface UserDtoOut {
     isAdmin: boolean;
     image: string | null;
 }
+
+export interface UsersList {
+    userName: string;
+    description: string;
+}
+
