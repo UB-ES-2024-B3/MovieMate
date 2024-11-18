@@ -18,7 +18,13 @@ jobs:
     - name: Log in to Azure CLI
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: >
+          {
+            "clientId": "e954483b-b765-4f77-8ab6-05421fbf9976",
+            "clientSecret": "D608Q~zsG5X7nmjJQKmtj1lSOL6ipOPMIfuLadrT",
+            "subscriptionId": "a5f09d52-7f97-4b2a-aea4-7779acd29a21",
+            "tenantId": "a2313cab-b1c3-4f3a-bb11-2157447ddbb4"
+          }
 
     # 3. Build and push Docker images
     - name: Log in to ACR
