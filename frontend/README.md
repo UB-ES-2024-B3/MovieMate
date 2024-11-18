@@ -29,13 +29,6 @@ Para trabajar con esta aplicación tenemos una serie de carpetas:
 - src/components: Añadir todos los componentes de la aplicacion
 - src/router: Para linkear todos los componentes con la aplicacion
 - src/style: Añadir todos los CSS pero con Tailwind no necesitaremos
-- 
-## Variables de entorno
-
-```sh
-VUE_APP_API_BASE_URL=http://localhost:3000;
-```
-
 ## Contribución
 
 Las pull requests son bienvenidas. Para grandes cambios, abrid primero un incident para poder discutir en profundidad.

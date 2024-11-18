@@ -2,8 +2,8 @@ const swaggerAutogen = require('swagger-autogen');
 
 // const outputFile = process.env['OPENAPI_PATH'];
 const outputFile = "./docs/openapi.json";
-const hostUrl = process.env['SW_HOST'] || 'localhost';
-const portUrl = process.env['SW_PORT'] || '3000';
+const hostUrl = process.env['HOST'] || 'localhost';
+const portUrl = process.env['PORT'] || '3000';
 
 const doc = {
     info: {

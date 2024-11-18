@@ -6,28 +6,9 @@ export interface UpdateUserData {
     gender?: string;
     description?: string;
     email?: string;
-    image?: any;
 }
 
 export interface UserWithProfileInfo {
-    user: UserDtoOut;
+    user: User;
     isOwnProfile: boolean;
 }
-
-export interface UserDtoOut {
-    id: number;
-    userName: string;
-    email: string;
-    birthDate: Date;
-    password: string;
-    gender: string;
-    description: string | null;
-    isAdmin: boolean;
-    image: string | null;
-}
-
-export interface UsersList {
-    userName: string;
-    description: string;
-}
-
