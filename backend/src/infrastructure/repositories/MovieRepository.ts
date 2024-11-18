@@ -28,7 +28,8 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.premiereDate,
             movieFromDB.duration,
             movieFromDB.classification,
-            movieFromDB.score
+            movieFromDB.score,
+            this.imageToBase64(movieFromDB.image)
         );
 
         return movie;
@@ -50,9 +51,10 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.premiereDate,
                 moviesFromDB.duration,
                 moviesFromDB.classification,
-                moviesFromDB.score
+                moviesFromDB.score,
+                this.imageToBase64(moviesFromDB.image)
             );
-        })
+        });
         return allMovies;
     }
 
@@ -66,21 +68,26 @@ export class MovieRepository implements IMovieRepository {
             throw createError('404, No top 10 movies found');
         }
 
-        const top10movies = top10FromDB.map((movieEntity: MovieEntity) => {
+        const top10movies = top10FromDB.map((top10FromDB: MovieEntity) => {
             return new Movie(
-                movieEntity.id,
-                movieEntity.title,
-                movieEntity.description,
-                movieEntity.genres,
-                movieEntity.directors,
-                movieEntity.actors,
-                movieEntity.premiereDate,
-                movieEntity.duration,
-                movieEntity.classification,
-                movieEntity.score
+                top10FromDB.id,
+                top10FromDB.title,
+                top10FromDB.description,
+                top10FromDB.genres,
+                top10FromDB.directors,
+                top10FromDB.actors,
+                top10FromDB.premiereDate,
+                top10FromDB.duration,
+                top10FromDB.classification,
+                top10FromDB.score,
+                this.imageToBase64(top10FromDB.image)
             );
         });
 
         return top10movies;
+    }
+
+    imageToBase64(image: Buffer | null): string | null {
+        return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
     }
 }

@@ -10,7 +10,8 @@ export class Movie {
         private _premiereDate: Date,
         private _duration: number,
         private _classification: string,
-        private _score: number
+        private _score: number,
+        private _image?: Buffer | string
     ) {
     }
 
@@ -93,5 +94,19 @@ export class Movie {
 
     set score(value: number) {
         this._score = value;
+    }
+
+    get image(): Buffer | string | undefined {
+        // image como Buffer para ser compatible con UserEntity
+        return this._image;
+    }
+
+    set image(value: Buffer | null) {
+        this._image = value ?? undefined;
+    }
+
+    // Función para convertir la imagen a base64
+    imageToBase64(): string | null {
+        return this._image ? `data:image/jpeg;base64,${this._image.toString('base64')}` : null;
     }
 }
