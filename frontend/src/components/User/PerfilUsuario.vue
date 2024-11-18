@@ -52,7 +52,17 @@
                 <div class="flex items-center justify-between mb-8">
                     <!-- Avatar y descripción -->
                     <div class="flex items-center">
-                        <div class="w-28 h-28 bg-gray-500 rounded-full mr-8"></div>
+                        <div class="w-28 h-28 bg-gray-500 rounded-full mr-8 overflow-hidden flex items-center justify-center">
+                            <!-- Mostrar imagen si existe -->
+                            <img
+                                v-if="user?.image"
+                                :src="user.image"
+                                alt="Profile"
+                                class="w-full h-full object-cover"
+                            />
+                            <!-- Mostrar ícono por defecto si no hay imagen -->
+                            <span v-else class="text-white text-5xl">&#128100;</span>
+                        </div>
 
                         <!-- Información del perfil -->
                         <div class="text-left">
@@ -140,6 +150,7 @@ export default {
                     gender: user.gender,
                     description: user.description,
                     isAdmin: user.isAdmin,
+                    image: user.image,
                 };
                 this.isLogged = isOwnProfile;
                 await this.setUserData(this.user);
