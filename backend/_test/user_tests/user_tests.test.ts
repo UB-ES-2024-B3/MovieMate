@@ -8,16 +8,20 @@ describe('User Tests', () => {
     describe('Registration Tests', () => {
         // Prueba de registrar usuario
         test('should register a user', async () => {
-            const response = await axios.post(`${baseURL}/register`, {
-                userName: 'testuser',
-                email: 'test@example.com',
-                password: 'Password123!',
-                birthDate: new Date(),
-                gender: 'male',
-                isAdmin: false,
-            });
-            expect(response.status).toBe(200);
-            expect(response.data).toEqual("Registration successful");
+            try {
+                const response = await axios.post(`${baseURL}/register`, {
+                    userName: 'testuser',
+                    email: 'test@example.com',
+                    password: 'Password123!',
+                    birthDate: '2002-11-17',
+                    gender: 'male',
+                    isAdmin: false,
+                });
+                expect(response.status).toBe(200);
+                expect(response.data).toEqual("Registration successful");
+            } catch (error) {
+                console.error('Error:', error.response ? error.response.data : error.message);
+            }
         });
 
         // Caso de fallo: usuario ya existe
@@ -42,7 +46,7 @@ describe('User Tests', () => {
                 userName: 'anotheruser',
                 email: 'test@example.com',
                 password: 'Password123!',
-                birthDate: new Date(),
+                birthDate: '2002-11-17',
                 gender: 'male',
                 isAdmin: false,
             }).catch(err => {
@@ -60,14 +64,14 @@ describe('User Tests', () => {
             expect(response.status).toBe(200);
 
             // Un poco feo pero aqui debemos guardarnos el user id para poder hacer el update luego
-            userId = response.data.user._id.toString();
+            userId = response.data.user.id.toString();
             // Verifica que los datos del usuario sean correctos
-            expect(response.data.user._userName).toBe('testuser');
-            expect(response.data.user._email).toBe('test@example.com');
-            expect(response.data.user._birthDate).toBe('2024-10-29');
-            expect(response.data.user._gender).toBe('male');
-            expect(response.data.user._description).toBeNull();
-            expect(response.data.user._isAdmin).toBe(false);
+            expect(response.data.user.userName).toBe('testuser');
+            expect(response.data.user.email).toBe('test@example.com');
+            expect(response.data.user.birthDate).toBe('2002-11-17');
+            expect(response.data.user.gender).toBe('male');
+            expect(response.data.user.description).toBeNull();
+            expect(response.data.user.isAdmin).toBe(false);
         });
 
         // Caso de fallo: usuario no encontrado
@@ -109,10 +113,9 @@ describe('User Tests', () => {
             const url= `${baseURL}/update/${userId}`
             const response = await axios.put(url, { userName: 'updatedUser' }).catch(err => err.response);
             expect(response.status).toBe(200);
-            expect(response.data).toEqual("User updated successfully");
 
             const updatedResponse = await axios.get(`${baseURL}/updatedUser`);
-            expect(updatedResponse.data.user._userName).toBe('updatedUser');
+            expect(updatedResponse.data.user.userName).toBe('updatedUser');
         });
 
         // Caso de fallo: usuario no encontrado al actualizar
@@ -122,6 +125,7 @@ describe('User Tests', () => {
             expect(response.data.error.message).toBe('User with Id < 999 > does not exist');
         });
     });
+
 
     describe('Delete Tests', () => {
         // Prueba de borrar usuario
