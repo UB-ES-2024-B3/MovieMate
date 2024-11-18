@@ -8,6 +8,9 @@ import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
 import {UpdateUserData} from "../../interfaces/Interfaces";
 
+const multer = require("multer")
+const storage = multer.memoryStorage();
+const upload = multer({storage});
 
 container.register(
     "IUserRepository", {
@@ -108,6 +111,31 @@ export class UserController {
 
             // Call the updateUser method in the UserService
             const result = await this.userService.updateUser(userId, userData);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async updateUserImage(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = parseInt(req.params.userId);
+
+            if (!req.file) {
+                throw createError(400, "No image file provided");
+            }
+
+            // Validar el tipo MIME para asegurarse de que es una imagen válida
+            const validMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validMimeTypes.includes(req.file.mimetype)) {
+                throw createError(400, "Invalid image format. Only JPEG, PNG and JPG, are allowed.");
+            }
+
+            // Asignar el Buffer de la imagen si existe y es válida
+            const image = req.file.buffer;
+
+            // Llamar al método updateUserImage en el servicio
+            const result = await this.userService.updateUserImage(image, userId);
             return res.status(200).json(result);
         } catch (e) {
             next(e);

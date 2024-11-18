@@ -109,7 +109,9 @@ export default {
           userName: this.username.toString(),
           password: this.password.toString()
         };
-        const response = await axios.post('http://localhost:3000/user/login', data);
+        const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+
+        const response = await axios.post(`${BASE_URL}/user/login`, data);
         // Verificamos si la autenticación fue exitosa y guardamos el token (LAIA)
         if (response.status === 200) {
           // usamos sessionStorage como temporal
@@ -146,8 +148,9 @@ export default {
         }
 
         try{
+            const BASE_URL = process.env['VUE_APP_API_BASE_URL']
             // eslint-disable-next-line no-unused-vars
-            const  response = await  axios.post('http://localhost:3000/user/requestPasswordRecovery', {email: this.email});
+            const  response = await  axios.post(`${BASE_URL}/user/requestPasswordRecovery`, {email: this.email});
 
             this.message = 'Email sent';
             this.messageType = 'success';

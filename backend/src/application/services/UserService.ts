@@ -16,6 +16,10 @@ export class UserService {
         return await this.userRepository.update(userId, userData);
     }
 
+    async updateUserImage(image: Buffer | null, userId: number): Promise<string> {
+        return await this.userRepository.updateUserImage(image, userId);
+    }
+
     async loginUser(userName: string, password: string): Promise<string> {
         return await this.userRepository.login(userName, password);
     }

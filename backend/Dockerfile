@@ -8,8 +8,13 @@ COPY . .
 # INSTALAR DEPENDENCIAS
 RUN npm install
 
-# PORT 3000
+# COPIAR EL ARCHIVO SQL Y EL SCRIPT DE EJECUCIÓN
+COPY ./docs/insert-movies.sql /app/scripts/
+COPY ./docs/init-movies.js /app/scripts/
+COPY ./docs/start.sh /app/start.sh
+
+# EXPONER PUERTO
 EXPOSE 3000
 
-# EJECUTAR
-CMD ["npm", "run", "dev"]
+# COMANDO DE INICIO
+CMD ["sh", "/app/start.sh"]

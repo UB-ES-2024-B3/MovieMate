@@ -25,4 +25,7 @@ export class UserEntity extends BaseEntity {
 
     @Column({nullable: false, default: false})
     isAdmin: boolean;
+
+    @Column({type: 'bytea', nullable: true})
+    image: Buffer;
 }

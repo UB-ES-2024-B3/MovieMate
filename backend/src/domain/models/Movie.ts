@@ -1,4 +1,5 @@
-export class Movie{
+export class Movie {
+
     constructor(
         private _id: number,
         private _title: string,
@@ -8,7 +9,9 @@ export class Movie{
         private _actors: string,
         private _premiereDate: Date,
         private _duration: number,
-        private _classification: string
+        private _classification: string,
+        private _score: number,
+        private _image?: Buffer | string
     ) {
     }
 
@@ -83,5 +86,27 @@ export class Movie{
 
     set classification(value: string) {
         this._classification = value;
+    }
+
+    get score(): number {
+        return this._score;
+    }
+
+    set score(value: number) {
+        this._score = value;
+    }
+
+    get image(): Buffer | string | undefined {
+        // image como Buffer para ser compatible con UserEntity
+        return this._image;
+    }
+
+    set image(value: Buffer | null) {
+        this._image = value ?? undefined;
+    }
+
+    // Función para convertir la imagen a base64
+    imageToBase64(): string | null {
+        return this._image ? `data:image/jpeg;base64,${this._image.toString('base64')}` : null;
     }
 }

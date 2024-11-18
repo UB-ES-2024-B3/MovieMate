@@ -16,5 +16,8 @@ export interface IUserRepository {
 
     recoverPassword(password: string, token: string): Promise<string>;
 
+    updateUserImage(image: Buffer, userId: number): Promise<string>;
+
     search(query: string): Promise<UsersList[]>;
+
 }
