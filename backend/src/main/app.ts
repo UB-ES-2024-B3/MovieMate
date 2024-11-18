@@ -4,7 +4,7 @@ import "reflect-metadata"
 import swaggerUi from "swagger-ui-express";
 import swaggerOutput from "../../docs/openapi.json";
 import userRoutes from "../infrastructure/routes/UserRoutes";
-import movieRoutes from "../infrastructure/routes/MovieRoutes"
+import movieRoutes from "../infrastructure/routes/MovieRoutes";
 import errorHandler from "../infrastructure/config/ErrorHandler";
 
 const app = express();
