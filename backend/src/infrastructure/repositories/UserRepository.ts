@@ -166,7 +166,7 @@ export class UserRepository implements IUserRepository {
             html: `<p> Click <a href="${url}">here</a> to reset your password.</p>`
         });
 
-        return 'Email sent';
+        return url;
     }
 
     async recoverPassword(password: string, token: string): Promise<string> {

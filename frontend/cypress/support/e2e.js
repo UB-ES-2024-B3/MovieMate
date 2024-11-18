@@ -39,9 +39,6 @@ before(() => {
         // Check that the toast notification appears with the expected message
         cy.contains('Registration successful').should('be.visible');
 
-        // Check that the toast notification appears with the expected message
-        cy.contains('Registration successful').should('be.visible');
-
         // Verify the redirect to login page
         cy.url({ timeout: 10000 }).should('include', '/login');
 
