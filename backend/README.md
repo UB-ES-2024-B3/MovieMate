@@ -41,7 +41,7 @@ Para trabajar con esta aplicación tenemos una serie de carpetas:
 ## Variables de entorno
 
 ```sh
-DB_HOST=localhost;DB_NAME=es-b3-database;DB_PASSWORD=prueba;DB_PORT=5432;DB_USERNAME=postgres;HOST=localhost;PORT=3000
+DB_HOST=localhost;DB_NAME=es-b3-database;DB_PASSWORD=12345;DB_PORT=5432;DB_USERNAME=user;SW_HOST=localhost;SW_PORT=3000;MAIL_USER=moviemate@zohomail.eu;MAIL_PASS=Movie@1234ADJLMN;SECRET_KEY=ES-UB-B3
 ```
 
 ## Contribución
