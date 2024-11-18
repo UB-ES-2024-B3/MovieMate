@@ -40,7 +40,6 @@
         </button>
 
         <div class="flex items-center mx-auto">
-          <div class="w-28 h-28 bg-gray-500 rounded-full mr-8"></div>
             <div class="text-left">
               <h2 class="text-3xl font-bold text-cyan-400">Edit profile</h2>
               <p class="text-cyan-400 mt-1">Update your profile information here.</p>
@@ -52,6 +51,21 @@
 
         <div class="w-full max-w-md bg-gray-800 rounded-lg shadow-lg mt-10 mx-auto p-6">
           <form @submit.prevent="updateUserProfile" class="space-y-4">
+
+              <!-- FOTO DE PERFIL -->
+              <div class="flex flex-col items-center justify-center">
+                  <label class="block mb-2 text-sm font-medium text-cyan-400">Profile Photo</label>
+                  <div class="w-28 h-28 bg-gray-500 rounded-full relative">
+                      <img
+                              v-if="formData.image"
+                              :src="formData.image"
+                              alt="Profile"
+                              class="w-full h-full object-cover rounded-full"
+                      />
+                      <span v-else class="text-white text-lg flex items-center justify-center h-full">&#128100;</span>
+                      <input type="file" @change="imageChange" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                  </div>
+              </div>
             <!-- USERNAME -->
             <div>
               <label for="nombre" class="block mb-2 text-sm font-medium text-cyan-400">UserName</label>
@@ -112,28 +126,69 @@ export default {
         userName: "",
         email: "",
         gender: "",
-        description: ""
+        description: "",
+        image: "",
+          imageFile: null,
       },
       // Toast
       showToast: false,
       toastMessage: '',
-      toastError: false
+      toastError: false,
+        username: "",
+        isAuthenticated: false,
     };
   },
   created() {
     if (this.userData) {
-      const {id, userName, email, gender, description} = this.userData;
-      this.formData = {id, userName, email, gender, description};
+      const {id, userName, email, gender, description, image} = this.userData;
+      this.formData = {id, userName, email, gender, description, image, imageFile: null};
     }
+
+    this.checkAuthStatus();
+    window.addEventListener('storage', this.checkAuthStatus);
   },
   methods: {
     async updateUserProfile() {
       try {
         const BASE_URL = process.env['VUE_APP_API_BASE_URL']
-        const response = await axios.put(
-            `${BASE_URL}/user/update/${this.formData.id}`,
-            this.formData
-        );
+          const token = sessionStorage.getItem("auth_token")
+
+          //Subir imagen si se ha seleccionado
+          if(this.formData.imageFile){
+              const  imageFormData = new FormData();
+              imageFormData.append("image", this.formData.imageFile);
+
+              console.log("FormData de la imagen:", imageFormData);
+
+              for(let pair of imageFormData.entries()){
+                  console.log(pair[0] + ": " + pair[1]);
+              }
+
+              const imageResponse = await axios.put(`${BASE_URL}/user/update-image/${this.formData.id}`, imageFormData,
+                  {headers:{
+                      "Content-Type": "multipart/form-data",
+                          Authorization: `Bearer ${token}`,
+                      },
+                  }
+              );
+
+
+              if(imageResponse.status==200){
+                  this.formData.image = imageResponse.data.image;
+              }else{
+                  this.showToastWithMessage("Error al subir la imagen", true);
+                  return
+              }
+          }
+
+          const response = await axios.put(
+              `${BASE_URL}/user/update/${this.formData.id}`,
+              this.formData, {
+                  headers:{
+                      Authorization: `Bearer ${token}`,
+                  }
+              }
+          );
         if (response.status === 200) {
           sessionStorage.setItem("username", this.formData.userName);
           this.showToastWithMessage("Perfil actualizado con éxito", false, () => {
@@ -164,6 +219,15 @@ export default {
         await axios.delete(`http://localhost:3000/user/${this.$route.params.userName}`);
 
         this.$router.push('/login');
+        sessionStorage.removeItem("auth_token");
+        sessionStorage.removeItem("username");
+
+        this.checkAuthStatus();
+        this.isAuthenticated = false;
+
+        this.$router.replace('/login').then(() => {
+            window.location.reload();
+        });
       } catch (error) {
         console.error('Error al eliminar la cuenta: ', error);
       }
@@ -180,6 +244,26 @@ export default {
         if (callback) callback();
       }, 3000);
     },
+
+      checkAuthStatus(){
+        const token = sessionStorage.getItem("auth_token");
+        this.isAuthenticated = !!token;
+        this.username = token ? sessionStorage.getItem('username'):'';
+      },
+
+      imageChange(event){
+        const file = event.target.files[0];
+        console.log("Archivo seleccionado:", file);
+        this.formData.imageFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            console.log("Imagen cargada en base64:", e.target.result);
+            this.formData.image = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      },
+
+
   }
 };
 </script>
