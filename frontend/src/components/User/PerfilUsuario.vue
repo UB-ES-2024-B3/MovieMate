@@ -69,7 +69,11 @@
                             </div>
 
                             <!-- Botón de seguir -->
-                            <button class="bg-cyan-600 text-white rounded-full px-6 py-2 mt-4 w-full hover:bg-gray-800 transition duration-200">SEGUIR</button>
+                            <router-link v-if="isLogged" to="/editar">
+                                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 mt-4 w-full hover:bg-gray-800 transition duration-200">EDIT PROFILE</button>
+                            </router-link>
+                            <button v-else class="bg-cyan-600 text-white rounded-full px-6 py-2 mt-4 w-full hover:bg-gray-800 transition duration-200">SEGUIR</button>
+
                         </div>
                     </div>
                 </div>
@@ -86,16 +90,6 @@
             </div>
 
         </main>
-
-        <!-- Botón de editar -->
-        <router-link to="/editar">
-            <button v-if="isLogged" class="absolute right-[20%] top-[20%] transform -translate-y-1/2 w-auto h-auto flex items-center justify-center">
-                <img src="../../assets/editar.png" alt="Editar perfil" class="w-12 h-12">
-            </button>
-        </router-link>
-
-
-
     </div>
 </template>
 
