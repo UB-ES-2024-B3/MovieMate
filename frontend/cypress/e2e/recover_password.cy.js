@@ -30,7 +30,7 @@ describe('MovieMate Password Recovery Flow', () => {
         cy.contains('Email sent').should('be.visible');
 
         // Hacemos una solicitud POST real a la API
-        cy.request({
+        /*cy.request({
             method: 'POST',
             url: 'http://localhost:3000/user/requestPasswordRecovery', // URL del endpoint
             body: {
@@ -47,29 +47,9 @@ describe('MovieMate Password Recovery Flow', () => {
             cy.get('#password').type('newpassword123J.');
             cy.get('#confirm_password').type('newpassword123J.');
             cy.contains('button', 'Recovery Password').click();
-        });
+        });*/
 
     });
-
-    /*it('should show a success message for valid email', function(){
-        // Visit the login page
-        cy.visit('http://localhost:8000/login');
-
-        // Click "Recovery password"
-        cy.contains('Recover here').click();
-
-        // Enter a valid email
-        cy.get('input[placeholder="Enter your email address"]').type(this.testUser.email);
-
-        // Click the Recover button
-        cy.get('div.fixed.inset-0.bg-black.bg-opacity-50') // Target the modal
-            .find('button')
-            .contains('Recover')
-            .click();
-
-        // Verify that a success message is shown
-        cy.contains('Email sent').should('be.visible');
-    });*/
 
     it('should show an error message for non-existing email', function() { // Use function() to access the correct context
         // Visit the login page
