@@ -218,6 +218,7 @@ export class UserRepository implements IUserRepository {
         return users.map(user => ({
             userName: user.userName,
             description: user.description || "No description available",
+            image: this.imageToBase64(user.image) || "No image available",
         }));
 
     }
