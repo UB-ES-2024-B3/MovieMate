@@ -1,0 +1,80 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Log in to Azure CLI
+    - name: Log in to Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # 3. Build and push Docker images
+    - name: Log in to ACR
+      run: |
+        az acr login --name moviemateacr
+
+    - name: Build and push Docker images
+      env:
+        ACR_NAME: moviemateacr.azurecr.io
+        FRONTEND_IMAGE: es-frontend
+        BACKEND_IMAGE: es-backend
+        DB_IMAGE: db-postgres
+      run: |
+        # Build images
+        docker build -t $ACR_NAME/$FRONTEND_IMAGE:latest ./frontend
+        docker build -t $ACR_NAME/$BACKEND_IMAGE:latest ./backend
+        docker tag postgres:latest $ACR_NAME/$DB_IMAGE:latest
+
+        # Push images to ACR
+        docker push $ACR_NAME/$FRONTEND_IMAGE:latest
+        docker push $ACR_NAME/$BACKEND_IMAGE:latest
+        docker push $ACR_NAME/$DB_IMAGE:latest
+
+    # 4. Deploy containers to Azure
+    - name: Deploy Database Container
+      run: |
+        az container create --resource-group MovieMate-Resources \
+          --name db-container \
+          --image moviemateacr.azurecr.io/db-postgres:latest \
+          --dns-name-label moviemate-db \
+          --ports 5432 \
+          --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345"
+
+    - name: Deploy Backend Container
+      run: |
+        az container create --resource-group MovieMate-Resources \
+          --name backend-container \
+          --image moviemateacr.azurecr.io/es-backend:latest \
+          --dns-name-label moviemate-backend \
+          --ports 3000 \
+          --environment-variables DB_HOST="moviemate-db.westeurope.azurecontainer.io" \
+                                  DB_NAME="es-b3-database" \
+                                  DB_PASSWORD="12345" \
+                                  DB_PORT="5432" \
+                                  DB_USERNAME="user" \
+                                  SW_HOST="0.0.0.0" \
+                                  SW_PORT="3000" \
+                                  MAIL_USER="moviemate@zohomail.eu" \
+                                  MAIL_PASS="Movie@1234ADJLMN" \
+                                  SECRET_KEY="ES-UB-B3"
+
+    - name: Deploy Frontend Container
+      run: |
+        az container create --resource-group MovieMate-Resources \
+          --name frontend-container \
+          --image moviemateacr.azurecr.io/es-frontend:latest \
+          --dns-name-label moviemate-frontend \
+          --ports 8000 \
+          --environment-variables VUE_APP_API_BASE_URL="http://moviemate-backend.westeurope.azurecontainer.io:3000"
