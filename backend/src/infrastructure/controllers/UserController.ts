@@ -193,15 +193,15 @@ export class UserController {
         try {
             const query = req.query.query as string;
             if (!query) {
+
                 return res.status(400).json({ message: "Query parameter is required" });
             }
 
             const users = await this.userService.searchUsers(query);
-
             return res.status(200).json(users);
+          
         } catch (e) {
             next(e);
         }
     }
-
 }
