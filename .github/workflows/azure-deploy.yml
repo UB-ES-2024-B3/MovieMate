@@ -41,8 +41,11 @@ jobs:
         # Build images
         docker build -t $ACR_NAME/$FRONTEND_IMAGE:latest ./frontend
         docker build -t $ACR_NAME/$BACKEND_IMAGE:latest ./backend
+        
+        # Build Postgres
+        docker pull postgres:latest
         docker tag postgres:latest $ACR_NAME/$DB_IMAGE:latest
-
+        
         # Push images to ACR
         docker push $ACR_NAME/$FRONTEND_IMAGE:latest
         docker push $ACR_NAME/$BACKEND_IMAGE:latest
