@@ -1,72 +1,76 @@
 <template>
-  <div class="movie-card-container p-4 max-w-3xl mx-auto">
-    <!-- Botón para regresar -->
-    <button @click="goBack" class="mb-4 bg-blue-500 text-white px-4 py-2 rounded-md">
-      ⬅ Back
-    </button>
+  <div class="min-h-screen grid place-items-center font-mono bg-gray-900">
+    <div class="flex w-full h-full">
+      <!-- Lateral izquierdo -->
+      <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between fixed top-16 left-0 h-[calc(100vh-64px)]">
+      </aside>
 
-    <!-- Imagen de la película -->
-    <div class="movie-image mb-4">
-      <img :src="movie.image" alt="Movie Poster" class="w-full h-auto object-cover rounded-md" />
-    </div>
 
-    <!-- Detalles de la película -->
-    <div class="movie-details">
-      <h2 class="text-2xl font-bold text-cyan-400 mb-2">{{ movie.title }}</h2>
-      <p class="text-lg mb-4">{{ movie.description }}</p>
+      <!-- Contenido principal -->
+      <div class="ml-64 flex-grow p-8">
+        <div class="max-w-6xl mx-auto">
+          <!-- Botón para volver atrás -->
+          <div class="mb-4">
+            <button
+              @click="goBack"
+              class="flex items-center bg-gray-800 text-[#5ce1e6] font-bold px-4 py-2 rounded-md border-2 border-[#5ce1e6] shadow-lg hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 mr-2"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Back
+            </button>
+          </div>
 
-      <!-- Géneros -->
-      <div class="genres mb-4">
-        <span class="font-semibold">Genres:</span>
-        <ul class="flex space-x-2">
-          <li v-for="genre in movie.genres" :key="genre" class="bg-gray-200 px-2 py-1 rounded-md">
-            {{ genre }}
-          </li>
-        </ul>
-      </div>
+          <!-- Tarjeta de película -->
+          <div class="bg-[#5ce1e6] rounded-md shadow-lg">
+            <div class="md:flex px-8 py-6 leading-none">
+              <!-- Imagen de la película -->
+              <div class="flex-none mr-8">
+                <img
+                  :src="movie.image"
+                  alt="Movie Poster"
+                  class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
+                />
+              </div>
 
-      <!-- Directores -->
-      <div class="directors mb-4">
-        <span class="font-semibold">Directors:</span>
-        <ul>
-          <li v-for="director in movie.directors" :key="director">{{ director }}</li>
-        </ul>
-      </div>
-
-      <!-- Actores -->
-      <div class="actors mb-4">
-        <span class="font-semibold">Actors:</span>
-        <ul>
-          <li v-for="actor in movie.actors" :key="actor">{{ actor }}</li>
-        </ul>
-      </div>
-
-      <!-- Fecha de estreno -->
-      <div class="premiere mb-4">
-        <span class="font-semibold">Premiere Date:</span>
-        <p>{{ movie.premiereDate }}</p>
-      </div>
-
-      <!-- Duración -->
-      <div class="duration mb-4">
-        <span class="font-semibold">Duration:</span>
-        <p>{{ movie.duration }} minutes</p>
-      </div>
-
-      <!-- Clasificación -->
-      <div class="classification mb-4">
-        <span class="font-semibold">Classification:</span>
-        <p>{{ movie.classification }}</p>
-      </div>
-
-      <!-- Puntuación -->
-      <div class="score mb-4">
-        <span class="font-semibold">Score:</span>
-        <p>{{ movie.score }} / 10</p>
+              <!-- Detalles de la película -->
+              <div class="flex-col text-[#545454]">
+                <p class="pt-4 text-3xl font-bold">
+                  {{ movie.title }} ({{ movie.year }})
+                </p>
+                <hr class="custom-hr" />
+                <div class="text-md flex justify-between my-4">
+                  <span class="font-bold">
+                    {{ movie.duration }} min | {{ movie.genres.join(", ") }}
+                  </span>
+                </div>
+                <p class="my-4 text-sm">
+                  {{ movie.description }}
+                </p>
+                <p class="text-md">
+                  Rating: {{ movie.score }} / 10
+                  <span class="font-bold px-2">|</span>
+                  Classification: {{ movie.classification }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from "axios";
@@ -86,36 +90,37 @@ export default {
         classification: "",
         score: "",
         image: "",
+        year: "",
       },
       errorMessage: "",
     };
   },
   mounted() {
     let movieTitle = this.$route.params.title; // Obtiene el título de la película desde la URL
-      movieTitle = movieTitle.replace("%20", ""); // Remueve el espacio codificado
-      movieTitle.toString();
+    movieTitle = movieTitle.replace(/%20/g, " "); // Remueve los espacios codificados
+
     this.fetchMovie(movieTitle); // Llama a la función para obtener los detalles de la película
   },
   methods: {
     async fetchMovie(title) {
       try {
         const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-        const response = await axios.get(`${BASE_URL}/movie/${title}`); // Llama al backend con el titulo de la película
-          console.log(title);
+        const response = await axios.get(`${BASE_URL}/movie/${title}`);
         const movieData = response.data;
 
-        // Asigna la información de la película a la propiedad movie
+        // Asigna la información de la película
         this.movie = {
-          title: movieData.title,
-          description: movieData.description,
-          genres: movieData.genres,
-          directors: movieData.directors,
-          actors: movieData.actors,
-          premiereDate: movieData.premiereDate,
-          duration: movieData.duration,
-          classification: movieData.classification,
-          score: movieData.score,
-          image: movieData.image ? `data:image/jpeg;base64,${movieData.image}` : 'default-image.jpg', // Convierte la imagen a base64 si existe
+          title: movieData._title,
+          description: movieData._description,
+          genres: Array.isArray(movieData._genres) ? movieData._genres : [movieData._genres],
+          directors: movieData._directors,
+          actors: movieData._actors,
+          premiereDate: movieData._premiereDate,
+          duration: movieData._duration,
+          classification: movieData._classification,
+          score: movieData._score,
+          image: movieData._image,
+          year: new Date(movieData._premiereDate).getFullYear(),
         };
       } catch (error) {
         this.errorMessage = "Error fetching movie details.";
@@ -123,34 +128,16 @@ export default {
       }
     },
     goBack() {
-      this.$router.go(-1); // Vuelve a la página anterior
+      this.$router.go(-1); // Navega hacia la página anterior
     },
   },
 };
 </script>
 
 <style scoped>
-.movie-card-container {
-  background-color: #1a202c; /* Fondo oscuro */
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.movie-details {
-  color: #f7fafc;
-}
-
-.movie-details h2 {
-  color: #fbbf24;
-}
-
-.movie-details ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.movie-details ul li {
-  color: #e2e8f0;
-  margin-bottom: 0.5rem;
+.custom-hr {
+  border: 0;
+  border-top: 1px solid #545454; /* Color del texto */
+  margin: 16px 0;
 }
 </style>
