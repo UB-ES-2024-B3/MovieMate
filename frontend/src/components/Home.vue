@@ -53,7 +53,7 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-md"
         />
         <button @click="searchMovies" class="w-full py-2 mt-2 bg-green-500 text-white rounded-md">
-          Search Movies (not functional yet)
+          Search Movies Now
         </button>
       </div>
     </div>
@@ -68,14 +68,22 @@
             :key="movie._id"
             class="bg-gray-600 h-32 flex flex-col items-center justify-center rounded"
           >
-            <router-link :to="`/movie/${movie._id}`">
-              <button>
-                <img
-                  :src="'https://via.placeholder.com/100?text=' + movie._title"
-                  :alt="movie._title"
-                  class="h-20 object-cover rounded mb-2"
-                />
-              </button>
+            <router-link :to="`/movie/${movie._title}`">
+              <button class="w-20 h-20 rounded mb-2 hover:brightness-110 hover:contrast-125 transition duration-300">
+                              <img
+                                      v-if="movie?._image"
+                                      :src="movie._image"
+                                      alt="Profile"
+                                      class="h-20 object-cover rounded mb-2"
+                              />
+
+                              <img
+                                  v-else
+                                  :src="'https://via.placeholder.com/100?text=' + movie._title"
+                                  :alt="movie._title"
+                                  class="h-20 object-cover rounded mb-2"
+                              />
+                          </button>
             </router-link>
             <p class="text-white text-sm font-bold">{{ movie._title }}</p>
           </div>
@@ -134,6 +142,7 @@ export default {
         const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
         const response = await axios.get(`${BASE_URL}/movie/top10`);
         this.movies = response.data;
+        console.log(this.movies)
       } catch (error) {
         console.error("Error fetching movies: ", error);
       }
@@ -141,7 +150,26 @@ export default {
 
     // Función placeholder para la búsqueda de películas (por ahora no se usa)
     async searchMovies() {
-      console.log("Movie search query:", this.movieSearchQuery);
+      if (!this.movieSearchQuery.trim()) {
+        this.errorMessage = "Please enter a search query.";
+        this.movies = [];
+        return;
+      }
+
+      this.loading = true;
+      this.errorMessage = "";
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.get(`${BASE_URL}/movie/search`, {
+          params: { query: this.movieSearchQuery },
+        });
+        this.movies = response.data;
+      } catch (error) {
+        this.errorMessage = error.response?.data?.error || "An error occurred.";
+        this.movies = [];
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };
