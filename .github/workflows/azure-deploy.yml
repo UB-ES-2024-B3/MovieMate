@@ -26,7 +26,15 @@ jobs:
             "tenantId": "a2313cab-b1c3-4f3a-bb11-2157447ddbb4"
           }
 
-    # 3. Build and push Docker images
+    # 3. ACR Credentials
+    - name: Get ACR credentials
+      id: acr-credentials
+      run: |
+        acr_credentials=$(az acr credential show --name moviemateacr --query "{username:username, password:passwords[0].value}" -o json)
+        echo "ACR_USERNAME=$(echo $acr_credentials | jq -r .username)" >> $GITHUB_ENV
+        echo "ACR_PASSWORD=$(echo $acr_credentials | jq -r .password)" >> $GITHUB_ENV
+
+    # 4. Build and push Docker images
     - name: Log in to ACR
       run: |
         az acr login --name moviemateacr
@@ -57,6 +65,8 @@ jobs:
         az container create --resource-group MovieMate-Resources \
           --name db-container \
           --image moviemateacr.azurecr.io/db-postgres:latest \
+          --registry-username ${{ env.ACR_USERNAME }} \
+          --registry-password ${{ env.ACR_PASSWORD }} \
           --dns-name-label moviemate-db \
           --ports 5432 \
           --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345"
@@ -66,6 +76,8 @@ jobs:
         az container create --resource-group MovieMate-Resources \
           --name backend-container \
           --image moviemateacr.azurecr.io/es-backend:latest \
+          --registry-username ${{ env.ACR_USERNAME }} \
+          --registry-password ${{ env.ACR_PASSWORD }} \
           --dns-name-label moviemate-backend \
           --ports 3000 \
           --environment-variables DB_HOST="moviemate-db.westeurope.azurecontainer.io" \
@@ -84,6 +96,8 @@ jobs:
         az container create --resource-group MovieMate-Resources \
           --name frontend-container \
           --image moviemateacr.azurecr.io/es-frontend:latest \
+          --registry-username ${{ env.ACR_USERNAME }} \
+          --registry-password ${{ env.ACR_PASSWORD }} \
           --dns-name-label moviemate-frontend \
           --ports 8000 \
           --environment-variables VUE_APP_API_BASE_URL="http://moviemate-backend.westeurope.azurecontainer.io:3000"
