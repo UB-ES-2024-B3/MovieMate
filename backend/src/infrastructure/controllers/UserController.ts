@@ -191,14 +191,14 @@ export class UserController {
 
     static async searchUsers(req: Request, res: Response, next: NextFunction) {
         try {
-            const {query} = req.query;
-            if (!query || typeof query !== 'string') {
-                return res.status(400).json({ error: "Invalid query" });
+            const query = req.query.query as string;
+            if (!query) {
+                return res.status(400).json({ message: "Query parameter is required" });
             }
 
-            const result = await this.userService.searchUsers(query);
+            const users = await this.userService.searchUsers(query);
 
-            return res.status(200).json(result);
+            return res.status(200).json(users);
         } catch (e) {
             next(e);
         }

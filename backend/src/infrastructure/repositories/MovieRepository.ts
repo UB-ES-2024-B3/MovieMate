@@ -1,9 +1,10 @@
-import {Repository} from "typeorm";
+import {ILike, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
+import {MoviesList} from "../../interfaces/Interfaces";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
@@ -89,5 +90,23 @@ export class MovieRepository implements IMovieRepository {
 
     imageToBase64(image: Buffer | null): string | null {
         return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
+    }
+
+    async search(query: string): Promise<MoviesList[]> {
+        const movies = await this.repository.find({
+            where: [{ title: ILike(`%${query}%`) }], order: {title: 'ASC'},
+        });
+
+        if (movies.length === 0) {
+            throw createError(404, "Movies not found");
+        }
+
+        return movies.map(movie => ({
+            title: movie.title,
+            premiereDate: movie.premiereDate,
+            genres: movie.genres,
+            directors: movie.directors,
+            image: this.imageToBase64(movie.image) || "No image available",
+        }));
     }
 }

@@ -40,4 +40,18 @@ export class MovieController {
             next(e);
         }
     }
+
+    static async search(req: Request, res: Response, next: NextFunction) {
+        try {
+            const query = req.query.query as string;
+            if (!query) {
+                return res.status(400).json({ message: "Query parameter is required" });
+            }
+
+            const movies = await this.movieService.searchMovies(query);
+            return res.status(200).json(movies);
+        } catch (e) {
+            next(e);
+        }
+    }
 }

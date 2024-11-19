@@ -31,3 +31,10 @@ export interface UsersList {
     description: string;
 }
 
+export interface MoviesList {
+    title: string;
+    premiereDate: Date;
+    genres: string;
+    directors: string;
+    image: string | null;
+}
