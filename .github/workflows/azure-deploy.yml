@@ -59,7 +59,7 @@ jobs:
         docker push $ACR_NAME/$BACKEND_IMAGE:latest
         docker push $ACR_NAME/$DB_IMAGE:latest
 
-    # 4. Deploy containers to Azure
+    # 5. Deploy containers to Azure
     - name: Deploy Database Container
       run: |
         az container create --resource-group MovieMate-Resources \
