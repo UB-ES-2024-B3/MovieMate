@@ -1,6 +1,7 @@
 import {Movie} from "../../domain/models/Movie";
 import {inject, injectable} from "tsyringe";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
+import {MoviesList} from "../../interfaces/Interfaces";
 
 @injectable()
 export class MovieService {
@@ -17,5 +18,9 @@ export class MovieService {
 
     async getTop10() {
         return await this.movieRepository.getTop10();
+    }
+
+    async searchMovies(query: string): Promise<MoviesList[]> {
+        return await this.movieRepository.search(query);
     }
 }
