@@ -8,6 +8,10 @@ import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
 import {UpdateUserData} from "../../interfaces/Interfaces";
 
+const multer = require("multer")
+const storage = multer.memoryStorage();
+const upload = multer({storage});
+
 container.register(
     "IUserRepository", {
         useClass: UserRepository
@@ -113,12 +117,89 @@ export class UserController {
         }
     }
 
+    static async updateUserImage(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = parseInt(req.params.userId);
+
+            if (!req.file) {
+                throw createError(400, "No image file provided");
+            }
+
+            // Validar el tipo MIME para asegurarse de que es una imagen válida
+            const validMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validMimeTypes.includes(req.file.mimetype)) {
+                throw createError(400, "Invalid image format. Only JPEG, PNG and JPG, are allowed.");
+            }
+
+            // Asignar el Buffer de la imagen si existe y es válida
+            const image = req.file.buffer;
+
+            // Llamar al método updateUserImage en el servicio
+            const result = await this.userService.updateUserImage(image, userId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
     static async getUser(req: Request, res: Response, next: NextFunction) {
         try {
             const userName = req.params.userName;
             const auth_token = req.headers.authorization?.split(" ")[1];
             const result = await this.userService.getUser(userName, auth_token);
             return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async sendRecoveryEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const email = req.body.email;
+
+            const result = await this.userService.sendRecoveryEmail(email);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async recoverPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = req.body;
+            const token = req.headers.authorization?.split(" ")[1];
+
+            const validationResult = DtoInValidation.validateRecoverPasswordDto(data);
+
+            if (!isRight(validationResult)) {
+                throw createError(400, "Invalid password format!");
+            }
+
+            const validatedData = validationResult.right;
+
+            if (validatedData.password != validatedData.confirmPassword) {
+                throw createError(400, "Password confirmation does not match!");
+            }
+
+            const result = await this.userService.recoverPassword(validatedData.password, token);
+
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async searchUsers(req: Request, res: Response, next: NextFunction) {
+        try {
+            const query = req.query.query as string;
+            if (!query) {
+
+                return res.status(400).json({ message: "Query parameter is required" });
+            }
+
+            const users = await this.userService.searchUsers(query);
+            return res.status(200).json(users);
+          
         } catch (e) {
             next(e);
         }

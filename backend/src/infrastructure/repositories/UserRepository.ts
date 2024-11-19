@@ -1,12 +1,14 @@
-import {Repository} from "typeorm";
+import {ILike, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IUserRepository} from "../../domain/repositories/IUserRepository";
 import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {UpdateUserData, UsersList, UserDtoOut, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import {EnviromentUtils} from "../../../context/env";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
@@ -78,7 +80,10 @@ export class UserRepository implements IUserRepository {
         // Save the updated user
         await this.repository.save(userFromBD);
 
-        return 'User updated successfully';
+        // Update token
+        const token = jwt.sign({userName: userFromBD.userName}, EnviromentUtils.getEnvVar('SECRET_KEY'));
+
+        return token;
 
     }
 
@@ -90,8 +95,8 @@ export class UserRepository implements IUserRepository {
         if (!existingUser || existingUser.password != hashedPassword) {
             throw createError(401, "Username or password are incorrect");
         }
-        const secretKey = 'ES-UB-B3'
-        const token = jwt.sign({userName: existingUser.userName}, secretKey);
+
+        const token = jwt.sign({userName: existingUser.userName}, EnviromentUtils.getEnvVar('SECRET_KEY'));
 
         return token;
     }
@@ -111,16 +116,17 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
 
-        const user = new User(
-            userFromDB.id,
-            userFromDB.userName,
-            userFromDB.email,
-            userFromDB.birthDate,
-            userFromDB.password,
-            userFromDB.gender,
-            userFromDB.description,
-            userFromDB.isAdmin,
-        );
+        const user: UserDtoOut = {
+            id: userFromDB.id,
+            userName: userFromDB.userName,
+            email: userFromDB.email,
+            birthDate: userFromDB.birthDate, // Convertir a cadena (YYYY-MM-DD)
+            password: userFromDB.password,
+            gender: userFromDB.gender,
+            description: userFromDB.description,
+            isAdmin: userFromDB.isAdmin,
+            image: this.imageToBase64(userFromDB.image) // Convertir la imagen a base64 o null
+        };
 
         const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
 
@@ -129,8 +135,92 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-
         return {user, isOwnProfile};
+    }
+
+    async sendRecoveryEmail(email: string): Promise<string> {
+        const userFromDB = await this.repository.findOneBy({email: email});
+        if (!userFromDB) {
+            throw createError(404, `User with email < ${email} > does not exist`);
+        }
+
+        const token = jwt.sign({email: userFromDB.email}, EnviromentUtils.getEnvVar('SECRET_KEY'), {expiresIn: '1h'});
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.zoho.eu',
+            port: 587,
+            secure: false,
+            auth: {
+                user: EnviromentUtils.getEnvVar('MAIL_USER'),
+                pass: EnviromentUtils.getEnvVar('MAIL_PASS'),
+            }
+        });
+
+        const baseUrl = "http://localhost:8000/recovery/"
+        const url = `${baseUrl}${token}`;
+
+        await transporter.sendMail({
+            from: EnviromentUtils.getEnvVar('MAIL_USER'),
+            to: email,
+            subject: 'Password Recovery',
+            html: `<p> Click <a href="${url}">here</a> to reset your password.</p>`
+        });
+
+        return url;
+    }
+
+    async recoverPassword(password: string, token: string): Promise<string> {
+        try {
+            const decoded = jwt.verify(token, EnviromentUtils.getEnvVar('SECRET_KEY')) as jwt.JwtPayload;
+
+            const userFromDB = await this.repository.findOneBy({email: decoded.email});
+
+            const newPassword = createHash('sha256').update(password).digest('hex');
+
+            userFromDB.password = newPassword;
+
+            await this.repository.save(userFromDB);
+
+        } catch (e) {
+            throw createError(404, `The token is invalid or has expired`);
+        }
+
+        return 'Password changed successfully';
+    }
+
+    async updateUserImage(image: Buffer, userId: number): Promise<string> {
+        const userFromBD = await this.repository.findOneBy({id: userId});
+        if (!userFromBD) {
+            throw createError(404, `User with Id < ${userId} > does not exist`);
+        }
+        // Verificar que es un Buffer antes de asignar
+        if (image && Buffer.isBuffer(image)) {
+            userFromBD.image = image;  // Asigna el buffer de la imagen si es válido
+        }
+        // Save the updated user
+        await this.repository.save(userFromBD);
+        return this.imageToBase64(userFromBD.image);
+    }
+
+    imageToBase64(image: Buffer | null): string | null {
+        return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
+    }
+
+    async search(query: string): Promise<UsersList[]> {
+        const users = await this.repository.find({
+            where: [{ userName: ILike(`%${query}%`) }], order: {userName: 'ASC'},
+        });
+
+        if (users.length === 0) {
+            throw createError(404, "Users not found");
+        }
+
+        return users.map(user => ({
+            userName: user.userName,
+            description: user.description || "No description available",
+            image: this.imageToBase64(user.image) || "No image available",
+        }));
+
     }
 
 }
