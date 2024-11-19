@@ -15,8 +15,16 @@
                           class="bg-gray-600 h-32 flex flex-col items-center justify-center rounded"
                   >
                       <router-link :to=" `/movie/${movie._id}` " >
-                          <button>
+                          <button class="w-20 h-20 rounded mb-2 hover:brightness-110 hover:contrast-125 transition duration-300">
                               <img
+                                  v-if="movie?._image"
+                                  :src="movie._image"
+                                  alt="Profile"
+                                  class="h-20 object-cover rounded mb-2"
+                              />
+
+                              <img
+                                  v-else
                                   :src="'https://via.placeholder.com/100?text=' + movie._title"
                                   :alt="movie._title"
                                   class="h-20 object-cover rounded mb-2"
