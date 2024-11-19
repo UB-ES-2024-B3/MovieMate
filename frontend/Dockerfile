@@ -8,8 +8,6 @@ COPY . .
 # INSTALAR DEPENDENCIAS
 RUN npm install
 
-COPY .env .env
-
 # PORT 8000
 EXPOSE 8000
 
