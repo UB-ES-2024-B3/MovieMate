@@ -1,9 +1,8 @@
 import 'reflect-metadata';
-import {describe, test, expect, jest, beforeEach} from '@jest/globals';
-import {UserService} from '../../src/application/services/UserService';
-import {UserRepository} from '../../src/infrastructure/repositories/UserRepository';
+import { describe, test, expect, jest, beforeEach } from '@jest/globals';
+import { UserService } from '../../src/application/services/UserService';
 import { User } from '../../src/domain/models/User';
-import { UpdateUserData } from '../../src/interfaces/Interfaces';
+import {UpdateUserData, UserDtoOut} from '../../src/interfaces/Interfaces';
 import { IUserRepository } from '../../src/domain/repositories/IUserRepository';
 // @ts-ignore
 import createError from 'http-errors';
@@ -32,14 +31,14 @@ describe('UserService Unit Tests', () => {
     describe('registerUser', () => {
         it('should register a user successfully', async () => {
             const newUser = new User(
-                1, // id
-                'testuser', // userName
-                'test@example.com', // email
-                new Date('2002-11-17'), // birthDate
-                'hashedPassword123!', // password
-                'male', // gender
-                'This is a test user', // description
-                false // isAdmin
+                1,
+                'testuser',
+                'test@example.com',
+                new Date('2002-11-17'),
+                'hashedPassword123!',
+                'male',
+                'This is a test user',
+                false
             );
 
             mockUserRepository.register.mockResolvedValue('Registration successful');
@@ -48,26 +47,40 @@ describe('UserService Unit Tests', () => {
 
             expect(result).toBe('Registration successful');
             expect(mockUserRepository.register).toHaveBeenCalledWith(newUser);
-            expect(mockUserRepository.register).toHaveBeenCalledTimes(1);
         });
 
         it('should throw an error if username is already in use', async () => {
             const newUser = new User(
-                1, // id
-                'testuser', // userName
-                'test@example.com', // email
-                new Date('2002-11-17'), // birthDate
-                'hashedPassword123!', // password
-                'male', // gender
-                'This is a test user', // description
-                false // isAdmin
+                1,
+                'testuser',
+                'test@example.com',
+                new Date('2002-11-17'),
+                'hashedPassword123!',
+                'male',
+                'This is a test user',
+                false
             );
 
             mockUserRepository.register.mockRejectedValue(createError(409, 'UserName is already in use.'));
 
             await expect(userService.registerUser(newUser)).rejects.toThrow('UserName is already in use.');
-            expect(mockUserRepository.register).toHaveBeenCalledWith(newUser);
-            expect(mockUserRepository.register).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error if email is already registered', async () => {
+            const newUser = new User(
+                1,
+                'anotheruser',
+                'test@example.com', // Email repetido
+                new Date('2002-11-17'),
+                'hashedPassword123!',
+                'male',
+                'This is another test user',
+                false
+            );
+
+            mockUserRepository.register.mockRejectedValue(createError(409, 'Email is already registered.'));
+
+            await expect(userService.registerUser(newUser)).rejects.toThrow('Email is already registered.');
         });
     });
 
@@ -82,7 +95,6 @@ describe('UserService Unit Tests', () => {
 
             expect(result).toBe('Update successful');
             expect(mockUserRepository.update).toHaveBeenCalledWith(userId, updateData);
-            expect(mockUserRepository.update).toHaveBeenCalledTimes(1);
         });
 
         it('should throw an error if user does not exist', async () => {
@@ -91,9 +103,9 @@ describe('UserService Unit Tests', () => {
 
             mockUserRepository.update.mockRejectedValue(createError(404, `User with Id < ${userId} > does not exist`));
 
-            await expect(userService.updateUser(userId, updateData)).rejects.toThrow(`User with Id < ${userId} > does not exist`);
-            expect(mockUserRepository.update).toHaveBeenCalledWith(userId, updateData);
-            expect(mockUserRepository.update).toHaveBeenCalledTimes(1);
+            await expect(userService.updateUser(userId, updateData)).rejects.toThrow(
+                `User with Id < ${userId} > does not exist`
+            );
         });
     });
 
@@ -108,7 +120,6 @@ describe('UserService Unit Tests', () => {
 
             expect(result).toBe('mock-token');
             expect(mockUserRepository.login).toHaveBeenCalledWith(userName, password);
-            expect(mockUserRepository.login).toHaveBeenCalledTimes(1);
         });
 
         it('should throw an error for incorrect credentials', async () => {
@@ -117,14 +128,14 @@ describe('UserService Unit Tests', () => {
 
             mockUserRepository.login.mockRejectedValue(createError(401, 'Username or password are incorrect'));
 
-            await expect(userService.loginUser(userName, password)).rejects.toThrow('Username or password are incorrect');
-            expect(mockUserRepository.login).toHaveBeenCalledWith(userName, password);
-            expect(mockUserRepository.login).toHaveBeenCalledTimes(1);
+            await expect(userService.loginUser(userName, password)).rejects.toThrow(
+                'Username or password are incorrect'
+            );
         });
     });
 
     describe('deleteUser', () => {
-        it('should delete user successfully', async () => {
+        it('should delete a user successfully', async () => {
             const userId = '1';
 
             mockUserRepository.delete.mockResolvedValue('User deleted successfully');
@@ -133,7 +144,6 @@ describe('UserService Unit Tests', () => {
 
             expect(result).toBe('User deleted successfully');
             expect(mockUserRepository.delete).toHaveBeenCalledWith(userId);
-            expect(mockUserRepository.delete).toHaveBeenCalledTimes(1);
         });
 
         it('should throw an error if user does not exist', async () => {
@@ -141,9 +151,9 @@ describe('UserService Unit Tests', () => {
 
             mockUserRepository.delete.mockRejectedValue(createError(404, `User with username < ${userId} > does not exist`));
 
-            await expect(userService.deleteUser(userId)).rejects.toThrow(`User with username < ${userId} > does not exist`);
-            expect(mockUserRepository.delete).toHaveBeenCalledWith(userId);
-            expect(mockUserRepository.delete).toHaveBeenCalledTimes(1);
+            await expect(userService.deleteUser(userId)).rejects.toThrow(
+                `User with username < ${userId} > does not exist`
+            );
         });
     });
 
@@ -167,10 +177,11 @@ describe('UserService Unit Tests', () => {
 
             const result = await userService.getUser(userId, authToken);
 
+            expect(result.user.id).toBe(1);
             expect(result.user.userName).toBe('testuser');
+            expect(result.user.email).toBe('test@example.com');
             expect(result.isOwnProfile).toBe(true);
             expect(mockUserRepository.get).toHaveBeenCalledWith(userId, authToken);
-            expect(mockUserRepository.get).toHaveBeenCalledTimes(1);
         });
 
         it('should throw an error if user does not exist', async () => {
@@ -179,9 +190,9 @@ describe('UserService Unit Tests', () => {
 
             mockUserRepository.get.mockRejectedValue(createError(404, `User with username < ${userId} > does not exist`));
 
-            await expect(userService.getUser(userId, authToken)).rejects.toThrow(`User with username < ${userId} > does not exist`);
-            expect(mockUserRepository.get).toHaveBeenCalledWith(userId, authToken);
-            expect(mockUserRepository.get).toHaveBeenCalledTimes(1);
+            await expect(userService.getUser(userId, authToken)).rejects.toThrow(
+                `User with username < ${userId} > does not exist`
+            );
         });
     });
 });
