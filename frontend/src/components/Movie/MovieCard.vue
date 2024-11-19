@@ -128,7 +128,7 @@ export default {
       }
     },
     goBack() {
-      this.$router.go(-1); // Navega hacia la página anterior
+      this.$router.go(-1);
     },
   },
 };
