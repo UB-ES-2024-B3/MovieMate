@@ -6,11 +6,11 @@
       </router-link>
 
         <!-- Buscador  -->
-        <div   class="relative flex items-center" data-twe-input-wrapper-init data-twe-input-group-ref>
+        <div v-if="!hideSearch" class="relative flex items-center border-b-0" data-twe-input-wrapper-init data-twe-input-group-ref>
             <input
               v-model="searchQuery"
               type="search"
-              class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary data-[twe-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-white dark:placeholder:text-neutral-300 dark:autofill:shadow-autofill dark:peer-focus:text-primary [&:not([data-twe-input-placeholder-active])]:placeholder:opacity-0"
+              class="peer block min-h-[auto] h-[2.5rem] w-[calc(100%-2.5rem)] rounded-l-md border-2 border-cyan-400 bg-transparent text-cyan-400 px-3 py-[0.32rem] leading-[1.6] focus:border-cyan-400 focus:ring-0 focus:text-cyan-400 dark:text-white dark:placeholder:text-neutral-300 dark:autofill:shadow-autofill dark:focus:border-cyan-400"
               aria-label="Search"
               placeholder="Search"
               id="search-input"
@@ -18,14 +18,8 @@
               aria-describedby="search-button"
             />
 
-            <label
-                    for="search-input"
-                    class = "pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[twe-input-state-active]:-translate-y-[0.9rem] peer-data-[twe-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-400 dark:peer-focus:text-primary">
-                Search
-            </label>
-
             <button
-              class="relative z-[2] -ms-0.5 flex items-center rounded-e bg-blue-500 px-5 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:bg-blue-600 hover:shadow-lg focus:bg-blue-600 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-700 active:shadow-lg dark:shadow-black/30 dark:hover:shadow-lg dark:focus:shadow-lg dark:active:shadow-lg"
+                    class="relative z-[2] flex items-center justify-center h-[2.5rem] w-[2.5rem] bg-cyan-400 text-xs font-medium text-white shadow-md transition duration-150 ease-in-out hover:bg-cyan-500 focus:outline-none"
               type="button"
               id="search-button"
               @click="search">
@@ -44,7 +38,6 @@
               </span>
             </button>
 
-        <div v-if="loading" class="mt-4 text-center">Loading...</div>
 
         <div v-if="results && !hideResults"
              class="absolute top-full left-0 w-full bg-gray-800 rounded-lg shadow-lg mt-2 z-50 max-h-96 overflow-y-auto border border-gray-300 dark:border-gray-600">
@@ -141,6 +134,7 @@ export default {
       loading: false,
       errorMessage: false,
         hideResults: false,
+      hideSearch: false,
     };
   },
   created() {
@@ -153,21 +147,6 @@ export default {
       this.username = sessionStorage.getItem('username');
     }
 
-  },
-
-      // Hook para asegurarse de que la búsqueda se ejecute en la navegación
-  beforeRouteEnter(to, from, next) {
-    next(vm => {
-      vm.search(); // Realiza la búsqueda cada vez que se entra a una nueva ruta
-    });
-  },
-
-  beforeRouteUpdate(to, from, next) {
-    // La búsqueda se actualiza cuando la ruta cambia, pero solo si el query ha cambiado
-    if (this.searchQuery.trim()) {
-      this.search();
-    }
-    next();
   },
 
     methods: {
@@ -230,6 +209,10 @@ export default {
         }
     },
   watch: {
+      $route(to) {
+        const hiddenRoutes = ['/login', '/register', '/editar', '/recovery/:token'];
+        this.hideSearch = hiddenRoutes.includes(to.path);
+      },
     isAuthenticated(newVal) {
       if (newVal && this.username) {
         // Redirige a la página del usuario cuando se autentique
@@ -237,14 +220,6 @@ export default {
       }
     },
 
-      searchQuery(newVal, oldVal) {
-        if (newVal !== oldVal) {
-          // Solo buscamos si hay algo en el campo de búsqueda
-          if (this.searchQuery.trim()) {
-            this.search();
-          }
-        }
-    },
   },
 
     mounted() {
