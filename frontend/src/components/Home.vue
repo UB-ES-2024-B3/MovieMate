@@ -6,21 +6,21 @@
       </aside>
 
       <main class="flex-1 bg-gray-900 p-6">
-          <section class="mb-8">
-              <h3 class="text-cyan-400 text-xl font-bold mb-4">TOP 10 PELICULAS</h3>
-              <div class="grid grid-cols-5 gap-4">
-                  <div
-                          v-for="movie in movies"
-                          :key="movie._id"
-                          class="bg-gray-600 h-32 flex flex-col items-center justify-center rounded"
-                  >
-                      <router-link :to=" `/movie/${movie._id}` " >
-                          <button class="w-20 h-20 rounded mb-2 hover:brightness-110 hover:contrast-125 transition duration-300">
+      <section v-if="movies.length > 0" class="mb-8">
+        <h3 class="text-cyan-400 text-xl font-bold mb-4">TOP 10 PELÍCULAS</h3>
+        <div class="grid grid-cols-5 gap-4">
+          <div
+            v-for="movie in movies"
+            :key="movie._id"
+            class="bg-gray-600 h-32 flex flex-col items-center justify-center rounded"
+          >
+            <router-link :to="`/movie/${movie._title}`">
+              <button class="w-20 h-20 rounded mb-2 hover:brightness-110 hover:contrast-125 transition duration-300">
                               <img
-                                  v-if="movie?._image"
-                                  :src="movie._image"
-                                  alt="Profile"
-                                  class="h-20 object-cover rounded mb-2"
+                                      v-if="movie?._image"
+                                      :src="movie._image"
+                                      alt="Profile"
+                                      class="h-20 object-cover rounded mb-2"
                               />
 
                               <img
@@ -30,12 +30,11 @@
                                   class="h-20 object-cover rounded mb-2"
                               />
                           </button>
-                      </router-link>
-                      <p class="text-white text-sm font-bold">{{ movie._title }}</p>
-                  </div>
-              </div>
-
-          </section>
+            </router-link>
+            <p class="text-white text-sm font-bold">{{ movie._title }}</p>
+          </div>
+        </div>
+      </section>
       </main>
 
 

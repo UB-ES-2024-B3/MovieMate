@@ -14,7 +14,7 @@
               aria-label="Search"
               placeholder="Search"
               id="search-input"
-              @input="search"
+              @input="hideResults = false; search"
               aria-describedby="search-button"
             />
 
@@ -46,51 +46,59 @@
 
         <div v-if="loading" class="mt-4 text-center">Loading...</div>
 
-        <div v-if="results" class="bg-gray-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+        <div v-if="results && !hideResults"
+             class="absolute top-full left-0 w-full bg-gray-800 rounded-lg shadow-lg mt-2 z-50 max-h-96 overflow-y-auto border border-gray-300 dark:border-gray-600">
           <!-- Usuarios -->
-          <div v-if="results.users.length">
-            <h2 class="text-lg font-bold text-white">Users</h2>
+          <div v-if="results.users.length" class="p-4">
             <ul class="space-y-2">
               <li
                 v-for="user in results.users"
                 :key="user.userName"
                 class="flex items-center space-x-3 p-2 border border-gray-200 rounded-md dark:border-gray-700">
-                <img
-                  v-if="user?.image"
-                  :src="user.image"
-                  alt="Profile"
-                  class="w-10 h-10 rounded-full object-cover" />
-                <span v-else class="text-white text-5xl">&#128100;</span>
-                <div>
-                  <div class="font-semibold text-white">{{ user.userName }}</div>
-                  <p class="text-gray-400">{{ user.description }}</p>
-                </div>
+                  <router-link
+                          :to="`/user/${user.userName}`"
+                          class="flex items-center space-x-3 w-full no-underline hover:bg-gray-700 p-2 rounded"
+                          @click="hideSearchResults">
+                      <img
+                          v-if="user?.image"
+                          :src="user.image"
+                          alt=""
+                          class="w-10 h-10 rounded-full object-cover" />
+
+                      <span v-else class="text-white text-5xl">&#128100;</span>
+                      <div>
+                          <div class="font-semibold text-cyan-400">@{{ user.userName }}</div>
+                      </div>
+                  </router-link>
               </li>
             </ul>
           </div>
 
           <!-- Películas -->
           <div v-if="results.movies.length">
-            <h2 class="text-lg font-bold text-white">Movies</h2>
             <ul class="space-y-2">
               <li
                 v-for="movie in results.movies"
-                :key="movie._title"
+                :key="movie._id"
                 class="flex items-center space-x-3 p-2 border border-gray-200 rounded-md dark:border-gray-700">
-                <img
-                  v-if="movie?._image"
-                  :src="movie._image"
-                  alt="Movie image"
-                  class="w-10 h-10 rounded-full object-cover" />
-                <img
-                  v-else
-                  :src="'https://via.placeholder.com/100?text=' + movie._title"
-                  :alt="movie._title"
-                  class="h-20 object-cover rounded mb-2" />
-                <div>
-                  <div class="font-semibold text-white">{{ movie._title }}</div>
-                  <p class="text-gray-400">{{ movie._description }}</p>
-                </div>
+                  <router-link
+                          :to="`/movie/${movie.title}`"
+                          class="flex items-center space-x-3 w-full no-underline hover:bg-gray-700 p-2 rounded"
+                          @click="hideSearchResults">
+                    <img
+                      v-if="movie?.image"
+                      :src="movie.image"
+                      alt="Movie image"
+                      class="w-10 h-10 rounded-full object-cover" />
+                    <img
+                      v-else
+                      :src="'https://via.placeholder.com/100?text=' + movie.title"
+                      :alt="movie._title"
+                      class="h-20 object-cover rounded mb-2" />
+                    <div>
+                      <div class="font-semibold text-cyan-400">{{ movie.title }}</div>
+                    </div>
+                  </router-link>
               </li>
             </ul>
           </div>
@@ -132,6 +140,7 @@ export default {
       searchQuery: "",
       loading: false,
       errorMessage: false,
+        hideResults: false,
     };
   },
   created() {
@@ -143,7 +152,24 @@ export default {
     if (this.isAuthenticated) {
       this.username = sessionStorage.getItem('username');
     }
+
   },
+
+      // Hook para asegurarse de que la búsqueda se ejecute en la navegación
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.search(); // Realiza la búsqueda cada vez que se entra a una nueva ruta
+    });
+  },
+
+  beforeRouteUpdate(to, from, next) {
+    // La búsqueda se actualiza cuando la ruta cambia, pero solo si el query ha cambiado
+    if (this.searchQuery.trim()) {
+      this.search();
+    }
+    next();
+  },
+
     methods: {
       async search() {
           if (!this.searchQuery.trim()) {
@@ -152,32 +178,25 @@ export default {
               return;
           }
 
+          this.hideResults = false;
           this.loading = true;
           this.errorMessage = "";
           try {
             const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-            console.log("BASE_URL:", BASE_URL);
-
 
             const [usersResponse, moviesResponse] = await Promise.all([
               axios.get(`${BASE_URL}/user/search`, { params: { query: this.searchQuery } }),
               axios.get(`${BASE_URL}/movie/search`, { params: { query: this.searchQuery } }),
             ]);
 
-            console.log(usersResponse);
-            console.log(moviesResponse);
-
-
-            this.results = {
-                users: Array.isArray(usersResponse.data) ? usersResponse.data : [],
-                movies: Array.isArray(moviesResponse.data) ? moviesResponse.data : [],
-            };
-
-
             this.results = {
               users: Array.isArray(usersResponse.data) ? usersResponse.data : [],
               movies: Array.isArray(moviesResponse.data) ? moviesResponse.data : [],
             };
+
+            if (!this.results.users.length && !this.results.movies.length) {
+                this.errorMessage = "No results found";
+            }
 
           } catch (error) {
             this.errorMessage = error.response?.data?.error || "An error occurred.";
@@ -186,6 +205,29 @@ export default {
             this.loading = false;
           }
       },
+        hideSearchResults(){
+          this.hideResults = true;
+          this.searchQuery = "";
+        },
+
+        beforeRouteEnter(to, from, next){
+          console.log("utilitzat");
+          next(vm => {
+              if(to.query.query){
+                  vm.searchQuery = to.query.query;
+                  vm.search();
+              }
+          });
+        },
+
+        beforeRouteUpdate(to, from, next){
+          console.log("utilitzat");
+          if(this.query.query !== from.query.query){
+              this.searchQuery = to.query.query || "";
+              this.search();
+          }
+          next();
+        }
     },
   watch: {
     isAuthenticated(newVal) {
@@ -193,8 +235,23 @@ export default {
         // Redirige a la página del usuario cuando se autentique
         this.$router.push(`/user/${this.username}`);
       }
+    },
+
+      searchQuery(newVal, oldVal) {
+        if (newVal !== oldVal) {
+          // Solo buscamos si hay algo en el campo de búsqueda
+          if (this.searchQuery.trim()) {
+            this.search();
+          }
+        }
+    },
+  },
+
+    mounted() {
+      if(this.searchQuery.trim()){
+          this.search();
+      }
     }
-  }
 };
 </script>
 

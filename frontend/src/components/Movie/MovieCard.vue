@@ -96,10 +96,10 @@ export default {
     };
   },
   mounted() {
-    let movieTitle = this.$route.params.title; // Obtiene el título de la película desde la URL
-    movieTitle = movieTitle.replace(/%20/g, " "); // Remueve los espacios codificados
-
-    this.fetchMovie(movieTitle); // Llama a la función para obtener los detalles de la película
+      this.loadMovie();
+  },
+    watch: {
+      "$route.params.title": "loadMovie", // Observa cambios y llama a la función directamente
   },
   methods: {
     async fetchMovie(title) {
@@ -127,9 +127,20 @@ export default {
         console.error("Error fetching movie details: ", error);
       }
     },
+      loadMovie(){
+        let movieTitle = this.$route.params.title;
+        movieTitle = movieTitle.replace(/%20/g, "");
+        this.fetchMovie(movieTitle);
+      },
     goBack() {
       this.$router.go(-1);
     },
+      beforeRouteUpdate(to, from, next){
+        if(to.params.title !== from.params.title){
+            this.loadMovie();
+        }
+        next();
+      }
   },
 };
 </script>
