@@ -126,6 +126,9 @@ export default {
         window.addEventListener('storage', this.checkAuthStatus);
     },
 
+    watch:{
+        "$route.params.userName": "fetchUserData",
+    },
 
     mounted() {
         this.fetchUserData();
