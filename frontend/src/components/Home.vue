@@ -5,35 +5,35 @@
 
       </aside>
 
-      <main class="flex-1 bg-gray-900 p-6">
+      <main class="flex-1 bg-gray-900 flex items-center justify-center">
       <section v-if="movies.length > 0" class="mb-8">
-        <h3 class="text-cyan-400 text-xl font-bold mb-4">TOP 10 PELÍCULAS</h3>
-        <div class="grid grid-cols-5 gap-4">
-          <div
-            v-for="movie in movies"
-            :key="movie._id"
-            class="bg-gray-600 h-32 flex flex-col items-center justify-center rounded"
-          >
-            <router-link :to="`/movie/${movie._title}`">
-              <button class="w-20 h-20 rounded mb-2 hover:brightness-110 hover:contrast-125 transition duration-300">
-                              <img
-                                      v-if="movie?._image"
-                                      :src="movie._image"
-                                      alt="Profile"
-                                      class="h-20 object-cover rounded mb-2"
-                              />
+        <h3 class="text-cyan-400 text-3xl font-bold mb-4">TOP 10 PELÍCULAS</h3>
+            <div class="overflow-x-auto flex justify-center items-center" style="width: 75rem;">
+                <div
+                        v-for="movie in movies"
+                        :key="movie._id"
+                        class="inline-block bg-gray-600 h-80 w-80 flex flex-col items-center justify-center rounded mx-6"
+                >
+                    <router-link :to="`/movie/${movie._title}`">
+                        <button class="w-64 h-64 flex items-center justify-center rounded hover:brightness-110 hover:contrast-125 transition duration-300">
+                            <img
+                                    v-if="movie?._image"
+                                    :src="movie._image"
+                                    alt="Profile"
+                                    class="h-64 w-64 object-contain rounded"
+                            />
+                            <img
+                                    v-else
+                                    :src="'https://via.placeholder.com/100?text=' + movie._title"
+                                    :alt="movie._title"
+                                    class="h-64 w-64 object-contain rounded"
+                            />
+                        </button>
+                    </router-link>
+                    <p class="text-white text-base font-bold">{{ movie._title }}</p>
+                </div>
+            </div>
 
-                              <img
-                                  v-else
-                                  :src="'https://via.placeholder.com/100?text=' + movie._title"
-                                  :alt="movie._title"
-                                  class="h-20 object-cover rounded mb-2"
-                              />
-                          </button>
-            </router-link>
-            <p class="text-white text-sm font-bold">{{ movie._title }}</p>
-          </div>
-        </div>
       </section>
       </main>
 
@@ -68,5 +68,12 @@ export default {
 </script>
 
 <style scoped>
-
+.overflow-x-auto {
+  display: flex;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+}
+.overflow-x-auto > div {
+  scroll-snap-align: start;
+}
 </style>
