@@ -6,9 +6,16 @@
       </aside>
 
       <main class="flex-1 bg-gray-900 flex items-center justify-center">
-      <section v-if="movies.length > 0" class="mb-8">
+      <section v-if="movies.length > 0" class="mb-8 relative">
         <h3 class="text-cyan-400 text-3xl font-bold mb-4">TOP 10 PELÍCULAS</h3>
-            <div class="overflow-x-auto flex justify-center items-center" style="width: 75rem;">
+          <button
+                  class="absolute left-0 -translate-x-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white rounded-full w-10 h-10 z-10 flex items-center justify-center"
+                  @click="scrollLeft"
+          >&#8592;</button>
+          <div
+                  ref="scrollContainer"
+                  class="flex items-center overflow-x-hidden scroll-smooth"
+                  style="width: 75rem;">
                 <div
                         v-for="movie in movies"
                         :key="movie._id"
@@ -33,6 +40,11 @@
                     <p class="text-white text-base font-bold">{{ movie._title }}</p>
                 </div>
             </div>
+
+          <button
+                  class="absolute right-0 translate-x-7 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white rounded-full w-10 h-10 z-10 flex items-center justify-center"
+                  @click="scrollRight"
+          >&#8594;</button>
 
       </section>
       </main>
@@ -62,18 +74,29 @@ export default {
             }catch (error){
                 console.error("Error fetching movies: ", error);
             }
+        },
+
+        scrollLeft(){
+            const container = this.$refs.scrollContainer;
+            container.scrollLeft -= 300;
+        },
+
+        scrollRight(){
+            const container = this.$refs.scrollContainer;
+            container.scrollLeft += 300;
         }
     }
 }
 </script>
 
 <style scoped>
-.overflow-x-auto {
-  display: flex;
-  overflow-x: scroll;
-  scroll-snap-type: x mandatory;
-}
 .overflow-x-auto > div {
   scroll-snap-align: start;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+.scroll-smooth {
+  scroll-behavior: smooth;
 }
 </style>
