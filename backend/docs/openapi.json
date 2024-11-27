@@ -216,6 +216,26 @@
         }
       }
     },
+    "/movie/search": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
     "/movie/top10": {
       "get": {
         "description": "",
@@ -237,6 +257,16 @@
             "type": "string"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/review/": {
+      "post": {
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"
