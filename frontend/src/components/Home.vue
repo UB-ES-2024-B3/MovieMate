@@ -58,11 +58,16 @@ export default {
     name: "HomeView",
     data(){
         return{
-            movies: []
+            movies: [],
+            autoScroll: null,
         };
     },
     mounted() {
         this.fetchMovies();
+        this.startAutoScroll();
+    },
+    beforeUnmount() {
+        this.stopAutoScroll();
     },
 
     methods:{
@@ -71,6 +76,10 @@ export default {
                 const BASE_URL = process.env['VUE_APP_API_BASE_URL']
                 const response = await axios.get(`${BASE_URL}/movie/top10`, );
                 this.movies = response.data;
+
+                this.$nextTick(() => {
+                    this.startAutoScroll();
+                })
             }catch (error){
                 console.error("Error fetching movies: ", error);
             }
@@ -78,12 +87,42 @@ export default {
 
         scrollLeft(){
             const container = this.$refs.scrollContainer;
+            if (!container) return;
             container.scrollLeft -= 300;
+            this.restartAutoScroll();
         },
 
         scrollRight(){
             const container = this.$refs.scrollContainer;
+            if (!container) return;
             container.scrollLeft += 300;
+            this.restartAutoScroll();
+        },
+
+        startAutoScroll(){
+            this.$nextTick(() => {
+                const container = this.$refs.scrollContainer;
+                if (!container) return;
+                this.autoScroll = setInterval(() => {
+                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+                        container.scrollLeft = 0;
+                    } else {
+                        container.scrollLeft += 300;
+                    }
+                }, 5000);
+            });
+        },
+
+        stopAutoScroll(){
+            if(this.autoScroll){
+                clearInterval(this.autoScroll);
+                this.autoScroll = null;
+            }
+        },
+
+        restartAutoScroll(){
+            this.stopAutoScroll();
+            this.startAutoScroll();
         }
     }
 }
