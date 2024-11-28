@@ -24,27 +24,63 @@
       </button>
     </div>
 
-    <div class="w-full form_background_input rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+    <div
+      class="w-full sm:w-[700px] max-w-2xl form_background_input rounded-lg shadow-lg md:mt-0 sm:max-w-md xl:p-6"
+    >
       <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-        <h1 class="text-xl font-bold leading-tight tracking-tight form_title_text md:text-2xl">
-          Nueva Reseña
+        <h1
+          class="text-xl font-bold leading-tight tracking-tight form_title_text md:text-2xl"
+        >
+          NUEVA RESEÑA
         </h1>
         <form @submit.prevent="handleSubmit" class="space-y-4 md:space-y-6">
           <!-- TITULO -->
           <div>
-            <label for="titulo" class="block mb-2 text-sm font-medium form_title_text">UserName</label>
-            <input type="text" name="titulo" v-model="titulo" id="titulo" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" required="">
+            <input
+              type="text"
+              name="titulo"
+              v-model="titulo"
+              id="titulo"
+              class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+              placeholder="Titulo"
+              required=""
+            />
           </div>
-          <!-- EMAIL -->
+          <!-- RESEÑA -->
           <div>
-            <label for="email" class="block mb-2 text-sm font-medium form_title_text">Email</label>
-            <input type="email" name="email" v-model="email" id="email" class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Comparte tu opinion" required="">
+            <textarea
+              name="resena"
+              v-model="resena"
+              id="resena"
+              rows="6"
+              class="form_text_input text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+              placeholder="Comparte aqui tu opinión"
+              required=""
+            ></textarea>
           </div>
         </form>
-          <!-- CREATION ACCOUNT -->
-          <button type="submit" class="w-full submit_button font-medium rounded-lg text-sm px-5 py-2.5 text-center">PUBLICAR</button>
       </div>
     </div>
+
+          <div class="flex justify-between items-center mt-6 space-x-3">
+
+
+      <!-- Botón de Publicar -->
+      <button
+        type="submit"
+        class="px-6 py-2 bg-cyan-400 text-white rounded-lg hover:bg-cyan-300 text-sm w-1/2"
+        style="background-color: #22d3ee;"
+      >
+        PUBLICAR
+      </button>
+              <button
+        type="button"
+        @click="handleDelete"
+        class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 text-sm w-1/2"
+      >
+        ELIMINAR
+      </button>
+</div>
   </div>
 </template>
 
