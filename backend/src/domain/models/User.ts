@@ -1,3 +1,7 @@
+import {Movie} from "./Movie";
+import * as Buffer from "buffer";
+import {undefined} from "io-ts";
+
 export class User {
     constructor(
         private _id: number,
@@ -8,7 +12,8 @@ export class User {
         private _gender: string,
         private _description: string,
         private _isAdmin: boolean,
-        private _image?: Buffer
+        private _image?: Buffer,
+        private _favs?: Movie[] | null
     ) {
     }
 
@@ -91,7 +96,7 @@ export class User {
     }
 
     set image(value: Buffer | null) {
-        this._image = value ?? undefined;
+        this._image = value ?? null;
     }
 
     // Función para convertir la imagen a base64
@@ -99,4 +104,11 @@ export class User {
         return this._image ? `data:image/jpeg;base64,${this._image.toString('base64')}` : null;
     }
 
+    get favs(): Movie[] | null {
+        return this._favs;
+    }
+
+    set favs(value: Movie[] | null) {
+        this._favs = value;
+    }
 }

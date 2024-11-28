@@ -8,19 +8,19 @@ export class MovieEntity extends BaseEntity {
     @Column({nullable: false})
     title: string;
 
-    @Column({nullable: true})
+    @Column({nullable: false})
     description: string;
 
-    @Column({nullable: false})
+    @Column({nullable: false, default: [], type: "jsonb"})
     genres: string[];
 
-    @Column({nullable: false})
+    @Column({nullable: false, default: [], type: "jsonb"})
     directors: string[];
 
-    @Column({nullable: false})
+    @Column({nullable: false, default: [], type: "jsonb"})
     actors: string[];
 
-    @Column({nullable: false, type: "date"})
+    @Column({nullable: false})
     premiereDate: Date;
 
     @Column({nullable: false})

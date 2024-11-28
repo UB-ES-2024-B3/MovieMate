@@ -1,5 +1,3 @@
-import {User} from "../domain/models/User";
-
 export interface UpdateUserData {
     userName?: string;
     password?: string;
@@ -34,7 +32,14 @@ export interface UsersList {
 export interface MoviesList {
     title: string;
     premiereDate: Date;
-    genres: string;
-    directors: string;
+    genres: string[];
+    directors: string[];
     image: string | null;
+}
+
+export interface ReviewDtoIn {
+    title: string;
+    review: string;
+    author: number;
+    movie: number;
 }

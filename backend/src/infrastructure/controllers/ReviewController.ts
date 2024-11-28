@@ -2,11 +2,10 @@ import {NextFunction, Request, Response} from "express";
 import {ReviewService} from "../../application/services/ReviewService";
 import {autoInjectable, container} from "tsyringe";
 import {ReviewRepository} from "../repositories/ReviewRepository";
-import {Review} from "../../domain/models/Review";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
-import {User} from "../../domain/models/User";
+import {ReviewDtoIn} from "../../interfaces/Interfaces";
 
 const multer = require("multer")
 const storage = multer.memoryStorage();
@@ -37,12 +36,13 @@ export class ReviewController {
             // Si la validación es correcta, accedemos a los datos validados
             const validatedData = validationResult.right;
 
-            // Creación del objeto User con los datos validados
-            const review: Review = new Review(
-                null,
-                validatedData.title,
-                validatedData.review
-            );
+            // Creación del objeto Review con los datos validados
+            const review: ReviewDtoIn = {
+                author: validatedData.author,
+                movie: validatedData.movie,
+                review: validatedData.review,
+                title: validatedData.title
+            }
 
             const result = await this.reviewService.createReview(review);
             return res.status(200).json(result);

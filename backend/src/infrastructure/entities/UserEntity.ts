@@ -1,5 +1,5 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable} from "typeorm";
-import {MovieEntity} from "./MovieEntity";  // Asegúrate de importar MovieEntity
+import {BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
+import {MovieEntity} from "./MovieEntity"; // Asegúrate de importar MovieEntity
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -31,7 +31,8 @@ export class UserEntity extends BaseEntity {
     image: Buffer;
 
     // Relación ManyToMany con MovieEntity
-    @ManyToMany(() => MovieEntity)
-    @JoinTable()  // La tabla intermedia será creada automáticamente
-    favs: MovieEntity[];
+    @ManyToMany(() => MovieEntity, {nullable: true})
+    @JoinTable()  // La tabla intermedia se crea aquí
+    favs: MovieEntity[] | null; // Permitir que 'favs' sea null
+
 }

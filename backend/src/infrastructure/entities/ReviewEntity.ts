@@ -1,7 +1,6 @@
 import {BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import {MovieEntity} from "./MovieEntity";
 import {UserEntity} from "./UserEntity";
-import {Movie} from "../../domain/models/Movie";
 
 @Entity()
 export class ReviewEntity extends BaseEntity {
@@ -18,5 +17,5 @@ export class ReviewEntity extends BaseEntity {
     movie: MovieEntity;
 
     @ManyToOne(type => UserEntity)
-    user: UserEntity;
+    author: UserEntity;
 }
