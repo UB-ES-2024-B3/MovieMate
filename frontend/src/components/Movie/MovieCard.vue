@@ -89,8 +89,9 @@ export default {
         duration: "",
         classification: "",
         score: "",
+          totalReviews: "",
         image: "",
-        year: "",
+          year: "",
       },
       errorMessage: "",
     };

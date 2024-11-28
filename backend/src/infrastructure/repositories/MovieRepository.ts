@@ -30,6 +30,7 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.duration,
             movieFromDB.classification,
             movieFromDB.score,
+            movieFromDB.totalReviews,
             this.imageToBase64(movieFromDB.image)
         );
 
@@ -53,6 +54,7 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.duration,
                 moviesFromDB.classification,
                 moviesFromDB.score,
+                moviesFromDB.totalReviews,
                 this.imageToBase64(moviesFromDB.image)
             );
         });
@@ -81,6 +83,7 @@ export class MovieRepository implements IMovieRepository {
                 top10FromDB.duration,
                 top10FromDB.classification,
                 top10FromDB.score,
+                top10FromDB.totalReviews,
                 this.imageToBase64(top10FromDB.image)
             );
         });
@@ -94,7 +97,7 @@ export class MovieRepository implements IMovieRepository {
 
     async search(query: string): Promise<MoviesList[]> {
         const movies = await this.repository.find({
-            where: [{ title: ILike(`%${query}%`) }], order: {title: 'ASC'},
+            where: [{title: ILike(`%${query}%`)}], order: {title: 'ASC'},
         });
 
         if (movies.length === 0) {
