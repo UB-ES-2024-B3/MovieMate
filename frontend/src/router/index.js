@@ -17,7 +17,7 @@ const routes = [
   { path: '/editar', component: EditarPerfil},
   { path: '/recovery/:token', component: RecuperarContrasena},
   { path: '/movie/:title', component: MovieCard},
-  { path: '/resena', component: PublicarResena},
+  { path: '/resena/:movieId/:userId', component: PublicarResena},
 ];
 
 const router = createRouter({

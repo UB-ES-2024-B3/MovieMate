@@ -68,6 +68,7 @@
       <!-- Botón de Publicar -->
       <button
         type="submit"
+        @click="handleSubmit"
         class="px-6 py-2 bg-cyan-400 text-white rounded-lg hover:bg-cyan-300 text-sm w-1/2"
         style="background-color: #22d3ee;"
       >
@@ -85,8 +86,76 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
-    name: "PublicarReseña"
+    name: "PublicarReseña",
+    data(){
+        return{
+            titulo: '',
+            resena: '',
+            movieId: 0,
+            userId: 0,
+
+            showToast: false,
+            toastMessage: '',
+            toastError: false,
+        }
+    },
+
+    methods:{
+        hideToast() {
+            this.showToast = false;
+        },
+
+        showToastWithMessage(message, error, callback){
+            this.toastMessage = message;
+            this.showToast = true;
+            this.toastError = error;
+            setTimeout(()=> {
+                this.showToast = false;
+                if (callback) callback();
+            }, 5000);
+        },
+
+        async handleSubmit(){
+            if(this.titulo == ''){
+                this.showToastWithMessage('Enter the title', true);
+                return;
+            }
+
+            if(this.resena == ''){
+                this.showToastWithMessage('Enter the review', true);
+                return;
+            }
+
+            let movieID = this.$route.params.movieId;
+            let userID = this.$route.params.userId;
+
+            const data = {
+                title: this.titulo.toString(),
+                review: this.resena.toString(),
+                author: Number(userID),
+                movie: Number(movieID),
+            }
+
+            console.log(data);
+
+            try{
+                const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+                const response = await axios.post(`${BASE_URL}/review`, data);
+
+                if(response.status == 200){
+                    this.showToastWithMessage(response.data.message || 'Request successful',
+                        false,
+                        ()=> this.$router.go(-1));
+                }
+            }catch (error){
+                console.error('Error del servidor:', error.response?.data || error.message);
+                this.showToastWithMessage(error.response?.data?.message || 'Request failed. Please try again', true);
+            }
+        }
+    }
 }
 </script>
 
