@@ -5,35 +5,47 @@
 
       </aside>
 
-      <main class="flex-1 bg-gray-900 p-6">
-      <section v-if="movies.length > 0" class="mb-8">
-        <h3 class="text-cyan-400 text-xl font-bold mb-4">TOP 10 PELÍCULAS</h3>
-        <div class="grid grid-cols-5 gap-4">
+      <main class="flex-1 bg-gray-900 flex items-center justify-center">
+      <section v-if="movies.length > 0" class="mb-8 relative">
+        <h3 class="text-cyan-400 text-3xl font-bold mb-4">TOP 10 PELÍCULAS</h3>
+          <button
+                  class="absolute left-0 -translate-x-5 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white rounded-full w-10 h-10 z-10 flex items-center justify-center"
+                  @click="scrollLeft"
+          >&#8592;</button>
           <div
-            v-for="movie in movies"
-            :key="movie._id"
-            class="bg-gray-600 h-32 flex flex-col items-center justify-center rounded"
-          >
-            <router-link :to="`/movie/${movie._title}`">
-              <button class="w-20 h-20 rounded mb-2 hover:brightness-110 hover:contrast-125 transition duration-300">
-                              <img
-                                      v-if="movie?._image"
-                                      :src="movie._image"
-                                      alt="Profile"
-                                      class="h-20 object-cover rounded mb-2"
-                              />
+                  ref="scrollContainer"
+                  class="flex items-center overflow-x-hidden scroll-smooth"
+                  style="width: 75rem;">
+                <div
+                        v-for="movie in movies"
+                        :key="movie._id"
+                        class="inline-block bg-gray-600 h-80 w-80 flex flex-col items-center justify-center rounded mx-6"
+                >
+                    <router-link :to="`/movie/${movie._title}`">
+                        <button class="w-64 h-64 flex items-center justify-center rounded hover:brightness-110 hover:contrast-125 transition duration-300">
+                            <img
+                                    v-if="movie?._image"
+                                    :src="movie._image"
+                                    alt="Profile"
+                                    class="h-64 w-64 object-contain rounded"
+                            />
+                            <img
+                                    v-else
+                                    :src="'https://via.placeholder.com/100?text=' + movie._title"
+                                    :alt="movie._title"
+                                    class="h-64 w-64 object-contain rounded"
+                            />
+                        </button>
+                    </router-link>
+                    <p class="text-white text-base font-bold">{{ movie._title }}</p>
+                </div>
+            </div>
 
-                              <img
-                                  v-else
-                                  :src="'https://via.placeholder.com/100?text=' + movie._title"
-                                  :alt="movie._title"
-                                  class="h-20 object-cover rounded mb-2"
-                              />
-                          </button>
-            </router-link>
-            <p class="text-white text-sm font-bold">{{ movie._title }}</p>
-          </div>
-        </div>
+          <button
+                  class="absolute right-0 translate-x-7 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white rounded-full w-10 h-10 z-10 flex items-center justify-center"
+                  @click="scrollRight"
+          >&#8594;</button>
+
       </section>
       </main>
 
@@ -46,11 +58,16 @@ export default {
     name: "HomeView",
     data(){
         return{
-            movies: []
+            movies: [],
+            autoScroll: null,
         };
     },
     mounted() {
         this.fetchMovies();
+        this.startAutoScroll();
+    },
+    beforeUnmount() {
+        this.stopAutoScroll();
     },
 
     methods:{
@@ -59,14 +76,66 @@ export default {
                 const BASE_URL = process.env['VUE_APP_API_BASE_URL']
                 const response = await axios.get(`${BASE_URL}/movie/top10`, );
                 this.movies = response.data;
+
+                this.$nextTick(() => {
+                    this.startAutoScroll();
+                })
             }catch (error){
                 console.error("Error fetching movies: ", error);
             }
+        },
+
+        scrollLeft(){
+            const container = this.$refs.scrollContainer;
+            if (!container) return;
+            container.scrollLeft -= 300;
+            this.restartAutoScroll();
+        },
+
+        scrollRight(){
+            const container = this.$refs.scrollContainer;
+            if (!container) return;
+            container.scrollLeft += 300;
+            this.restartAutoScroll();
+        },
+
+        startAutoScroll(){
+            this.$nextTick(() => {
+                const container = this.$refs.scrollContainer;
+                if (!container) return;
+                this.autoScroll = setInterval(() => {
+                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+                        container.scrollLeft = 0;
+                    } else {
+                        container.scrollLeft += 300;
+                    }
+                }, 5000);
+            });
+        },
+
+        stopAutoScroll(){
+            if(this.autoScroll){
+                clearInterval(this.autoScroll);
+                this.autoScroll = null;
+            }
+        },
+
+        restartAutoScroll(){
+            this.stopAutoScroll();
+            this.startAutoScroll();
         }
     }
 }
 </script>
 
 <style scoped>
-
+.overflow-x-auto > div {
+  scroll-snap-align: start;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
 </style>
