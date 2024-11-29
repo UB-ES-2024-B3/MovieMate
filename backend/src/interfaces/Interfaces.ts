@@ -1,3 +1,6 @@
+import {Movie} from "../domain/models/Movie";
+import {MovieEntity} from "../infrastructure/entities/MovieEntity";
+
 export interface UpdateUserData {
     userName?: string;
     password?: string;
