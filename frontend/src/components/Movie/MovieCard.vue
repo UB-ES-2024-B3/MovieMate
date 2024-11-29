@@ -5,26 +5,25 @@
       <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between fixed top-16 left-0 h-[calc(100vh-64px)]">
       </aside>
 
-
       <!-- Contenido principal -->
       <div class="ml-64 flex-grow p-8">
         <div class="max-w-6xl mx-auto">
           <!-- Botón para volver atrás -->
           <div class="mb-4">
             <button
-              @click="goBack"
-              class="flex items-center bg-gray-800 text-[#5ce1e6] font-bold px-4 py-2 rounded-md border-2 border-[#5ce1e6] shadow-lg hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
+                @click="goBack"
+                class="flex items-center bg-gray-800 text-[#5ce1e6] font-bold px-4 py-2 rounded-md border-2 border-[#5ce1e6] shadow-lg hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 mr-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
               >
                 <path
-                  fill-rule="evenodd"
-                  d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
-                  clip-rule="evenodd"
+                    fill-rule="evenodd"
+                    d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
+                    clip-rule="evenodd"
                 />
               </svg>
               Back
@@ -37,9 +36,9 @@
               <!-- Imagen de la película -->
               <div class="flex-none mr-8">
                 <img
-                  :src="movie.image"
-                  alt="Movie Poster"
-                  class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
+                    :src="movie.image"
+                    alt="Movie Poster"
+                    class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
                 />
               </div>
 
@@ -65,12 +64,36 @@
               </div>
             </div>
           </div>
+
+          <!-- Sistema de Puntuación -->
+          <div class="bg-gray-800 text-white rounded-md mt-6 p-6 shadow-lg">
+            <h3 class="text-xl font-bold mb-4">Puntúa esta película</h3>
+            <div class="stars flex justify-center mb-4">
+              <span
+                  v-for="star in 5"
+                  :key="star"
+                  class="star"
+                  :class="{ selected: star <= currentRating }"
+                  @click="rateMovie(star)"
+              >
+                ★
+              </span>
+            </div>
+            <p v-if="hasRated" class="text-center text-green-500 font-bold">
+              Has puntuado esta película con {{ currentRating }} estrellas.
+              <button
+                  @click="modifyRating"
+                  class="ml-2 text-sm bg-cyan-500 text-white px-2 py-1 rounded"
+              >
+                Modificar Puntuación
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import axios from "axios";
@@ -93,22 +116,23 @@ export default {
         year: "",
       },
       errorMessage: "",
+      currentRating: 0,
+      hasRated: false,
     };
   },
   mounted() {
-      this.loadMovie();
+    this.loadMovie();
   },
-    watch: {
-      "$route.params.title": "loadMovie", // Observa cambios y llama a la función directamente
+  watch: {
+    "$route.params.title": "loadMovie",
   },
   methods: {
     async fetchMovie(title) {
       try {
         const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-        const response = await axios.get(`${BASE_URL}/movie/${title}`);
+        const response = await axios.get(${BASE_URL}/movie/${title});
         const movieData = response.data;
 
-        // Asigna la información de la película
         this.movie = {
           title: movieData._title,
           description: movieData._description,
@@ -127,20 +151,33 @@ export default {
         console.error("Error fetching movie details: ", error);
       }
     },
-      loadMovie(){
-        let movieTitle = this.$route.params.title;
-        movieTitle = movieTitle.replace(/%20/g, "");
-        this.fetchMovie(movieTitle);
-      },
+    loadMovie() {
+      let movieTitle = this.$route.params.title;
+      movieTitle = movieTitle.replace(/%20/g, "");
+      this.fetchMovie(movieTitle);
+    },
     goBack() {
       this.$router.go(-1);
     },
-      beforeRouteUpdate(to, from, next){
-        if(to.params.title !== from.params.title){
-            this.loadMovie();
-        }
-        next();
+    rateMovie(rating) {
+      if (!this.hasRated) {
+        this.currentRating = rating;
+        this.hasRated = true;
+        alert(Has puntuado esta película con ${rating} estrellas.);
+        // Aquí puedes hacer una llamada al backend para guardar la puntuación
+      } else {
+        alert("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.");
       }
+    },
+    modifyRating() {
+      this.hasRated = false;
+    },
+    beforeRouteUpdate(to, from, next) {
+      if (to.params.title !== from.params.title) {
+        this.loadMovie();
+      }
+      next();
+    },
   },
 };
 </script>
@@ -148,7 +185,19 @@ export default {
 <style scoped>
 .custom-hr {
   border: 0;
-  border-top: 1px solid #545454; /* Color del texto */
+  border-top: 1px solid #545454;
   margin: 16px 0;
+}
+.stars {
+  display: flex;
+  justify-content: center;
+}
+.star {
+  font-size: 2rem;
+  cursor: pointer;
+  color: gray;
+}
+.star.selected {
+  color: gold;
 }
 </style>
