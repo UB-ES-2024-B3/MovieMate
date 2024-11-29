@@ -20,9 +20,9 @@ jobs:
       with:
         creds: >
           {
-            "clientId": "e954483b-b765-4f77-8ab6-05421fbf9976",
-            "clientSecret": "D608Q~zsG5X7nmjJQKmtj1lSOL6ipOPMIfuLadrT",
-            "subscriptionId": "a5f09d52-7f97-4b2a-aea4-7779acd29a21",
+            "clientId": "1285c1aa-e7c3-4fad-bdb8-1e6d0f21b822",
+            "clientSecret": "Mkq8Q~iBRRiQ72pXsL8CUsag27lucuMsnLM3Gdxv",
+            "subscriptionId": "deb369ec-1076-46f4-bc4d-4443879e0c54",
             "tenantId": "a2313cab-b1c3-4f3a-bb11-2157447ddbb4"
           }
 
