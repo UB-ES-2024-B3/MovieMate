@@ -4,7 +4,7 @@ import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
-import {MoviesList} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList, UserDtoOut} from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 
 export class MovieRepository implements IMovieRepository {
@@ -33,7 +33,7 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.duration,
             movieFromDB.classification,
             movieFromDB.score,
-            movieFromDB.totalReviews,
+            movieFromDB.totalReviews.length,
             this.imageToBase64(movieFromDB.image)
         );
 
@@ -57,7 +57,7 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.duration,
                 moviesFromDB.classification,
                 moviesFromDB.score,
-                moviesFromDB.totalReviews,
+                moviesFromDB.totalReviews.length,
                 this.imageToBase64(moviesFromDB.image)
             );
         });
@@ -86,7 +86,7 @@ export class MovieRepository implements IMovieRepository {
                 top10FromDB.duration,
                 top10FromDB.classification,
                 top10FromDB.score,
-                top10FromDB.totalReviews,
+                top10FromDB.totalReviews.length,
                 this.imageToBase64(top10FromDB.image)
             );
         });
@@ -116,7 +116,7 @@ export class MovieRepository implements IMovieRepository {
         }));
     }
 
-    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<string> {
+    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
         const user = await this.userRepo.findOne({
             where: { id: idUsuario },
             relations: ["reviewed"],
@@ -150,10 +150,15 @@ export class MovieRepository implements IMovieRepository {
         const totalScores = movie.totalReviews.reduce((sum, score) => sum + score, 0);
         movie.score = totalScores / movie.totalReviews.length;
 
+        const movieReview: MovieReviewDtoOut = {
+            totalReview: movie.totalReviews.length,
+            score: movie.score
+        };
+
         await this.userRepo.save(user);
         await this.repository.save(movie);
 
-        return hasReviewed ? "Review Updated" : "Review Published";
+        return movieReview
     }
 
 

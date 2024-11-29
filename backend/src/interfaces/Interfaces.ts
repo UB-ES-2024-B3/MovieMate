@@ -27,6 +27,11 @@ export interface UserDtoOut {
     image: string | null;
 }
 
+export interface MovieReviewDtoOut {
+    totalReview: number;
+    score: number;
+}
+
 export interface UsersList {
     userName: string;
     description: string;
