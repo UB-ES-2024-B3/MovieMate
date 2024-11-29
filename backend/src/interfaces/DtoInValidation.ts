@@ -34,6 +34,8 @@ export class DtoInValidation {
     static ReviewDtoInCodec = t.type({
         title: t.string,
         review: t.string,
+        author: t.number,
+        movie: t.number
     });
 
 

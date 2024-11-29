@@ -5,7 +5,7 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UsersList, UserDtoOut, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {UpdateUserData, UserDtoOut, UsersList, UserWithProfileInfo} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
@@ -42,7 +42,7 @@ export class UserRepository implements IUserRepository {
         user.password = createHash('sha256').update(user.password).digest('hex');
 
         // Save user using the repository
-        await this.repository.save(user);
+        await this.repository.save(this.userToUserEntity(user));
 
         // Return a success message or the new user's ID
         return "Registration successful";
@@ -208,7 +208,7 @@ export class UserRepository implements IUserRepository {
 
     async search(query: string): Promise<UsersList[]> {
         const users = await this.repository.find({
-            where: [{ userName: ILike(`%${query}%`) }], order: {userName: 'ASC'},
+            where: [{userName: ILike(`%${query}%`)}], order: {userName: 'ASC'},
         });
 
         if (users.length === 0) {
@@ -222,5 +222,22 @@ export class UserRepository implements IUserRepository {
         }));
 
     }
+
+    const
+
+    userToUserEntity(user: User): UserEntity {
+        const userEntity = new UserEntity();
+        userEntity.userName = user.userName;
+        userEntity.email = user.email;
+        userEntity.password = user.password;
+        userEntity.favs = [];  // Al inicio siempre estara vacio
+        userEntity.gender = user.gender;
+        userEntity.birthDate = user.birthDate;
+        userEntity.description = user.description;
+        userEntity.isAdmin = user.isAdmin;
+
+        return userEntity;
+    }
+
 
 }
