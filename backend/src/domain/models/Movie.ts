@@ -11,7 +11,7 @@ export class Movie {
         private _duration: number,
         private _classification: string,
         private _score: number,
-        private _totalReviews: number[],
+        private _totalReviews: number,
         private _image?: Buffer | string
     ) {
     }
