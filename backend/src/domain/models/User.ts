@@ -1,6 +1,8 @@
 import {Movie} from "./Movie";
 import * as Buffer from "buffer";
 import {undefined} from "io-ts";
+import postgres from "postgres";
+import {boolean, number, string} from "fp-ts";
 
 export class User {
     constructor(
@@ -13,7 +15,8 @@ export class User {
         private _description: string,
         private _isAdmin: boolean,
         private _image?: Buffer,
-        private _favs?: Movie[] | null
+        private _favs?: Movie[] | null,
+        private _reviewed?: Movie[] | null
     ) {
     }
 
@@ -110,5 +113,13 @@ export class User {
 
     set favs(value: Movie[] | null) {
         this._favs = value;
+    }
+
+    get reviewed(): Movie[] | null {
+        return this._reviewed;
+    }
+
+    set reviewed(value: Movie[] | null) {
+        this._reviewed = value;
     }
 }

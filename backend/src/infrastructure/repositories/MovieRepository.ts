@@ -5,12 +5,15 @@ import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
 import {MoviesList} from "../../interfaces/Interfaces";
+import {UserEntity} from "../entities/UserEntity";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
+    private readonly userRepo: Repository<UserEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(MovieEntity);
+        this.userRepo = PostgreTypeOrmDataSource.getRepository(UserEntity);
     }
 
     async get(title: string): Promise<Movie> {
@@ -112,4 +115,46 @@ export class MovieRepository implements IMovieRepository {
             image: this.imageToBase64(movie.image) || "No image available",
         }));
     }
+
+    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<string> {
+        const user = await this.userRepo.findOne({
+            where: { id: idUsuario },
+            relations: ["reviewed"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const movie = await this.repository.findOneBy({ id: idMovie });
+        if (!movie) {
+            throw createError(404, `Movie does not exist`);
+        }
+
+        const hasReviewed = user.reviewed.some(reviewedMovie => reviewedMovie.id === idMovie);
+
+        if (!hasReviewed) {
+            user.reviewed.push(movie);
+
+            if (!movie.totalReviews) {
+                movie.totalReviews = [];
+            }
+            movie.totalReviews.push(puntuacion);
+        } else {
+            const reviewIndex = user.reviewed.findIndex(reviewedMovie => reviewedMovie.id === idMovie);
+            if (reviewIndex !== -1) {
+                movie.totalReviews[reviewIndex] = puntuacion;
+            }
+        }
+
+        const totalScores = movie.totalReviews.reduce((sum, score) => sum + score, 0);
+        movie.score = totalScores / movie.totalReviews.length;
+
+        await this.userRepo.save(user);
+        await this.repository.save(movie);
+
+        return hasReviewed ? "Review Updated" : "Review Published";
+    }
+
+
 }

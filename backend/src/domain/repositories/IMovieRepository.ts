@@ -9,4 +9,6 @@ export interface IMovieRepository {
     getTop10(): Promise<Movie[]>;
 
     search(query: string): Promise<MoviesList[]>;
+
+    reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<string>;
 }

@@ -23,4 +23,9 @@ export class MovieService {
     async searchMovies(query: string): Promise<MoviesList[]> {
         return await this.movieRepository.search(query);
     }
+
+    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<string>{
+        return await this.movieRepository.reviewMovie(idUsuario, idMovie, puntuacion);
+    }
 }
+

@@ -32,8 +32,8 @@ export class MovieEntity extends BaseEntity {
     @Column({nullable: true, type: "float"})
     score: number;
 
-    @Column({nullable: true})
-    totalReviews: number;
+    @Column({ type: "jsonb", nullable: true, default: [] })
+    totalReviews: number[];
 
     @Column({type: 'bytea', nullable: true})
     image: Buffer;

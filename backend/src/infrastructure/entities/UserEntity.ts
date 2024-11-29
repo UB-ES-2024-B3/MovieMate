@@ -35,4 +35,7 @@ export class UserEntity extends BaseEntity {
     @JoinTable()  // La tabla intermedia se crea aquí
     favs: MovieEntity[] | null; // Permitir que 'favs' sea null
 
+    @ManyToMany(() => MovieEntity, {nullable: true})
+    @JoinTable()  // La tabla intermedia se crea aquí
+    reviewed: MovieEntity[] | null;
 }
