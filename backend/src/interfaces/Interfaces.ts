@@ -45,6 +45,12 @@ export interface MoviesList {
     image: string | null;
 }
 
+export interface MoviesInFavsDtoOut {
+    id: number;
+    title: string;
+    image: string | null;
+}
+
 export interface ReviewDtoIn {
     title: string;
     review: string;
