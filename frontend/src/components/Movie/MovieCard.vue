@@ -3,6 +3,7 @@
     <div class="flex w-full h-full">
       <!-- Lateral izquierdo -->
       <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between fixed top-16 left-0 h-[calc(100vh-64px)]">
+        <!-- Aquí puedes agregar contenido para el menú lateral -->
       </aside>
 
       <!-- Contenido principal -->
@@ -31,15 +32,16 @@
           </div>
 
           <!-- Tarjeta de película -->
-          <div class="bg-[#5ce1e6] rounded-md shadow-lg">
+          <div class="bg-[#5ce1e6] rounded-md shadow-lg relative">
             <div class="md:flex px-8 py-6 leading-none">
               <!-- Imagen de la película -->
-              <div class="flex-none mr-8">
+              <div class="flex-none mr-8 relative">
                 <img
                     :src="movie.image"
                     alt="Movie Poster"
                     class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
                 />
+
               </div>
 
               <!-- Detalles de la película -->
@@ -57,7 +59,7 @@
                   {{ movie.description }}
                 </p>
                 <p class="text-md">
-                  Rating: {{ movie.score }} / 10
+                  Rating: {{ movie.score }} / 5
                   <span class="font-bold px-2">|</span>
                   Classification: {{ movie.classification }}
                 </p>
@@ -89,12 +91,19 @@
               </button>
             </p>
           </div>
+
+          <!-- Mensaje de error -->
+          <div
+              v-if="showMessage"
+              class="fixed top-4 right-4 p-4 rounded-md text-white shadow-lg bg-red-500"
+          >
+            {{ message }}
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 
@@ -103,6 +112,7 @@ export default {
   data() {
     return {
       movie: {
+        id: 0,
         title: "",
         description: "",
         genres: [],
@@ -112,14 +122,26 @@ export default {
         duration: "",
         classification: "",
         score: "",
-          totalReviews: "",
+        totalReviews: "",
         image: "",
-          year: "",
+        year: "",
       },
       errorMessage: "",
       currentRating: 0,
       hasRated: false,
+      showMessage: false, // Controlar la visibilidad del mensaje
+      message: "", // Mensaje a mostrar
+      isAuthenticated: false,
     };
+  },
+  created() {
+    // Verificamos si el token y el nombre de usuario están en sessionStorage
+    const token = sessionStorage.getItem("auth_token");
+    this.isAuthenticated = !!token;
+
+    if (this.isAuthenticated) {
+      this.username = sessionStorage.getItem("username");
+    }
   },
   mounted() {
     this.loadMovie();
@@ -130,11 +152,12 @@ export default {
   methods: {
     async fetchMovie(title) {
       try {
-        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-        const response = await axios.get(${BASE_URL}/movie/${title});
+        const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+        const response = await axios.get(`${BASE_URL}/movie/${title}`);
         const movieData = response.data;
 
         this.movie = {
+          id: movieData._id,
           title: movieData._title,
           description: movieData._description,
           genres: Array.isArray(movieData._genres) ? movieData._genres : [movieData._genres],
@@ -154,33 +177,65 @@ export default {
     },
     loadMovie() {
       let movieTitle = this.$route.params.title;
-      movieTitle = movieTitle.replace(/%20/g, "");
+      movieTitle = movieTitle.replace(/%20/g, " ");
       this.fetchMovie(movieTitle);
     },
     goBack() {
       this.$router.go(-1);
     },
     rateMovie(rating) {
-      if (!this.hasRated) {
-        this.currentRating = rating;
-        this.hasRated = true;
-        alert(Has puntuado esta película con ${rating} estrellas.);
-        // Aquí puedes hacer una llamada al backend para guardar la puntuación
-      } else {
-        alert("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.");
+      if (!this.isAuthenticated) {
+        // Mostrar mensaje si no está autenticado
+        this.displayMessage("Debes iniciar sesión para puntuar películas.");
+        return;
       }
+
+      // Enviar puntuación al backend
+      const payload = {
+        userName: this.username,
+        idMovie: this.movie.id,
+        puntuacion: rating,
+      };
+      console.log(payload);
+      const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+
+      axios
+          .put(`${BASE_URL}/movie/score`, payload)
+          .then(() => {
+              if (!this.hasRated) {
+              this.currentRating = rating;
+              this.hasRated = true;
+              alert(`Has puntuado esta película con ${rating} estrellas.`);
+              // Volver a cargar los datos de la película para obtener el nuevo rating
+              this.fetchMovie(this.movie.title);
+            } else {
+              alert("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error al enviar la puntuación:", error);
+            this.displayMessage("Hubo un error al enviar tu puntuación. Inténtalo de nuevo.");
+          });
+
     },
     modifyRating() {
       this.hasRated = false;
     },
-    beforeRouteUpdate(to, from, next) {
-      if (to.params.title !== from.params.title) {
-        this.loadMovie();
-      }
-      next();
+
+    displayMessage(message) {
+      // Actualiza el mensaje y el estilo
+      this.message = message;
+      this.showMessage = true;
+
+      // Oculta automáticamente el mensaje después de 3 segundos
+      setTimeout(() => {
+        this.showMessage = false;
+        this.message = "";
+      }, 3000);
     },
   },
 };
+
 </script>
 
 <style scoped>
@@ -189,16 +244,20 @@ export default {
   border-top: 1px solid #545454;
   margin: 16px 0;
 }
+
 .stars {
   display: flex;
   justify-content: center;
 }
+
 .star {
   font-size: 2rem;
   cursor: pointer;
   color: gray;
 }
+
 .star.selected {
   color: gold;
 }
+
 </style>
