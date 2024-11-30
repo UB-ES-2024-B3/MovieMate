@@ -65,7 +65,7 @@ export class MovieController {
                 throw createError(400, `Parameters are incorrect`);
             }
 
-            if(puntuacion > 10 || puntuacion < 0){
+            if(puntuacion > 5 || puntuacion < 0){
                 throw createError(400, `Incorrect Puntuation`);
             }
 
