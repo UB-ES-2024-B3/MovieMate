@@ -264,6 +264,36 @@
         }
       }
     },
+    "/movie/score": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "example": "any"
+                },
+                "idMovie": {
+                  "example": "any"
+                },
+                "puntuacion": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/review/": {
       "post": {
         "description": "",
