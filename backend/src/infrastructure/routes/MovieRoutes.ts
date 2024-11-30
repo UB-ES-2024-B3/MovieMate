@@ -13,4 +13,5 @@ router.get("/:title", (req: Request, res: Response, next: NextFunction) => Movie
 
 router.put("/score",  (req: Request, res: Response, next: NextFunction) => MovieController.scoreMovie(req, res, next));
 
+router.put("/favorites", (req: Request, res: Response, next: NextFunction) => MovieController.addFavorites(req, res, next));
 export default router;
