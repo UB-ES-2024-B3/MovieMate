@@ -4,7 +4,13 @@ import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
-import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut, ReviewUserDtoOut} from "../../interfaces/Interfaces";
+import {
+    AuthorDtoOut,
+    MovieReviewDtoOut,
+    MoviesList,
+    MovieWithReviewsDtoOut,
+    ReviewDtoOut
+} from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 import {ReviewEntity} from "../entities/ReviewEntity";
 
@@ -32,12 +38,16 @@ export class MovieRepository implements IMovieRepository {
             relations: ['author'],
         });
 
-        const reviews: ReviewUserDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
-            const {author} = reviewFromDB;
+        const reviews: ReviewDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
+            const author: AuthorDtoOut = {
+                id: reviewFromDB.author.id,
+                userName: reviewFromDB.author.userName,
+                image: reviewFromDB.author.image ? reviewFromDB.author.image.toString('base64') : null
+            };
             return {
-                id: author.id,
-                userName: author.userName,
-                image: author.image ? author.image.toString('base64') : null,
+                title: reviewFromDB.title,
+                content: reviewFromDB.review,
+                author: author
             };
         });
 

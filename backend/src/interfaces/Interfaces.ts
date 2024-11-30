@@ -26,15 +26,21 @@ export interface UserDtoOut {
     image: string | null;
 }
 
-export interface ReviewUserDtoOut {
+export interface AuthorDtoOut {
     id: number;
     userName: string;
     image: string | null;
 }
 
+export interface ReviewDtoOut {
+    title: string;
+    content: string;
+    author: AuthorDtoOut;
+}
+
 export interface MovieWithReviewsDtoOut {
     movie: Movie;
-    reviews: ReviewUserDtoOut[]
+    reviews: ReviewDtoOut[];
 }
 
 export interface MovieReviewDtoOut {
