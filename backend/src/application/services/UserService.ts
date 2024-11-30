@@ -1,7 +1,7 @@
 import {User} from "../../domain/models/User";
 import {inject, injectable} from "tsyringe";
 import {IUserRepository} from "../../domain/repositories/IUserRepository";
-import {UpdateUserData, UsersList} from '../../interfaces/Interfaces';
+import {MoviesInFavsDtoOut, UpdateUserData, UsersList} from '../../interfaces/Interfaces';
 
 @injectable()
 export class UserService {
@@ -42,5 +42,9 @@ export class UserService {
 
     async searchUsers(query: string): Promise<UsersList[]> {
         return await this.userRepository.search(query);
+    }
+
+    async getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]> {
+        return await this.userRepository.getAllFavorites(userName);
     }
 }

@@ -5,7 +5,13 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UserDtoOut, UsersList, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {
+    MoviesInFavsDtoOut,
+    UpdateUserData,
+    UserDtoOut,
+    UsersList,
+    UserWithProfileInfo
+} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
@@ -237,6 +243,25 @@ export class UserRepository implements IUserRepository {
         userEntity.isAdmin = user.isAdmin;
 
         return userEntity;
+    }
+
+    async getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]> {
+        const user = await this.repository.findOne({
+            where: { userName: userName },
+            relations: ["favs"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const favoritesList: MoviesInFavsDtoOut[] = user.favs.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            image: movie.image ? movie.image.toString("base64") : null, // Convertir imagen a Base64 si existe
+        }));
+
+        return favoritesList
     }
 
 
