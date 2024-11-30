@@ -1,5 +1,5 @@
 import {Movie} from "../models/Movie"
-import {MoviesList} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList} from "../../interfaces/Interfaces";
 
 export interface IMovieRepository {
     get(title: string): Promise<Movie>;
@@ -9,4 +9,6 @@ export interface IMovieRepository {
     getTop10(): Promise<Movie[]>;
 
     search(query: string): Promise<MoviesList[]>;
+
+    reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>;
 }

@@ -54,4 +54,25 @@ export class MovieController {
             next(e);
         }
     }
+
+    static async scoreMovie(req: Request, res: Response, next: NextFunction) {
+        try {
+            const idUsuario = parseInt(req.body.idUsuario);
+            const idMovie = parseInt(req.body.idMovie);
+            const puntuacion = parseFloat(req.body.puntuacion);
+
+            if (isNaN(idUsuario) || isNaN(idMovie) || isNaN(puntuacion)) {
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            if(puntuacion > 10 || puntuacion < 0){
+                throw createError(400, `Incorrect Puntuation`);
+            }
+
+            const result = await this.movieService.reviewMovie(idUsuario, idMovie, puntuacion);
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }

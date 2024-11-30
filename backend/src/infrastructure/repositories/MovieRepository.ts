@@ -4,13 +4,16 @@ import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
-import {MoviesList} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList, UserDtoOut} from "../../interfaces/Interfaces";
+import {UserEntity} from "../entities/UserEntity";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
+    private readonly userRepo: Repository<UserEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(MovieEntity);
+        this.userRepo = PostgreTypeOrmDataSource.getRepository(UserEntity);
     }
 
     async get(title: string): Promise<Movie> {
@@ -30,7 +33,7 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.duration,
             movieFromDB.classification,
             movieFromDB.score,
-            movieFromDB.totalReviews,
+            movieFromDB.totalReviews.length,
             this.imageToBase64(movieFromDB.image)
         );
 
@@ -54,7 +57,7 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.duration,
                 moviesFromDB.classification,
                 moviesFromDB.score,
-                moviesFromDB.totalReviews,
+                moviesFromDB.totalReviews.length,
                 this.imageToBase64(moviesFromDB.image)
             );
         });
@@ -83,7 +86,7 @@ export class MovieRepository implements IMovieRepository {
                 top10FromDB.duration,
                 top10FromDB.classification,
                 top10FromDB.score,
-                top10FromDB.totalReviews,
+                top10FromDB.totalReviews.length,
                 this.imageToBase64(top10FromDB.image)
             );
         });
@@ -112,4 +115,51 @@ export class MovieRepository implements IMovieRepository {
             image: this.imageToBase64(movie.image) || "No image available",
         }));
     }
+
+    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
+        const user = await this.userRepo.findOne({
+            where: { id: idUsuario },
+            relations: ["reviewed"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const movie = await this.repository.findOneBy({ id: idMovie });
+        if (!movie) {
+            throw createError(404, `Movie does not exist`);
+        }
+
+        const hasReviewed = user.reviewed.some(reviewedMovie => reviewedMovie.id === idMovie);
+
+        if (!hasReviewed) {
+            user.reviewed.push(movie);
+
+            if (!movie.totalReviews) {
+                movie.totalReviews = [];
+            }
+            movie.totalReviews.push(puntuacion);
+        } else {
+            const reviewIndex = user.reviewed.findIndex(reviewedMovie => reviewedMovie.id === idMovie);
+            if (reviewIndex !== -1) {
+                movie.totalReviews[reviewIndex] = puntuacion;
+            }
+        }
+
+        const totalScores = movie.totalReviews.reduce((sum, score) => sum + score, 0);
+        movie.score = totalScores / movie.totalReviews.length;
+
+        const movieReview: MovieReviewDtoOut = {
+            totalReview: movie.totalReviews.length,
+            score: movie.score
+        };
+
+        await this.userRepo.save(user);
+        await this.repository.save(movie);
+
+        return movieReview
+    }
+
+
 }
