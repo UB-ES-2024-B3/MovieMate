@@ -70,7 +70,7 @@
           <!-- Sistema de Puntuación -->
           <div class="bg-gray-800 text-white rounded-md mt-6 p-6 shadow-lg">
             <h3 class="text-xl font-bold mb-4">Puntúa esta película</h3>
-            <div class="stars flex justify-center mb-4">
+            <div class="stars flex justify-center">
               <span
                   v-for="star in 5"
                   :key="star"
@@ -81,6 +81,12 @@
                 ★
               </span>
             </div>
+              <div class="flex justify-center mt-4">
+              <button @click="publicarResena" class="btn-publicar">
+                  PUBLICAR RESEÑA
+              </button>
+              </div>
+
             <p v-if="hasRated" class="text-center text-green-500 font-bold">
               Has puntuado esta película con {{ currentRating }} estrellas.
               <button
@@ -90,6 +96,7 @@
                 Modificar Puntuación
               </button>
             </p>
+
           </div>
 
           <!-- Mensaje de error -->
@@ -132,6 +139,7 @@ export default {
       showMessage: false, // Controlar la visibilidad del mensaje
       message: "", // Mensaje a mostrar
       isAuthenticated: false,
+        user: null,
     };
   },
   created() {
@@ -141,6 +149,7 @@ export default {
 
     if (this.isAuthenticated) {
       this.username = sessionStorage.getItem("username");
+      this.fetchUserData(this.username);
     }
   },
   mounted() {
@@ -149,6 +158,7 @@ export default {
   watch: {
     "$route.params.title": "loadMovie",
   },
+
   methods: {
     async fetchMovie(title) {
       try {
@@ -175,6 +185,34 @@ export default {
         console.error("Error fetching movie details: ", error);
       }
     },
+
+    async fetchUserData(username) {
+        try {
+            console.log("user")
+            const token = sessionStorage.getItem("auth_token");
+            const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+            const response = await axios.get(`${BASE_URL}/user/${username}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            const { user } = response.data;
+            this.user = {
+              id: user.id || null, // Verifica si `id` existe
+              userName: user.userName || "",
+              email: user.email || "",
+              gender: user.gender || "",
+              description: user.description || "",
+              isAdmin: user.isAdmin || false,
+              image: user.image || "",
+            };
+            console.log(this.user);
+        } catch (error) {
+            this.error = 'No se puede cargar la información del usuario';
+        }
+    },
+
     loadMovie() {
       let movieTitle = this.$route.params.title;
       movieTitle = movieTitle.replace(/%20/g, " ");
@@ -233,6 +271,16 @@ export default {
         this.message = "";
       }, 3000);
     },
+
+    publicarResena(){
+        if (!this.isAuthenticated) {
+            this.displayMessage("Debes iniciar sesión para publicar una reseña");
+            return;
+        }
+
+        let userId = this.user.id;
+        this.$router.push({ path: `/resena/${this.movie.id}/${userId}` });
+    }
   },
 };
 
@@ -248,6 +296,7 @@ export default {
 .stars {
   display: flex;
   justify-content: center;
+    margin-bottom: 0.5rem;
 }
 
 .star {
@@ -258,6 +307,45 @@ export default {
 
 .star.selected {
   color: gold;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #222; /* Fondo oscuro */
+}
+
+.btn-publicar {
+  display: inline-flex; /* Cambiado de flex a inline-flex para que el tamaño se ajuste al contenido */
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px; /* Espaciado interno ajustado */
+  background-color: #3ce3e3;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px; /* Tamaño de texto ajustado */
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-publicar:hover {
+  background-color: #34c5c5;
+  transform: scale(1.05);
+}
+
+.btn-publicar:active {
+  transform: scale(0.95);
+}
+
+.btn-publicar .icon {
+    font-size: 18px;
+    margin-right: 8px;
 }
 
 </style>
