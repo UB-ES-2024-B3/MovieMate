@@ -24,8 +24,8 @@ export class MovieService {
         return await this.movieRepository.search(query);
     }
 
-    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
-        return await this.movieRepository.reviewMovie(idUsuario, idMovie, puntuacion);
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
+        return await this.movieRepository.reviewMovie(userName, idMovie, puntuacion);
     }
 }
 
