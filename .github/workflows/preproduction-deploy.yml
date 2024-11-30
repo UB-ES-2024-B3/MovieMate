@@ -3,7 +3,7 @@ name: Deploy to Azure
 on:
   push:
     branches:
-      - main
+      - develop #Temporalmente, deberia ser pre-production
 
 jobs:
   deploy:
@@ -42,9 +42,9 @@ jobs:
     - name: Build and push Docker images
       env:
         ACR_NAME: moviemateacr.azurecr.io
-        FRONTEND_IMAGE: es-frontend
-        BACKEND_IMAGE: es-backend
-        DB_IMAGE: db-postgres
+        FRONTEND_IMAGE: pre-frontend
+        BACKEND_IMAGE: pre-backend
+        DB_IMAGE: pre-db-postgres
       run: |
         # Build images
         docker build -t $ACR_NAME/$FRONTEND_IMAGE:latest ./frontend
@@ -63,24 +63,24 @@ jobs:
     - name: Deploy Database Container
       run: |
         az container create --resource-group MovieMate-Resources \
-          --name db-container \
-          --image moviemateacr.azurecr.io/db-postgres:latest \
+          --name pre-db-container \
+          --image moviemateacr.azurecr.io/pre-db-postgres:latest \
           --registry-username ${{ env.ACR_USERNAME }} \
           --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-db \
+          --dns-name-label moviemate-pre-db \
           --ports 5432 \
           --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345"
 
     - name: Deploy Backend Container
       run: |
         az container create --resource-group MovieMate-Resources \
-          --name backend-container \
-          --image moviemateacr.azurecr.io/es-backend:latest \
+          --name pre-backend-container \
+          --image moviemateacr.azurecr.io/pre-backend:latest \
           --registry-username ${{ env.ACR_USERNAME }} \
           --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-backend \
+          --dns-name-label moviemate-pre-backend \
           --ports 3000 \
-          --environment-variables DB_HOST="moviemate-db.westeurope.azurecontainer.io" \
+          --environment-variables DB_HOST="moviemate-pre-db.westeurope.azurecontainer.io" \
                                   DB_NAME="es-b3-database" \
                                   DB_PASSWORD="12345" \
                                   DB_PORT="5432" \
@@ -94,10 +94,10 @@ jobs:
     - name: Deploy Frontend Container
       run: |
         az container create --resource-group MovieMate-Resources \
-          --name frontend-container \
-          --image moviemateacr.azurecr.io/es-frontend:latest \
+          --name pre-frontend-container \
+          --image moviemateacr.azurecr.io/pre-frontend:latest \
           --registry-username ${{ env.ACR_USERNAME }} \
           --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-frontend \
+          --dns-name-label moviemate-pre-frontend \
           --ports 8000 \
-          --environment-variables VUE_APP_API_BASE_URL="http://moviemate-backend.westeurope.azurecontainer.io:3000"
+          --environment-variables VUE_APP_API_BASE_URL="http://moviemate-pre-backend.westeurope.azurecontainer.io:3000"
