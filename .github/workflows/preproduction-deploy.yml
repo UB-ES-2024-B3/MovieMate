@@ -3,7 +3,7 @@ name: Deploy to Pre-production
 on:
   push:
     branches:
-      - develop #Temporalmente, deberia ser pre-production
+      - pre-production
 
 jobs:
   deploy:
