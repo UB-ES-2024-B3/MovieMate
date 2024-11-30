@@ -1,3 +1,5 @@
+import {Review} from "./Review";
+
 export class Movie {
 
     constructor(
@@ -12,11 +14,20 @@ export class Movie {
         private _classification: string,
         private _score: number,
         private _totalReviews: number,
-        private _image?: Buffer | string
+        private _image?: Buffer | string,
+        private _reviews?: Review[]
     ) {
     }
 
     //Getters y setters
+    get reviews(): Review[] {
+        return this._reviews;
+    }
+
+    set reviews(value: Review[]) {
+        this._reviews = value;
+    }
+
     get id(): number {
         return this._id;
     }

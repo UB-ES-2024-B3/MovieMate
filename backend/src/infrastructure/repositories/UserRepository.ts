@@ -222,9 +222,6 @@ export class UserRepository implements IUserRepository {
         }));
 
     }
-
-    const
-
     userToUserEntity(user: User): UserEntity {
         const userEntity = new UserEntity();
         userEntity.userName = user.userName;

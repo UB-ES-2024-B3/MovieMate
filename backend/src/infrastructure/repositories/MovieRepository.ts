@@ -4,23 +4,42 @@ import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
-import {MovieReviewDtoOut, MoviesList, UserDtoOut} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut, ReviewUserDtoOut} from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
+import {ReviewEntity} from "../entities/ReviewEntity";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
     private readonly userRepo: Repository<UserEntity>;
+    private readonly reviewRepo: Repository<ReviewEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(MovieEntity);
         this.userRepo = PostgreTypeOrmDataSource.getRepository(UserEntity);
+        this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
     }
 
-    async get(title: string): Promise<Movie> {
-        const movieFromDB = await this.repository.findOneBy({title: title});
+    async get(title: string): Promise<MovieWithReviewsDtoOut> {
+        const movieFromDB = await this.repository.findOne({where: {title: title}});
+
         if (!movieFromDB) {
             throw createError(404, `Movie with title < ${title} > does not exist`);
         }
+
+        const reviewsFromDB = await this.reviewRepo.find({
+            where: {movie: {id: movieFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author'],
+        });
+
+        const reviews: ReviewUserDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
+            const {author} = reviewFromDB;
+            return {
+                id: author.id,
+                userName: author.userName,
+                image: author.image ? author.image.toString('base64') : null,
+            };
+        });
 
         const movie = new Movie(
             movieFromDB.id,
@@ -37,7 +56,12 @@ export class MovieRepository implements IMovieRepository {
             this.imageToBase64(movieFromDB.image)
         );
 
-        return movie;
+        const result: MovieWithReviewsDtoOut = {
+            movie: movie,
+            reviews: reviews
+        };
+
+        return result;
     }
 
     async getAll(): Promise<Movie[]> {
@@ -118,7 +142,7 @@ export class MovieRepository implements IMovieRepository {
 
     async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
         const user = await this.userRepo.findOne({
-            where: { id: idUsuario },
+            where: {id: idUsuario},
             relations: ["reviewed"],
         });
 
@@ -126,7 +150,7 @@ export class MovieRepository implements IMovieRepository {
             throw createError(404, `User does not exist`);
         }
 
-        const movie = await this.repository.findOneBy({ id: idMovie });
+        const movie = await this.repository.findOneBy({id: idMovie});
         if (!movie) {
             throw createError(404, `Movie does not exist`);
         }
@@ -160,6 +184,5 @@ export class MovieRepository implements IMovieRepository {
 
         return movieReview
     }
-
 
 }
