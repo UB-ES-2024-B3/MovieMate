@@ -75,4 +75,20 @@ export class MovieController {
             next(error);
         }
     }
+
+    static async addFavorites(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const idMovie = parseInt(req.body.idMovie);
+
+            if (!userName || isNaN(idMovie)) {
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.movieService.addFavorites(userName, idMovie);
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
