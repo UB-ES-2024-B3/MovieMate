@@ -1,4 +1,4 @@
-name: Deploy to Azure
+name: Deploy to Pre-production
 
 on:
   push:
@@ -69,7 +69,8 @@ jobs:
           --registry-password ${{ env.ACR_PASSWORD }} \
           --dns-name-label moviemate-pre-db \
           --ports 5432 \
-          --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345"
+          --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345" \
+          --os-type Linux
 
     - name: Deploy Backend Container
       run: |
@@ -89,7 +90,8 @@ jobs:
                                   SW_PORT="3000" \
                                   MAIL_USER="moviemate@zohomail.eu" \
                                   MAIL_PASS="Movie@1234ADJLMN" \
-                                  SECRET_KEY="ES-UB-B3"
+                                  SECRET_KEY="ES-UB-B3" \
+          --os-type Linux
 
     - name: Deploy Frontend Container
       run: |
@@ -100,4 +102,5 @@ jobs:
           --registry-password ${{ env.ACR_PASSWORD }} \
           --dns-name-label moviemate-pre-frontend \
           --ports 8000 \
-          --environment-variables VUE_APP_API_BASE_URL="http://moviemate-pre-backend.westeurope.azurecontainer.io:3000"
+          --environment-variables VUE_APP_API_BASE_URL="http://moviemate-pre-backend.westeurope.azurecontainer.io:3000" \
+          --os-type Linux
