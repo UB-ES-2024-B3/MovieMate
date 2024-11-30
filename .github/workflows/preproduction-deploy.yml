@@ -70,7 +70,9 @@ jobs:
           --dns-name-label moviemate-pre-db \
           --ports 5432 \
           --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345" \
-          --os-type Linux
+          --os-type Linux \
+          --cpu 1 \
+          --memory 1.5
 
     - name: Deploy Backend Container
       run: |
@@ -91,7 +93,9 @@ jobs:
                                   MAIL_USER="moviemate@zohomail.eu" \
                                   MAIL_PASS="Movie@1234ADJLMN" \
                                   SECRET_KEY="ES-UB-B3" \
-          --os-type Linux
+          --os-type Linux \
+          --cpu 1 \
+          --memory 1.5
 
     - name: Deploy Frontend Container
       run: |
@@ -103,4 +107,6 @@ jobs:
           --dns-name-label moviemate-pre-frontend \
           --ports 8000 \
           --environment-variables VUE_APP_API_BASE_URL="http://moviemate-pre-backend.westeurope.azurecontainer.io:3000" \
-          --os-type Linux
+          --os-type Linux \
+          --cpu 1 \
+          --memory 1.5
