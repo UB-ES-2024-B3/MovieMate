@@ -3,8 +3,8 @@
     <div class="flex w-full h-full">
       <!-- Lateral izquierdo -->
       <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between fixed top-16 left-0 h-[calc(100vh-64px)]">
+        <!-- Aquí puedes agregar contenido para el menú lateral -->
       </aside>
-
 
       <!-- Contenido principal -->
       <div class="ml-64 flex-grow p-8">
@@ -12,19 +12,19 @@
           <!-- Botón para volver atrás -->
           <div class="mb-4">
             <button
-              @click="goBack"
-              class="flex items-center bg-gray-800 text-[#5ce1e6] font-bold px-4 py-2 rounded-md border-2 border-[#5ce1e6] shadow-lg hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
+                @click="goBack"
+                class="flex items-center bg-gray-800 text-[#5ce1e6] font-bold px-4 py-2 rounded-md border-2 border-[#5ce1e6] shadow-lg hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 mr-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
               >
                 <path
-                  fill-rule="evenodd"
-                  d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
-                  clip-rule="evenodd"
+                    fill-rule="evenodd"
+                    d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
+                    clip-rule="evenodd"
                 />
               </svg>
               Back
@@ -32,15 +32,16 @@
           </div>
 
           <!-- Tarjeta de película -->
-          <div class="bg-[#5ce1e6] rounded-md shadow-lg">
+          <div class="bg-[#5ce1e6] rounded-md shadow-lg relative">
             <div class="md:flex px-8 py-6 leading-none">
               <!-- Imagen de la película -->
-              <div class="flex-none mr-8">
+              <div class="flex-none mr-8 relative">
                 <img
-                  :src="movie.image"
-                  alt="Movie Poster"
-                  class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
+                    :src="movie.image"
+                    alt="Movie Poster"
+                    class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
                 />
+
               </div>
 
               <!-- Detalles de la película -->
@@ -58,20 +59,51 @@
                   {{ movie.description }}
                 </p>
                 <p class="text-md">
-                  Rating: {{ movie.score }} / 10
+                  Rating: {{ movie.score }} / 5
                   <span class="font-bold px-2">|</span>
                   Classification: {{ movie.classification }}
                 </p>
               </div>
             </div>
           </div>
+
+          <!-- Sistema de Puntuación -->
+          <div class="bg-gray-800 text-white rounded-md mt-6 p-6 shadow-lg">
+            <h3 class="text-xl font-bold mb-4">Puntúa esta película</h3>
+            <div class="stars flex justify-center mb-4">
+              <span
+                  v-for="star in 5"
+                  :key="star"
+                  class="star"
+                  :class="{ selected: star <= currentRating }"
+                  @click="rateMovie(star)"
+              >
+                ★
+              </span>
+            </div>
+            <p v-if="hasRated" class="text-center text-green-500 font-bold">
+              Has puntuado esta película con {{ currentRating }} estrellas.
+              <button
+                  @click="modifyRating"
+                  class="ml-2 text-sm bg-cyan-500 text-white px-2 py-1 rounded"
+              >
+                Modificar Puntuación
+              </button>
+            </p>
+          </div>
+
+          <!-- Mensaje de error -->
+          <div
+              v-if="showMessage"
+              class="fixed top-4 right-4 p-4 rounded-md text-white shadow-lg bg-red-500"
+          >
+            {{ message }}
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-
 <script>
 import axios from "axios";
 
@@ -80,6 +112,7 @@ export default {
   data() {
     return {
       movie: {
+        id: 0,
         title: "",
         description: "",
         genres: [],
@@ -89,28 +122,42 @@ export default {
         duration: "",
         classification: "",
         score: "",
-          totalReviews: "",
+        totalReviews: "",
         image: "",
-          year: "",
+        year: "",
       },
       errorMessage: "",
+      currentRating: 0,
+      hasRated: false,
+      showMessage: false, // Controlar la visibilidad del mensaje
+      message: "", // Mensaje a mostrar
+      isAuthenticated: false,
     };
   },
-  mounted() {
-      this.loadMovie();
+  created() {
+    // Verificamos si el token y el nombre de usuario están en sessionStorage
+    const token = sessionStorage.getItem("auth_token");
+    this.isAuthenticated = !!token;
+
+    if (this.isAuthenticated) {
+      this.username = sessionStorage.getItem("username");
+    }
   },
-    watch: {
-      "$route.params.title": "loadMovie", // Observa cambios y llama a la función directamente
+  mounted() {
+    this.loadMovie();
+  },
+  watch: {
+    "$route.params.title": "loadMovie",
   },
   methods: {
     async fetchMovie(title) {
       try {
-        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const BASE_URL = process.env.VUE_APP_API_BASE_URL;
         const response = await axios.get(`${BASE_URL}/movie/${title}`);
         const movieData = response.data;
 
-        // Asigna la información de la película
         this.movie = {
+          id: movieData._id,
           title: movieData._title,
           description: movieData._description,
           genres: Array.isArray(movieData._genres) ? movieData._genres : [movieData._genres],
@@ -128,28 +175,89 @@ export default {
         console.error("Error fetching movie details: ", error);
       }
     },
-      loadMovie(){
-        let movieTitle = this.$route.params.title;
-        movieTitle = movieTitle.replace(/%20/g, "");
-        this.fetchMovie(movieTitle);
-      },
+    loadMovie() {
+      let movieTitle = this.$route.params.title;
+      movieTitle = movieTitle.replace(/%20/g, " ");
+      this.fetchMovie(movieTitle);
+    },
     goBack() {
       this.$router.go(-1);
     },
-      beforeRouteUpdate(to, from, next){
-        if(to.params.title !== from.params.title){
-            this.loadMovie();
-        }
-        next();
+    rateMovie(rating) {
+      if (!this.isAuthenticated) {
+        // Mostrar mensaje si no está autenticado
+        this.displayMessage("Debes iniciar sesión para puntuar películas.");
+        return;
       }
+
+      // Enviar puntuación al backend
+      const payload = {
+        userName: this.username,
+        idMovie: this.movie.id,
+        puntuacion: rating,
+      };
+      console.log(payload);
+      const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+
+      axios
+          .put(`${BASE_URL}/movie/score`, payload)
+          .then(() => {
+              if (!this.hasRated) {
+              this.currentRating = rating;
+              this.hasRated = true;
+              alert(`Has puntuado esta película con ${rating} estrellas.`);
+              // Volver a cargar los datos de la película para obtener el nuevo rating
+              this.fetchMovie(this.movie.title);
+            } else {
+              alert("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error al enviar la puntuación:", error);
+            this.displayMessage("Hubo un error al enviar tu puntuación. Inténtalo de nuevo.");
+          });
+
+    },
+    modifyRating() {
+      this.hasRated = false;
+    },
+
+    displayMessage(message) {
+      // Actualiza el mensaje y el estilo
+      this.message = message;
+      this.showMessage = true;
+
+      // Oculta automáticamente el mensaje después de 3 segundos
+      setTimeout(() => {
+        this.showMessage = false;
+        this.message = "";
+      }, 3000);
+    },
   },
 };
+
 </script>
 
 <style scoped>
 .custom-hr {
   border: 0;
-  border-top: 1px solid #545454; /* Color del texto */
+  border-top: 1px solid #545454;
   margin: 16px 0;
 }
+
+.stars {
+  display: flex;
+  justify-content: center;
+}
+
+.star {
+  font-size: 2rem;
+  cursor: pointer;
+  color: gray;
+}
+
+.star.selected {
+  color: gold;
+}
+
 </style>
