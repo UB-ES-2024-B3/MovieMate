@@ -265,7 +265,7 @@
       }
     },
     "/movie/score": {
-      "post": {
+      "put": {
         "description": "",
         "parameters": [
           {
@@ -274,7 +274,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "idUsuario": {
+                "username": {
                   "example": "any"
                 },
                 "idMovie": {
@@ -290,9 +290,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
