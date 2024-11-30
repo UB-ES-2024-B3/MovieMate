@@ -116,9 +116,9 @@ export class MovieRepository implements IMovieRepository {
         }));
     }
 
-    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
         const user = await this.userRepo.findOne({
-            where: { id: idUsuario },
+            where: { userName: userName },
             relations: ["reviewed"],
         });
 

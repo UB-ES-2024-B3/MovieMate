@@ -57,19 +57,19 @@ export class MovieController {
 
     static async scoreMovie(req: Request, res: Response, next: NextFunction) {
         try {
-            const idUsuario = parseInt(req.body.idUsuario);
+            const userName = req.body.userName;
             const idMovie = parseInt(req.body.idMovie);
             const puntuacion = parseFloat(req.body.puntuacion);
 
-            if (isNaN(idUsuario) || isNaN(idMovie) || isNaN(puntuacion)) {
+            if (!userName || isNaN(idMovie) || isNaN(puntuacion)) {
                 throw createError(400, `Parameters are incorrect`);
             }
 
-            if(puntuacion > 10 || puntuacion < 0){
+            if(puntuacion > 5 || puntuacion < 0){
                 throw createError(400, `Incorrect Puntuation`);
             }
 
-            const result = await this.movieService.reviewMovie(idUsuario, idMovie, puntuacion);
+            const result = await this.movieService.reviewMovie(userName, idMovie, puntuacion);
             return res.status(200).json(result);
         } catch (error) {
             next(error);
