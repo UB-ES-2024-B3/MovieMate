@@ -229,8 +229,6 @@ export class UserRepository implements IUserRepository {
 
     }
 
-    const
-
     userToUserEntity(user: User): UserEntity {
         const userEntity = new UserEntity();
         userEntity.userName = user.userName;
@@ -258,7 +256,7 @@ export class UserRepository implements IUserRepository {
         const favoritesList: MoviesInFavsDtoOut[] = user.favs.map(movie => ({
             id: movie.id,
             title: movie.title,
-            image: movie.image ? movie.image.toString("base64") : null, // Convertir imagen a Base64 si existe
+            image: this.imageToBase64(movie.image) || "No image available",
         }));
 
         return favoritesList
