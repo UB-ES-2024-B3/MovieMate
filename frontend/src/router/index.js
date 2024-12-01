@@ -7,6 +7,7 @@ import Register from "../components/User/Register.vue";
 import EditarPerfil from "../components/User/EditarPerfil.vue";
 import RecuperarContrasena from "@/components/User/RecuperarContrasena.vue";
 import MovieCard from "@/components/Movie/MovieCard.vue";
+import PeliculasFavoritas from "@/components/User/PeliculasFavoritas.vue";
 
 const routes = [
   { path: '/', component: Home },
@@ -16,6 +17,7 @@ const routes = [
   { path: '/editar', component: EditarPerfil},
   { path: '/recovery/:token', component: RecuperarContrasena},
   { path: '/movie/:title', component: MovieCard},
+  { path: '/favorites', component: PeliculasFavoritas},
 ];
 
 const router = createRouter({
