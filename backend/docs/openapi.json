@@ -206,6 +206,24 @@
         }
       }
     },
+    "/user/{userName}/favorites": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/movie/": {
       "get": {
         "description": "",
@@ -274,13 +292,40 @@
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
+                "userName": {
                   "example": "any"
                 },
                 "idMovie": {
                   "example": "any"
                 },
                 "puntuacion": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/movie/favorites": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userName": {
+                  "example": "any"
+                },
+                "idMovie": {
                   "example": "any"
                 }
               }

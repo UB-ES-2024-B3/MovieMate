@@ -1,0 +1,38 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - pre-production
+      - main
+  push:
+    branches:
+      - develop
+      - pre-production
+      - main
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
+
+      # 4. Run unit tests
+      - name: Run unit tests
+        working-directory: ./backend
+        run: npm run test:unit
