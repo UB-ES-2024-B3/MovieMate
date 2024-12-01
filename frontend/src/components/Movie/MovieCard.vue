@@ -280,39 +280,7 @@ export default {
         this.displayMessage("Hubo un error al procesar tu solicitud. Inténtalo de nuevo.");
       }
       
-      }
-
-      // Enviar puntuación al backend
-      const payload = {
-        userName: this.username,
-        idMovie: this.movie.id,
-        puntuacion: rating,
-      };
-      console.log(payload);
-      const BASE_URL = process.env.VUE_APP_API_BASE_URL;
-
-      axios
-          .put(`${BASE_URL}/movie/score`, payload)
-          .then(() => {
-              if (!this.hasRated) {
-              this.currentRating = rating;
-              this.hasRated = true;
-              alert(`Has puntuado esta película con ${rating} estrellas.`);
-              // Volver a cargar los datos de la película para obtener el nuevo rating
-              this.fetchMovie(this.movie.title);
-            } else {
-              alert("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.");
-            }
-          })
-          .catch((error) => {
-            console.error("Error al enviar la puntuación:", error);
-            this.displayMessage("Hubo un error al enviar tu puntuación. Inténtalo de nuevo.");
-          });
-
-    },
-    modifyRating() {
-      this.hasRated = false;
-    },
+      },
 
     displayMessage(message) {
       // Actualiza el mensaje y el estilo
