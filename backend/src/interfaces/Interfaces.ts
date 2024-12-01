@@ -35,12 +35,18 @@ export interface AuthorDtoOut {
 export interface ReviewDtoOut {
     title: string;
     content: string;
-    author: AuthorDtoOut;
+    author?: AuthorDtoOut;
 }
 
 export interface MovieWithReviewsDtoOut {
     movie: Movie;
     reviews: ReviewDtoOut[];
+}
+
+export interface UserWithReviewsDtoOut {
+    User: UserDtoOut;
+    reviews: ReviewDtoOut[];
+    isOwnProfile: boolean;
 }
 
 export interface MovieReviewDtoOut {

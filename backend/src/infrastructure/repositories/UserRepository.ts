@@ -5,16 +5,26 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UserDtoOut, UsersList, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {
+    AuthorDtoOut,
+    ReviewDtoOut,
+    UpdateUserData,
+    UserDtoOut,
+    UsersList,
+    UserWithReviewsDtoOut
+} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
+import {ReviewEntity} from "../entities/ReviewEntity";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
+    private readonly reviewRepo: Repository<ReviewEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(UserEntity);
+        this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
     }
 
     async getByEmail(email: string): Promise<UserEntity | null> {
@@ -110,11 +120,24 @@ export class UserRepository implements IUserRepository {
         return `user with username < ${userName} > deleted successfully`
     }
 
-    async get(userName: string, auth_token: string): Promise<UserWithProfileInfo> {
+    async get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
+
+        const reviewsFromDB = await this.reviewRepo.find({
+            where: {author: {id: userFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author'],
+        });
+
+        const reviews: ReviewDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
+            return {
+                title: reviewFromDB.title,
+                content: reviewFromDB.review
+            };
+        });
 
         const user: UserDtoOut = {
             id: userFromDB.id,
@@ -135,7 +158,13 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-        return {user, isOwnProfile};
+        const result: UserWithReviewsDtoOut = {
+            User: user,
+            isOwnProfile: isOwnProfile,
+            reviews: reviews
+        };
+
+        return result;
     }
 
     async sendRecoveryEmail(email: string): Promise<string> {
@@ -222,6 +251,7 @@ export class UserRepository implements IUserRepository {
         }));
 
     }
+
     userToUserEntity(user: User): UserEntity {
         const userEntity = new UserEntity();
         userEntity.userName = user.userName;
