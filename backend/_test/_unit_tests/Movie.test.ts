@@ -5,12 +5,17 @@ import { Movie } from '../../src/domain/models/Movie';
 import { IMovieRepository } from '../../src/domain/repositories/IMovieRepository';
 // @ts-ignore
 import createError from 'http-errors';
+import {number, string} from "fp-ts";
+import {MovieReviewDtoOut} from "../../src/interfaces/Interfaces";
 
 // Mock del repositorio
 const mockMovieRepository: jest.Mocked<IMovieRepository> = {
     get: jest.fn(),
     getAll: jest.fn(),
     getTop10: jest.fn(),
+    search: jest.fn(),
+    reviewMovie: jest.fn(),
+    addFavorites: jest.fn()
 };
 
 describe('MovieService Unit Tests', () => {
@@ -27,9 +32,9 @@ describe('MovieService Unit Tests', () => {
                 1,
                 'Inception',
                 'A mind-bending thriller',
-                'Sci-Fi, Thriller',
-                'Christopher Nolan',
-                'Leonardo DiCaprio Joseph Gordon-Levitt',
+                ['Sci-Fi', 'Thriller'],
+                ['Christopher Nolan'],
+                ['Leonardo DiCaprio',  'Joseph Gordon-Levitt'],
                 new Date('2010-07-16'),
                 148,
                 'PG-13',
@@ -44,8 +49,8 @@ describe('MovieService Unit Tests', () => {
             // Verifica que los datos devueltos sean correctos
             expect(result.title).toBe('Inception');
             expect(result.description).toBe('A mind-bending thriller');
-            expect(result.genres).toEqual('Sci-Fi, Thriller');
-            expect(result.directors).toEqual('Christopher Nolan');
+            expect(result.genres).toEqual(['Sci-Fi', 'Thriller']);
+            expect(result.directors).toEqual(['Christopher Nolan']);
             expect(result.score).toBe(8.8);
 
             // Verifica que el repositorio sea llamado correctamente
@@ -74,9 +79,9 @@ describe('MovieService Unit Tests', () => {
                     1,
                     'Inception',
                     'A mind-bending thriller',
-                    'Sci-Fi, Thriller',
-                    'Christopher Nolan',
-                    'Leonardo DiCaprio, Joseph Gordon-Levitt',
+                    ['Sci-Fi', 'Thriller'],
+                    ['Christopher Nolan'],
+                    ['Leonardo DiCaprio', 'Joseph Gordon-Levitt'],
                     new Date('2010-07-16'),
                     148,
                     'PG-13',
@@ -87,9 +92,9 @@ describe('MovieService Unit Tests', () => {
                     2,
                     'The Dark Knight',
                     'A gritty superhero movie',
-                    'Action, Crime',
-                    'Christopher Nolan',
-                    'Christian Bale, Heath Ledger',
+                    ['Action', 'Crime'],
+                    ['Christopher Nolan'],
+                    ['Christian Bale', 'Heath Ledger'],
                     new Date('2008-07-18'),
                     152,
                     'PG-13',
@@ -127,9 +132,9 @@ describe('MovieService Unit Tests', () => {
                     i + 1,
                     `Movie ${i + 1}`,
                     `Description for movie ${i + 1}`,
-                    'Genre1, Genre2',
-                    'Director1',
-                    'Actor1, Actor2',
+                    ['Genre1', 'Genre2'],
+                    ['Director1'],
+                    ['Actor1', 'Actor2'],
                     new Date(`2023-01-${i + 1}`),
                     120,
                     'PG',
