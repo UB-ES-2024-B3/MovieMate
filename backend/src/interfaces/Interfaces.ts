@@ -51,7 +51,7 @@ export interface MovieWithReviewsDtoOut {
 }
 
 export interface UserWithReviewsDtoOut {
-    User: UserDtoOut;
+    user: UserDtoOut;
     reviews: ReviewDtoOut[];
     isOwnProfile: boolean;
 }
