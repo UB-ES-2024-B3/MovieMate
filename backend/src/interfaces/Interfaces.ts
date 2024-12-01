@@ -32,10 +32,17 @@ export interface AuthorDtoOut {
     image: string | null;
 }
 
+export interface MovieDtoOut {
+    id: number;
+    title: string;
+    image: string | null;
+}
+
 export interface ReviewDtoOut {
     title: string;
     content: string;
     author?: AuthorDtoOut;
+    movie?: MovieDtoOut;
 }
 
 export interface MovieWithReviewsDtoOut {

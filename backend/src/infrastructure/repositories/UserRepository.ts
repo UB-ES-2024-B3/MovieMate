@@ -6,7 +6,7 @@ import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
 import {
-    AuthorDtoOut,
+    MovieDtoOut,
     ReviewDtoOut,
     UpdateUserData,
     UserDtoOut,
@@ -129,13 +129,19 @@ export class UserRepository implements IUserRepository {
         const reviewsFromDB = await this.reviewRepo.find({
             where: {author: {id: userFromDB.id}},
             order: {createdAt: 'DESC'},
-            relations: ['author'],
+            relations: ['author', 'movie'],
         });
 
         const reviews: ReviewDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
+            const movie: MovieDtoOut = {
+                id: reviewFromDB.movie.id,
+                title: reviewFromDB.movie.title,
+                image: reviewFromDB.movie.image ? this.imageToBase64(reviewFromDB.movie.image) : null
+            };
             return {
                 title: reviewFromDB.title,
-                content: reviewFromDB.review
+                content: reviewFromDB.review,
+                movie: movie
             };
         });
 
