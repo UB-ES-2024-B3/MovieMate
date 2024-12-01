@@ -11,4 +11,7 @@ router.post("/", (req: Request, res: Response, next: NextFunction) => {
     ReviewController.createReview(req, res, next);
 });
 
+router.get("/", (req: Request, res: Response, next: NextFunction) => ReviewController.getAllReviews(req, res, next));
+router.get("/:id", (req: Request, res: Response, next: NextFunction) => ReviewController.getReview(req, res, next));
+
 export default router;
