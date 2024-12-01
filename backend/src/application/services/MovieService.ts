@@ -12,6 +12,10 @@ export class MovieService {
         return await this.movieRepository.get(title);
     }
 
+    async getMoviebyId(id: number): Promise<Movie> {
+        return await this.movieRepository.getbyId(id);
+    }
+
     async getAllMovies() {
         return await this.movieRepository.getAll();
     }

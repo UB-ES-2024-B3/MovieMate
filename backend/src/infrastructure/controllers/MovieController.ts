@@ -16,8 +16,15 @@ export class MovieController {
 
     static async getMovie(req: Request, res: Response, next: NextFunction) {
         try {
-            const title = req.params.title;
-            const result = await this.movieService.getMovie(title);
+            let result;
+            if (!isNaN(Number(req.params.title))) {
+                const title = parseInt(req.params.title);
+                result = await this.movieService.getMoviebyId(title);
+            } else {
+                const title = req.params.title;
+                result = await this.movieService.getMovie(title);
+            }
+
             return res.status(200).json(result);
         } catch (e) {
             next(e);
