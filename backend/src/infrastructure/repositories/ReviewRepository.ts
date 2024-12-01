@@ -47,7 +47,8 @@ export class ReviewRepository implements IReviewRepository {
     }
 
     async get(reviewId: number): Promise<ReviewDtoIn> {
-        const reviewFromDB = await this.repository.findOneBy({id: reviewId});
+        const reviewFromDB = await this.repository.findOne({where: {id: reviewId},
+            relations: ['author', 'movie'],});
 
         if (!reviewFromDB) {
             throw createError(404, "The review doesn't exist");
@@ -64,7 +65,7 @@ export class ReviewRepository implements IReviewRepository {
     }
 
     async getAll(): Promise<ReviewDtoIn[]> {
-        const reviewsFromDB = await this.repository.find();
+        const reviewsFromDB = await this.repository.find({relations: ['author', 'movie'],});
         if (!reviewsFromDB) {
             throw createError(404, `No reviews found`);
         }
