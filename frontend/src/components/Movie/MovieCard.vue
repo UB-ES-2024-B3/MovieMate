@@ -402,11 +402,6 @@ body {
 .btn-publicar:active {
   transform: scale(0.95);
 }
-
-.btn-publicar .icon {
-    font-size: 18px;
-    margin-right: 8px;
-}
     
 button svg {
   transition: all 0.3s ease;
