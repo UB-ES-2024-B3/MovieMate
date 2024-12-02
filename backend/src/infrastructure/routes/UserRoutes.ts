@@ -38,5 +38,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction)=> UserCo
 router.post("/requestPasswordRecovery", (req: Request, res: Response, next: NextFunction) => UserController.sendRecoveryEmail(req, res, next));
 router.put("/passwordRecovery", (req: Request, res: Response, next: NextFunction) => UserController.recoverPassword(req, res, next));
 
+router.get("/:userName/favorites", (req: Request, res: Response, next: NextFunction)=> UserController.getAllFavorites(req, res, next));
 
 export default router;

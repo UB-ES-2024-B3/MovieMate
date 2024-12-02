@@ -206,6 +206,24 @@
         }
       }
     },
+    "/user/{userName}/favorites": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/movie/": {
       "get": {
         "description": "",
@@ -265,7 +283,7 @@
       }
     },
     "/movie/score": {
-      "post": {
+      "put": {
         "description": "",
         "parameters": [
           {
@@ -274,7 +292,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "idUsuario": {
+                "userName": {
                   "example": "any"
                 },
                 "idMovie": {
@@ -290,9 +308,33 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/movie/favorites": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userName": {
+                  "example": "any"
+                },
+                "idMovie": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

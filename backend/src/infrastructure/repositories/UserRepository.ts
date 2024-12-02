@@ -6,6 +6,7 @@ import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
 import {
+    MoviesInFavsDtoOut,
     MovieDtoOut,
     ReviewDtoOut,
     UpdateUserData,
@@ -270,6 +271,25 @@ export class UserRepository implements IUserRepository {
         userEntity.isAdmin = user.isAdmin;
 
         return userEntity;
+    }
+
+    async getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]> {
+        const user = await this.repository.findOne({
+            where: { userName: userName },
+            relations: ["favs"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const favoritesList: MoviesInFavsDtoOut[] = user.favs.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            image: this.imageToBase64(movie.image) || "No image available",
+        }));
+
+        return favoritesList
     }
 
 

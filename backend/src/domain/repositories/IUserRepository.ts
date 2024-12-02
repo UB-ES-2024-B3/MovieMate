@@ -1,5 +1,5 @@
 import {User} from "../models/User";
-import {UpdateUserData, UsersList, UserWithProfileInfo, UserWithReviewsDtoOut} from "../../interfaces/Interfaces";
+import {UpdateUserData, UsersList, MoviesInFavsDtoOut, UserWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 export interface IUserRepository {
     register(user: User): Promise<string>;
@@ -20,4 +20,5 @@ export interface IUserRepository {
 
     search(query: string): Promise<UsersList[]>;
 
+    getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]>;
 }

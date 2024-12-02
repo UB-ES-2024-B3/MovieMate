@@ -6,6 +6,8 @@ import {ReviewDtoIn} from "../../interfaces/Interfaces";
 import {MovieEntity} from "../entities/MovieEntity";
 import {UserEntity} from "../entities/UserEntity";
 import createError from "http-errors";
+import {Review} from "../../domain/models/Review";
+import {User} from "../../domain/models/User";
 
 export class ReviewRepository implements IReviewRepository {
     private readonly repository: Repository<ReviewEntity>;
@@ -42,5 +44,39 @@ export class ReviewRepository implements IReviewRepository {
 
         // Return a success message or the new review ID
         return "Review Published";
+    }
+
+    async get(reviewId: number): Promise<ReviewDtoIn> {
+        const reviewFromDB = await this.repository.findOne({where: {id: reviewId},
+            relations: ['author', 'movie'],});
+
+        if (!reviewFromDB) {
+            throw createError(404, "The review doesn't exist");
+        }
+
+        const review : ReviewDtoIn = {
+            title: reviewFromDB.title,
+            review: reviewFromDB.review,
+            author: reviewFromDB.author.id,
+            movie: reviewFromDB.movie.id,
+        };
+
+        return review;
+    }
+
+    async getAll(): Promise<ReviewDtoIn[]> {
+        const reviewsFromDB = await this.repository.find({relations: ['author', 'movie'],});
+        if (!reviewsFromDB) {
+            throw createError(404, `No reviews found`);
+        }
+
+        const allReviews = reviewsFromDB.map((review: ReviewEntity) => ({
+            title: review.title,
+            review: review.review,
+            author: review.author.id,
+            movie: review.movie.id
+        }));
+
+        return allReviews;
     }
 }

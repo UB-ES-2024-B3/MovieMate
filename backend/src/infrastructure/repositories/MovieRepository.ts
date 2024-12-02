@@ -150,9 +150,9 @@ export class MovieRepository implements IMovieRepository {
         }));
     }
 
-    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
         const user = await this.userRepo.findOne({
-            where: {id: idUsuario},
+            where: {userName: userName},
             relations: ["reviewed"],
         });
 
@@ -194,5 +194,36 @@ export class MovieRepository implements IMovieRepository {
 
         return movieReview
     }
+
+    async addFavorites(userName: string, idMovie: number): Promise<string> {
+        const user = await this.userRepo.findOne({
+            where: {userName: userName},
+            relations: ["favs"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const movie = await this.repository.findOneBy({id: idMovie});
+        if (!movie) {
+            throw createError(404, `Movie does not exist`);
+        }
+
+        const isFav = user.favs.some(favMovie => favMovie.id === idMovie);
+        if (!isFav) {
+            user.favs.push(movie);
+
+            await this.userRepo.save(user);
+        } else {
+            user.favs = user.favs.filter(favMovie => favMovie.id !== idMovie);
+
+            await this.userRepo.save(user);
+        }
+
+        return !isFav ? "Movie added to favorites" : "Movie removed from favorites";
+
+    }
+
 
 }
