@@ -2,7 +2,7 @@ import {Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IReviewRepository} from "../../domain/repositories/IReviewRepository";
 import {ReviewEntity} from "../entities/ReviewEntity";
-import {ReviewDtoIn} from "../../interfaces/Interfaces";
+import {AuthorDtoOut, MovieDtoOut, ReviewDtoIn, ReviewDtoOut} from "../../interfaces/Interfaces";
 import {MovieEntity} from "../entities/MovieEntity";
 import {UserEntity} from "../entities/UserEntity";
 import createError from "http-errors";
@@ -19,6 +19,10 @@ export class ReviewRepository implements IReviewRepository {
         this.repository = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
         this.movieRepo = PostgreTypeOrmDataSource.getRepository(MovieEntity);
         this.userRepo = PostgreTypeOrmDataSource.getRepository(UserEntity);
+    }
+
+    imageToBase64(image: Buffer | null): string | null {
+        return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
     }
 
     async create(review: ReviewDtoIn): Promise<string> {
@@ -46,7 +50,7 @@ export class ReviewRepository implements IReviewRepository {
         return "Review Published";
     }
 
-    async get(reviewId: number): Promise<ReviewDtoIn> {
+    async get(reviewId: number): Promise<ReviewDtoOut> {
         const reviewFromDB = await this.repository.findOne({where: {id: reviewId},
             relations: ['author', 'movie'],});
 
@@ -54,29 +58,60 @@ export class ReviewRepository implements IReviewRepository {
             throw createError(404, "The review doesn't exist");
         }
 
-        const review : ReviewDtoIn = {
+        const author: AuthorDtoOut = {
+            id: reviewFromDB.author.id,
+            userName: reviewFromDB.author.userName,
+            image: reviewFromDB.author.image ? this.imageToBase64(reviewFromDB.author.image) : null
+        };
+
+        const movie: MovieDtoOut = {
+            id: reviewFromDB.movie.id,
+            title: reviewFromDB.movie.title,
+            image: reviewFromDB.movie.image ? this.imageToBase64(reviewFromDB.movie.image) : null
+        };
+
+        const review : ReviewDtoOut = {
+            id: reviewFromDB.id,
             title: reviewFromDB.title,
-            review: reviewFromDB.review,
-            author: reviewFromDB.author.id,
-            movie: reviewFromDB.movie.id,
+            content: reviewFromDB.review,
+            author: author,
+            movie: movie,
         };
 
         return review;
     }
 
-    async getAll(): Promise<ReviewDtoIn[]> {
+    async getAll(): Promise<ReviewDtoOut[]> {
         const reviewsFromDB = await this.repository.find({relations: ['author', 'movie'],});
         if (!reviewsFromDB) {
             throw createError(404, `No reviews found`);
         }
 
-        const allReviews = reviewsFromDB.map((review: ReviewEntity) => ({
-            title: review.title,
-            review: review.review,
-            author: review.author.id,
-            movie: review.movie.id
-        }));
+        const allReviews = reviewsFromDB.map((review: ReviewEntity) => {
+            const author: AuthorDtoOut = {
+                id: review.author.id,
+                userName: review.author.userName,
+                image: review.author.image ? this.imageToBase64(review.author.image) : null
+            };
+
+            const movie: MovieDtoOut = {
+                id: review.movie.id,
+                title: review.movie.title,
+                image: review.movie.image ? this.imageToBase64(review.movie.image) : null
+            };
+
+            const reviewDto: ReviewDtoOut = {
+                id: review.id,
+                title: review.title,
+                content: review.review,
+                author: author,
+                movie: movie,
+            };
+
+            return reviewDto;
+        });
 
         return allReviews;
+
     }
 }
