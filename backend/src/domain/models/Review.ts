@@ -1,22 +1,22 @@
 import {User} from "./User";
 import {Movie} from "./Movie";
-import postgres from "postgres";
+import {ReviewUserDtoOut} from "../../interfaces/Interfaces";
 
 export class Review {
     constructor(
         private _id: number,
         private _title: string,
         private _review: string,
-        private _author: User,
+        private _author: User | ReviewUserDtoOut,
         private _movie: Movie
     ) {
     }
 
-    get author(): User {
+    get author(): User | ReviewUserDtoOut {
         return this._author;
     }
 
-    set author(value: User) {
+    set author(value: User | ReviewUserDtoOut) {
         this._author = value;
     }
 

@@ -1,8 +1,8 @@
 import {Movie} from "../models/Movie"
-import {MovieReviewDtoOut, MoviesList} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 export interface IMovieRepository {
-    get(title: string): Promise<Movie>;
+    get(title: string): Promise<MovieWithReviewsDtoOut>;
 
     getAll(): Promise<Movie[]>;
 

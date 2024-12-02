@@ -1,5 +1,4 @@
 import {Movie} from "../domain/models/Movie";
-import {MovieEntity} from "../infrastructure/entities/MovieEntity";
 
 export interface UpdateUserData {
     userName?: string;
@@ -25,6 +24,23 @@ export interface UserDtoOut {
     description: string | null;
     isAdmin: boolean;
     image: string | null;
+}
+
+export interface AuthorDtoOut {
+    id: number;
+    userName: string;
+    image: string | null;
+}
+
+export interface ReviewDtoOut {
+    title: string;
+    content: string;
+    author: AuthorDtoOut;
+}
+
+export interface MovieWithReviewsDtoOut {
+    movie: Movie;
+    reviews: ReviewDtoOut[];
 }
 
 export interface MovieReviewDtoOut {

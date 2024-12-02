@@ -1,4 +1,4 @@
-import {BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import {MovieEntity} from "./MovieEntity";
 import {UserEntity} from "./UserEntity";
 
@@ -12,6 +12,9 @@ export class ReviewEntity extends BaseEntity {
 
     @Column({nullable: true})
     review: string;
+
+    @CreateDateColumn({type: "timestamp"}) // Autogenera la fecha y hora
+    createdAt: Date;
 
     @ManyToOne(type => MovieEntity)
     movie: MovieEntity;

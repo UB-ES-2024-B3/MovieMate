@@ -1,14 +1,14 @@
 import {Movie} from "../../domain/models/Movie";
 import {inject, injectable} from "tsyringe";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
-import {MovieReviewDtoOut, MoviesList} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 @injectable()
 export class MovieService {
     constructor(@inject("IMovieRepository") private movieRepository: IMovieRepository) {
     }
 
-    async getMovie(title: string): Promise<Movie> {
+    async getMovie(title: string): Promise<MovieWithReviewsDtoOut> {
         return await this.movieRepository.get(title);
     }
 
