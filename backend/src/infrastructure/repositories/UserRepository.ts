@@ -166,7 +166,7 @@ export class UserRepository implements IUserRepository {
             isOwnProfile = true;
         }
         const result: UserWithReviewsDtoOut = {
-            User: user,
+            user: user,
             isOwnProfile: isOwnProfile,
             reviews: reviews
         };
