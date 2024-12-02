@@ -39,6 +39,7 @@ export interface MovieDtoOut {
 }
 
 export interface ReviewDtoOut {
+    id: number;
     title: string;
     content: string;
     author?: AuthorDtoOut;

@@ -42,9 +42,10 @@ export class MovieRepository implements IMovieRepository {
             const author: AuthorDtoOut = {
                 id: reviewFromDB.author.id,
                 userName: reviewFromDB.author.userName,
-                image: reviewFromDB.author.image ? reviewFromDB.author.image.toString('base64') : null
+                image: reviewFromDB.author.image ? this.imageToBase64(reviewFromDB.author.image) : null
             };
             return {
+                id: reviewFromDB.id,
                 title: reviewFromDB.title,
                 content: reviewFromDB.review,
                 author: author
