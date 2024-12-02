@@ -135,6 +135,34 @@
           >
             {{ message }}
           </div>
+
+            <div class="mt-10">
+              <div class="review-container">
+                  <div v-if= "reviews.length > 0">
+                      <div v-for="(review, index) in reviews" :key="index"
+                           class="review-card bg-gray-800 text-white rounded-md p-4 mb-4 shadow-lg">
+                          <h5 class="text-[#5ce1e6] font-semibold text-lg mb-2">{{ review.title }}</h5>
+                          <p class="text-gray-400 text-sm mb-4">@{{ review.author.userName}}</p>
+                          <p class="text-gray-200 mb-4">{{ review.content }}</p>
+                          <!-- Botones de Comentar y Me gusta dentro de la reseña -->
+                          <div class="flex justify-end space-x-4 mt-4">
+                            <button class="text-gray-400 hover:text-cyan-400 transition">
+                              <i class="fas fa-thumbs-up"></i>
+                            </button>
+                              <button class="text-gray-400 hover:text-cyan-400 transition">
+                              <i class="fas fa-thumbs-down"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-cyan-400 transition">
+                              <i class="fas fa-comment"></i>
+                            </button>
+                          </div>
+                      </div>
+                  </div>
+                  <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
+
+              </div>
+
+          </div>
         </div>
       </div>
     </div>
@@ -170,6 +198,7 @@ export default {
       message: "", // Mensaje a mostrar
       isAuthenticated: false,
         user: null,
+        reviews: [],
     };
   },
   created() {
@@ -190,32 +219,41 @@ export default {
   },
 
   methods: {
-    async fetchMovie(title) {
-      try {
+      async fetchMovie(title) {
+        try {
+          const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+          const response = await axios.get(`${BASE_URL}/movie/${title}`);
 
-        const BASE_URL = process.env.VUE_APP_API_BASE_URL;
-        const response = await axios.get(`${BASE_URL}/movie/${title}`);
-        const movieData = response.data;
+          // Ajusta la desestructuración con los nombres correctos
+          const { movie, reviews } = response.data;
 
-        this.movie = {
-          id: movieData._id,
-          title: movieData._title,
-          description: movieData._description,
-          genres: Array.isArray(movieData._genres) ? movieData._genres : [movieData._genres],
-          directors: movieData._directors,
-          actors: movieData._actors,
-          premiereDate: movieData._premiereDate,
-          duration: movieData._duration,
-          classification: movieData._classification,
-          score: movieData._score,
-          image: movieData._image,
-          year: new Date(movieData._premiereDate).getFullYear(),
-        };
-      } catch (error) {
-        this.errorMessage = "Error fetching movie details.";
-        console.error("Error fetching movie details: ", error);
-      }
-    },
+          console.log(response.data);
+
+          // Asigna los datos correctamente al objeto `movie`
+          this.movie = {
+            id: movie._id,
+            title: movie._title,
+            description: movie._description,
+            genres: Array.isArray(movie._genres) ? movie._genres : [movie._genres],
+            directors: movie._directors || [],
+            actors: movie._actors || [],
+            premiereDate: movie._premiereDate || "",
+            duration: movie._duration || 0,
+            classification: movie._classification || "No clasificado",
+            score: movie._score || 0,
+            image: movie._image || "",
+            year: movie._premiereDate ? new Date(movie._premiereDate).getFullYear() : "N/A",
+          };
+
+          // Asigna las reseñas, con un manejo seguro de datos
+          this.reviews = Array.isArray(reviews) ? reviews : [];
+          console.log(this.reviews);
+        } catch (error) {
+          // Manejando errores de forma más detallada
+          this.errorMessage = "Error al obtener los detalles de la película.";
+          console.error("Error fetching movie details:", error.message);
+        }
+      },
 
     async fetchUserData(username) {
         try {
@@ -245,8 +283,7 @@ export default {
     },
 
     loadMovie() {
-      let movieTitle = this.$route.params.title;
-      movieTitle = movieTitle.replace(/%20/g, " ");
+      let movieTitle = this.$route.params.title.replace(/%20/g, " ").trim();
       this.fetchMovie(movieTitle);
     },
     goBack() {
@@ -347,12 +384,6 @@ export default {
 </script>
 
 <style scoped>
-.custom-hr {
-  border: 0;
-  border-top: 1px solid #545454;
-  margin: 16px 0;
-}
-
 .stars {
   display: flex;
   justify-content: center;
@@ -376,18 +407,18 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #222; /* Fondo oscuro */
+    background-color: #222;
 }
 
 .btn-publicar {
-  display: inline-flex; /* Cambiado de flex a inline-flex para que el tamaño se ajuste al contenido */
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 16px; /* Espaciado interno ajustado */
+  padding: 8px 16px;
   background-color: #3ce3e3;
   border: none;
   border-radius: 5px;
-  font-size: 14px; /* Tamaño de texto ajustado */
+  font-size: 14px;
   font-weight: bold;
   color: #000;
   cursor: pointer;
@@ -410,5 +441,59 @@ button svg {
 button svg.fill-red-500 {
   transform: scale(1.1);
 }
+.review-container {
+  height: 12rem;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: thin;
+}
 
+.review-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.review-container::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.review-container::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.review-card {
+  background-color: #374151;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: white;
+  scroll-snap-align: start;
+}
+
+.review-card h5 {
+  margin-bottom: 0.5rem;
+}
+
+.review-card p {
+  margin-top: 0.5rem;
+}
+
+.review-card .flex {
+  margin-top: auto;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.review-card button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.review-card button:hover {
+  color: #5ce1e6;
+}
 </style>
