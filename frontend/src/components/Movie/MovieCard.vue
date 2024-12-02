@@ -407,18 +407,18 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #222; /* Fondo oscuro */
+    background-color: #222;
 }
 
 .btn-publicar {
-  display: inline-flex; /* Cambiado de flex a inline-flex para que el tamaño se ajuste al contenido */
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 16px; /* Espaciado interno ajustado */
+  padding: 8px 16px;
   background-color: #3ce3e3;
   border: none;
   border-radius: 5px;
-  font-size: 14px; /* Tamaño de texto ajustado */
+  font-size: 14px;
   font-weight: bold;
   color: #000;
   cursor: pointer;
@@ -442,7 +442,7 @@ button svg.fill-red-500 {
   transform: scale(1.1);
 }
 .review-container {
-  height: 12rem; /* Altura ajustada de acuerdo a tu necesidad */
+  height: 12rem;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
   scrollbar-width: thin;
@@ -480,9 +480,9 @@ button svg.fill-red-500 {
 }
 
 .review-card .flex {
-  margin-top: auto; /* Alinea los botones al final de la tarjeta */
+  margin-top: auto;
   gap: 1rem;
-  justify-content: flex-end; /* Alineación de los botones a la derecha */
+  justify-content: flex-end;
 }
 
 .review-card button {
@@ -494,6 +494,6 @@ button svg.fill-red-500 {
 }
 
 .review-card button:hover {
-  color: #5ce1e6; /* Color de hover */
+  color: #5ce1e6;
 }
 </style>

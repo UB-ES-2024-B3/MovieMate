@@ -153,7 +153,7 @@ export default {
       async search() {
           if (!this.searchQuery.trim()) {
               this.errorMessage = "Please enter a search query";
-              this.results = { users: [], movies: [] }; // Inicializado correctamente
+              this.results = { users: [], movies: [] };
               return;
           }
 
@@ -215,7 +215,6 @@ export default {
       },
     isAuthenticated(newVal) {
       if (newVal && this.username) {
-        // Redirige a la página del usuario cuando se autentique
         this.$router.push(`/user/${this.username}`);
       }
     },

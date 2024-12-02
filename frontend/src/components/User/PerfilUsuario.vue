@@ -92,11 +92,32 @@
                 <div class="border-t border-cyan-400 w-full mt-8"></div>
                 <!-- Publicaciones del usuario -->
                 <div class="mt-10">
-                    <h4 class="text-lg font-semibold">Publicaciones</h4>
-                    <div class="mt-4">
-                        <p class="text-gray-300">Aquí aparecerán las publicaciones del usuario...</p>
-                    </div>
-                </div>
+                  <div class="review-container">
+                      <div v-if= "reviews.length > 0">
+                          <div v-for="(review, index) in reviews" :key="index"
+                               class="review-card bg-gray-800 text-white rounded-md p-4 mb-4 shadow-lg">
+                              <h5 class="text-[#5ce1e6] font-semibold text-lg mb-2 text-left">{{ review.title }}</h5>
+                              <p class="text-gray-400 text-sm mb-4 text-left">{{ review.movie.title}}</p>
+                              <p class="text-gray-200 mb-4 text-left">{{ review.content }}</p>
+                              <!-- Botones de Comentar y Me gusta dentro de la reseña -->
+                              <div class="flex justify-end space-x-4 mt-4">
+                                <button class="text-gray-400 hover:text-cyan-400 transition">
+                                  <i class="fas fa-thumbs-up"></i>
+                                </button>
+                                  <button class="text-gray-400 hover:text-cyan-400 transition">
+                                  <i class="fas fa-thumbs-down"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-cyan-400 transition">
+                                  <i class="fas fa-comment"></i>
+                                </button>
+                              </div>
+                          </div>
+                      </div>
+                      <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
+
+                  </div>
+
+              </div>
             </div>
 
         </main>
@@ -117,6 +138,7 @@ export default {
             isLogged: null,
             isAuthenticated: false,
             username: "",
+            reviews: [],
         };
     },
 
@@ -145,7 +167,7 @@ export default {
                     Authorization: `Bearer ${token}`
                   }
                 });
-                const {user, isOwnProfile} = response.data;
+                const {user, isOwnProfile, reviews} = response.data;
                 this.user = {
                     id: user.id,
                     userName: user.userName,
@@ -156,6 +178,7 @@ export default {
                     image: user.image,
                 };
                 this.isLogged = isOwnProfile;
+                this.reviews = reviews || [];
                 await this.setUserData(this.user);
 
             } catch (error) {
@@ -228,6 +251,64 @@ body {
 button svg {
   width: 24px;
   height: 24px;
+}
+
+.review-container {
+  height: 24rem;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: thin;
+}
+
+.review-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.review-container::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.review-container::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.review-card {
+  background-color: #374151;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: white;
+  scroll-snap-align: start;
+  text-align: left;
+}
+
+
+.review-card h5 {
+  margin-bottom: 0.5rem;
+}
+
+.review-card p {
+  margin-top: 0.5rem;
+}
+
+.review-card .flex {
+  margin-top: auto;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.review-card button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.review-card button:hover {
+  color: #5ce1e6;
 }
 </style>
 
