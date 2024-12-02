@@ -140,6 +140,7 @@ export class UserRepository implements IUserRepository {
                 image: reviewFromDB.movie.image ? this.imageToBase64(reviewFromDB.movie.image) : null
             };
             return {
+                id: reviewFromDB.id,
                 title: reviewFromDB.title,
                 content: reviewFromDB.review,
                 movie: movie

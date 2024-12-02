@@ -1,6 +1,6 @@
 import {inject, injectable} from "tsyringe";
 import {IReviewRepository} from "../../domain/repositories/IReviewRepository";
-import {ReviewDtoIn} from "../../interfaces/Interfaces"
+import {ReviewDtoIn, ReviewDtoOut} from "../../interfaces/Interfaces"
 import {Review} from "../../domain/models/Review";
 
 @injectable()
@@ -12,11 +12,11 @@ export class ReviewService {
         return await this.ReviewRepository.create(review);
     }
 
-    async getReview(reviewId: number): Promise<ReviewDtoIn> {
+    async getReview(reviewId: number): Promise<ReviewDtoOut> {
         return await this.ReviewRepository.get(reviewId);
     }
 
-    async getAllReviews(): Promise<ReviewDtoIn[]> {
+    async getAllReviews(): Promise<ReviewDtoOut[]> {
         return await this.ReviewRepository.getAll();
     }
 }
