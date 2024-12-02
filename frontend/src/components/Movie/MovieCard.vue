@@ -141,6 +141,7 @@
                   <div v-if= "reviews.length > 0">
                       <div v-for="(review, index) in reviews" :key="index"
                            class="review-card bg-gray-800 text-white rounded-md p-4 mb-4 shadow-lg">
+                          <router-link :to="`/review/${review.id}`">
                           <h5 class="text-[#5ce1e6] font-semibold text-lg mb-2">{{ review.title }}</h5>
                           <p class="text-gray-400 text-sm mb-4">@{{ review.author.userName}}</p>
                           <p class="text-gray-200 mb-4">{{ review.content }}</p>
@@ -156,6 +157,7 @@
                               <i class="fas fa-comment"></i>
                             </button>
                           </div>
+                          </router-link>
                       </div>
                   </div>
                   <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
