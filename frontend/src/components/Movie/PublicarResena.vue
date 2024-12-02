@@ -146,7 +146,7 @@ export default {
                 const response = await axios.post(`${BASE_URL}/review`, data);
 
                 if(response.status == 200){
-                    this.showToastWithMessage(response.data.message || 'Request successful',
+                    this.showToastWithMessage(response.data.message || 'Reseña publicada',
                         false,
                         ()=> this.$router.go(-1));
                 }
@@ -154,6 +154,12 @@ export default {
                 console.error('Error del servidor:', error.response?.data || error.message);
                 this.showToastWithMessage(error.response?.data?.message || 'Request failed. Please try again', true);
             }
+        },
+
+        handleDelete(){
+            this.titulo.nextSibling;
+            this.resena.nextSibling;
+            this.$router.go(-1);
         }
     }
 }
