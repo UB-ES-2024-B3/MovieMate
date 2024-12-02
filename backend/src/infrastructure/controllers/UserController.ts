@@ -204,4 +204,19 @@ export class UserController {
             next(e);
         }
     }
+
+    static async getAllFavorites(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userName = req.params.userName;
+            if (!userName) {
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const favorites = await this.userService.getAllFavorites(userName);
+            return res.status(200).json(favorites);
+
+        } catch (e) {
+            next(e);
+        }
+    }
 }

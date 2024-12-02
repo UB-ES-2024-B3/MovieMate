@@ -1,3 +1,4 @@
+import {Movie} from "../../domain/models/Movie";
 import {inject, injectable} from "tsyringe";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
@@ -23,8 +24,12 @@ export class MovieService {
         return await this.movieRepository.search(query);
     }
 
-    async reviewMovie(idUsuario: number, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
-        return await this.movieRepository.reviewMovie(idUsuario, idMovie, puntuacion);
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
+        return await this.movieRepository.reviewMovie(userName, idMovie, puntuacion);
+    }
+
+    async addFavorites(userName: string, idMovie: number): Promise<String>{
+        return await this.movieRepository.addFavorites(userName, idMovie);
     }
 }
 

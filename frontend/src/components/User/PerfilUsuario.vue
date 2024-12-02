@@ -12,9 +12,9 @@
                 </button>
 
                 <!-- Boton guardado -->
-                <button class="flex items-center justify-center text-black rounded-md px-4 py-2 border-2 border-black hover:bg-black hover:text-cyan-400 transition duration-200 gap-4">
+                <button  @click="goToFavorites" class="flex items-center justify-center text-black rounded-md px-4 py-2 border-2 border-black hover:bg-black hover:text-cyan-400 transition duration-200 gap-4">
                     <img src="../../assets/guardado.png" class="w-12 h-12">
-                    <span class="font-bold text-lg">GUARDADO</span>
+                    <span class="font-bold text-lg">PELÍCULAS FAVORITAS</span>
                 </button>
 
                 <!-- Boton moderar -->
@@ -200,6 +200,10 @@ export default {
             this.isAuthenticated = !!token;
             this.username = token ? sessionStorage.getItem('username'):'';
         },
+
+      goToFavorites() {
+        this.$router.push("/favorites"); // Redirige a la página de favoritos
+      }
     }
 };
 </script>

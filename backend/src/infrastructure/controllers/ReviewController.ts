@@ -52,4 +52,23 @@ export class ReviewController {
         }
 
     }
+
+    static async getReview(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = parseInt(req.params.id);
+            const result = await this.reviewService.getReview(id);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async getAllReviews(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.reviewService.getAllReviews();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
 }
