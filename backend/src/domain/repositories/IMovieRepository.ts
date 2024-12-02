@@ -11,4 +11,6 @@ export interface IMovieRepository {
     search(query: string): Promise<MoviesList[]>;
 
     reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>;
+
+    addFavorites(userName: string, idMovie: number): Promise<string>;
 }

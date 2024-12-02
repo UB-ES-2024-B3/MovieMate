@@ -27,5 +27,9 @@ export class MovieService {
     async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
         return await this.movieRepository.reviewMovie(userName, idMovie, puntuacion);
     }
+
+    async addFavorites(userName: string, idMovie: number): Promise<String>{
+        return await this.movieRepository.addFavorites(userName, idMovie);
+    }
 }
 

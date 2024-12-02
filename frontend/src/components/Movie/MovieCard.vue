@@ -42,6 +42,34 @@
                     class="h-80 w-64 rounded-md shadow-2xl border-4 border-gray-300"
                 />
 
+                <!-- Botón de Añadir a Favoritos -->
+                <button
+                    @click="toggleFavorite"
+                    @mouseover="showTooltip = true"
+                    @mouseleave="showTooltip = false"
+                    class="absolute top-4 right-4 bg-gray-800 text-[#5ce1e6] p-3 rounded-full shadow-md hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
+                >
+                  <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-6 w-6"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      :class="{ 'fill-red-500': isFavorite }"
+                  >
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Tooltip -->
+                <div
+                    v-if="showTooltip"
+                    class="absolute top-16 right-4 bg-gray-800 text-white text-sm px-4 py-2 rounded shadow-md"
+                >
+                  {{ isFavorite ? "Eliminar de Favoritos" : "Añadir a Favoritos" }}
+                </div>
+
               </div>
 
               <!-- Detalles de la película -->
@@ -66,6 +94,7 @@
               </div>
             </div>
           </div>
+
 
           <!-- Sistema de Puntuación -->
           <div class="bg-gray-800 text-white rounded-md mt-6 p-6 shadow-lg">
@@ -113,6 +142,7 @@
 </template>
 <script>
 import axios from "axios";
+const BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
 export default {
   name: "MovieCard",
@@ -162,6 +192,7 @@ export default {
   methods: {
     async fetchMovie(title) {
       try {
+
         const BASE_URL = process.env.VUE_APP_API_BASE_URL;
         const response = await axios.get(`${BASE_URL}/movie/${title}`);
         const movieData = response.data;
@@ -234,13 +265,11 @@ export default {
         idMovie: this.movie.id,
         puntuacion: rating,
       };
-      console.log(payload);
-      const BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
       axios
           .put(`${BASE_URL}/movie/score`, payload)
           .then(() => {
-              if (!this.hasRated) {
+            if (!this.hasRated) {
               this.currentRating = rating;
               this.hasRated = true;
               alert(`Has puntuado esta película con ${rating} estrellas.`);
@@ -259,6 +288,37 @@ export default {
     modifyRating() {
       this.hasRated = false;
     },
+
+    async toggleFavorite() {
+      if (!this.isAuthenticated) {
+        this.displayMessage("Debes iniciar sesión para agregar a favoritos.");
+        return;
+      }
+
+      try {
+        // Enviar datos al backend
+        const payload = {
+          userName: this.username,
+          idMovie: this.movie.id,
+        };
+
+        const response = await axios.put(`${BASE_URL}/movie/favorites`, payload);
+
+        if (response.status === 200) {
+          this.isFavorite = !this.isFavorite; // Cambiar estado local
+          const message = this.isFavorite
+              ? "Añadido a favoritos."
+              : "Eliminado de favoritos.";
+          alert(message);
+        } else {
+          throw new Error("No se pudo procesar la solicitud.");
+        }
+      } catch (error) {
+        console.error("Error al añadir/eliminar de favoritos:", error);
+        this.displayMessage("Hubo un error al procesar tu solicitud. Inténtalo de nuevo.");
+      }
+      
+      },
 
     displayMessage(message) {
       // Actualiza el mensaje y el estilo
@@ -346,6 +406,13 @@ body {
 .btn-publicar .icon {
     font-size: 18px;
     margin-right: 8px;
+    
+button svg {
+  transition: all 0.3s ease;
+}
+
+button svg.fill-red-500 {
+  transform: scale(1.1);
 }
 
 </style>

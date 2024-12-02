@@ -5,7 +5,13 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UserDtoOut, UsersList, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {
+    MoviesInFavsDtoOut,
+    UpdateUserData,
+    UserDtoOut,
+    UsersList,
+    UserWithProfileInfo
+} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
@@ -223,8 +229,6 @@ export class UserRepository implements IUserRepository {
 
     }
 
-    const
-
     userToUserEntity(user: User): UserEntity {
         const userEntity = new UserEntity();
         userEntity.userName = user.userName;
@@ -237,6 +241,25 @@ export class UserRepository implements IUserRepository {
         userEntity.isAdmin = user.isAdmin;
 
         return userEntity;
+    }
+
+    async getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]> {
+        const user = await this.repository.findOne({
+            where: { userName: userName },
+            relations: ["favs"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const favoritesList: MoviesInFavsDtoOut[] = user.favs.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            image: this.imageToBase64(movie.image) || "No image available",
+        }));
+
+        return favoritesList
     }
 
 
