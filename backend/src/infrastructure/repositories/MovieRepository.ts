@@ -74,6 +74,30 @@ export class MovieRepository implements IMovieRepository {
         return result;
     }
 
+    async getbyId(id: number): Promise<Movie> {
+        const movieFromDB = await this.repository.findOneBy({id: id});
+        if (!movieFromDB) {
+            throw createError(404, `Movie with id < ${id} > does not exist`);
+        }
+
+        const movie = new Movie(
+            movieFromDB.id,
+            movieFromDB.title,
+            movieFromDB.description,
+            movieFromDB.genres,
+            movieFromDB.directors,
+            movieFromDB.actors,
+            movieFromDB.premiereDate,
+            movieFromDB.duration,
+            movieFromDB.classification,
+            movieFromDB.score,
+            movieFromDB.totalReviews.length,
+            this.imageToBase64(movieFromDB.image)
+        );
+
+        return movie;
+    }
+
     async getAll(): Promise<Movie[]> {
         const moviesFromDB = await this.repository.find();
         if (!moviesFromDB) {

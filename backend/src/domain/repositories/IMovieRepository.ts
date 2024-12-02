@@ -4,6 +4,8 @@ import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../inter
 export interface IMovieRepository {
     get(title: string): Promise<MovieWithReviewsDtoOut>;
 
+    getbyId(id: number): Promise<Movie>;
+
     getAll(): Promise<Movie[]>;
 
     getTop10(): Promise<Movie[]>;
