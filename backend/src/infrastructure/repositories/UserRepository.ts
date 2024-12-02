@@ -118,7 +118,7 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
         await this.repository.remove(userFromDB)
-        return `user with username < ${userName} > deleted successfully`
+        return `user with username < ${userName} > deleted successfully`;
     }
 
     async get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut> {
