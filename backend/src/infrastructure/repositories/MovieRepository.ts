@@ -63,7 +63,7 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.duration,
             movieFromDB.classification,
             movieFromDB.score,
-            movieFromDB.totalReviews.length,
+            movieFromDB.totalReviews ? movieFromDB.totalReviews.length : 0,
             this.imageToBase64(movieFromDB.image)
         );
 
@@ -92,7 +92,7 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.duration,
             movieFromDB.classification,
             movieFromDB.score,
-            movieFromDB.totalReviews.length,
+            movieFromDB.totalReviews ? movieFromDB.totalReviews.length : 0,
             this.imageToBase64(movieFromDB.image)
         );
 
@@ -116,7 +116,7 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.duration,
                 moviesFromDB.classification,
                 moviesFromDB.score,
-                moviesFromDB.totalReviews.length,
+                moviesFromDB.totalReviews ? moviesFromDB.totalReviews.length : 0,
                 this.imageToBase64(moviesFromDB.image)
             );
         });
@@ -145,7 +145,7 @@ export class MovieRepository implements IMovieRepository {
                 top10FromDB.duration,
                 top10FromDB.classification,
                 top10FromDB.score,
-                top10FromDB.totalReviews.length,
+                top10FromDB.totalReviews ? top10FromDB.totalReviews.length : 0,
                 this.imageToBase64(top10FromDB.image)
             );
         });
