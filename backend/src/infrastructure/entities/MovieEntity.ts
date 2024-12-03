@@ -8,19 +8,19 @@ export class MovieEntity extends BaseEntity {
     @Column({nullable: false})
     title: string;
 
-    @Column({nullable: true})
+    @Column({nullable: false})
     description: string;
 
-    @Column({nullable: false})
-    genres: string;
+    @Column({nullable: false, default: [], type: "jsonb"})
+    genres: string[];
+
+    @Column({nullable: false, default: [], type: "jsonb"})
+    directors: string[];
+
+    @Column({nullable: false, default: [], type: "jsonb"})
+    actors: string[];
 
     @Column({nullable: false})
-    directors: string;
-
-    @Column({nullable: false})
-    actors: string;
-
-    @Column({nullable: false, type: "date"})
     premiereDate: Date;
 
     @Column({nullable: false})
@@ -32,6 +32,10 @@ export class MovieEntity extends BaseEntity {
     @Column({nullable: true, type: "float"})
     score: number;
 
+    @Column({ type: "jsonb", nullable: true, default: [] })
+    totalReviews: number[];
+
     @Column({type: 'bytea', nullable: true})
     image: Buffer;
+
 }

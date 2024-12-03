@@ -31,6 +31,14 @@ export class DtoInValidation {
         isAdmin: t.union([t.boolean, t.undefined])
     });
 
+    static ReviewDtoInCodec = t.type({
+        title: t.string,
+        review: t.string,
+        author: t.number,
+        movie: t.number
+    });
+
+
     // Definimos el esquema de validación para el UpdateUserDto
     static UpdateUserDtoCodec = t.type({
         userName: OptionalString,
@@ -49,6 +57,10 @@ export class DtoInValidation {
     // Método para validar los datos de la solicitud
     static validateUserDto(data: any) {
         return DtoInValidation.UserDtoInCodec.decode(data);
+    }
+
+    static validateReviewDto(data: any) {
+        return DtoInValidation.ReviewDtoInCodec.decode(data);
     }
 
     // Método para validar los datos de la solicitud para UpdateUserDto

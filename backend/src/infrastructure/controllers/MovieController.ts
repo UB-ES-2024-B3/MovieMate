@@ -16,8 +16,15 @@ export class MovieController {
 
     static async getMovie(req: Request, res: Response, next: NextFunction) {
         try {
-            const title = req.params.title;
-            const result = await this.movieService.getMovie(title);
+            let result;
+            if (!isNaN(Number(req.params.title))) {
+                const title = parseInt(req.params.title);
+                result = await this.movieService.getMoviebyId(title);
+            } else {
+                const title = req.params.title;
+                result = await this.movieService.getMovie(title);
+            }
+
             return res.status(200).json(result);
         } catch (e) {
             next(e);
@@ -52,6 +59,43 @@ export class MovieController {
             return res.status(200).json(movies);
         } catch (e) {
             next(e);
+        }
+    }
+
+    static async scoreMovie(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const idMovie = parseInt(req.body.idMovie);
+            const puntuacion = parseFloat(req.body.puntuacion);
+
+            if (!userName || isNaN(idMovie) || isNaN(puntuacion)) {
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            if(puntuacion > 5 || puntuacion < 0){
+                throw createError(400, `Incorrect Puntuation`);
+            }
+
+            const result = await this.movieService.reviewMovie(userName, idMovie, puntuacion);
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async addFavorites(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const idMovie = parseInt(req.body.idMovie);
+
+            if (!userName || isNaN(idMovie)) {
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.movieService.addFavorites(userName, idMovie);
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
         }
     }
 }

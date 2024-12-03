@@ -1,4 +1,4 @@
-import {User} from "../domain/models/User";
+import {Movie} from "../domain/models/Movie";
 
 export interface UpdateUserData {
     userName?: string;
@@ -26,6 +26,42 @@ export interface UserDtoOut {
     image: string | null;
 }
 
+export interface AuthorDtoOut {
+    id: number;
+    userName: string;
+    image: string | null;
+}
+
+export interface MovieDtoOut {
+    id: number;
+    title: string;
+    image: string | null;
+}
+
+export interface ReviewDtoOut {
+    id: number;
+    title: string;
+    content: string;
+    author?: AuthorDtoOut;
+    movie?: MovieDtoOut;
+}
+
+export interface MovieWithReviewsDtoOut {
+    movie: Movie;
+    reviews: ReviewDtoOut[];
+}
+
+export interface UserWithReviewsDtoOut {
+    user: UserDtoOut;
+    reviews: ReviewDtoOut[];
+    isOwnProfile: boolean;
+}
+
+export interface MovieReviewDtoOut {
+    totalReview: number;
+    score: number;
+}
+
 export interface UsersList {
     userName: string;
     description: string;
@@ -34,7 +70,20 @@ export interface UsersList {
 export interface MoviesList {
     title: string;
     premiereDate: Date;
-    genres: string;
-    directors: string;
+    genres: string[];
+    directors: string[];
     image: string | null;
+}
+
+export interface MoviesInFavsDtoOut {
+    id: number;
+    title: string;
+    image: string | null;
+}
+
+export interface ReviewDtoIn {
+    title: string;
+    review: string;
+    author: number;
+    movie: number;
 }
