@@ -13,7 +13,7 @@ describe('Validation and Security Tests', () => {
       isAdmin: false,
     }).catch(err => {
       expect(err.response.status).toBe(400);
-      expect(err.response.data.error.message).toBe('Invalid user data!');  // Cambia esto al mensaje real
+      expect(err.response.data.error.message).toBe('Invalid user data!');
     });
   });
 });
