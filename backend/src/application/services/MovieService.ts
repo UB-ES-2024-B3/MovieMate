@@ -1,15 +1,19 @@
 import {Movie} from "../../domain/models/Movie";
 import {inject, injectable} from "tsyringe";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
-import {MoviesList} from "../../interfaces/Interfaces";
+import {MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 @injectable()
 export class MovieService {
     constructor(@inject("IMovieRepository") private movieRepository: IMovieRepository) {
     }
 
-    async getMovie(title: string): Promise<Movie> {
+    async getMovie(title: string): Promise<MovieWithReviewsDtoOut> {
         return await this.movieRepository.get(title);
+    }
+
+    async getMoviebyId(id: number): Promise<Movie> {
+        return await this.movieRepository.getbyId(id);
     }
 
     async getAllMovies() {
@@ -23,4 +27,13 @@ export class MovieService {
     async searchMovies(query: string): Promise<MoviesList[]> {
         return await this.movieRepository.search(query);
     }
+
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
+        return await this.movieRepository.reviewMovie(userName, idMovie, puntuacion);
+    }
+
+    async addFavorites(userName: string, idMovie: number): Promise<String>{
+        return await this.movieRepository.addFavorites(userName, idMovie);
+    }
 }
+

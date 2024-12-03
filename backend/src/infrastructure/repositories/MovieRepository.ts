@@ -4,19 +4,81 @@ import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
 import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
-import {MoviesList} from "../../interfaces/Interfaces";
+import {
+    AuthorDtoOut,
+    MovieReviewDtoOut,
+    MoviesList,
+    MovieWithReviewsDtoOut,
+    ReviewDtoOut
+} from "../../interfaces/Interfaces";
+import {UserEntity} from "../entities/UserEntity";
+import {ReviewEntity} from "../entities/ReviewEntity";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
+    private readonly userRepo: Repository<UserEntity>;
+    private readonly reviewRepo: Repository<ReviewEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(MovieEntity);
+        this.userRepo = PostgreTypeOrmDataSource.getRepository(UserEntity);
+        this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
     }
 
-    async get(title: string): Promise<Movie> {
-        const movieFromDB = await this.repository.findOneBy({title: title});
+    async get(title: string): Promise<MovieWithReviewsDtoOut> {
+        const movieFromDB = await this.repository.findOne({where: {title: title}});
+
         if (!movieFromDB) {
             throw createError(404, `Movie with title < ${title} > does not exist`);
+        }
+
+        const reviewsFromDB = await this.reviewRepo.find({
+            where: {movie: {id: movieFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author'],
+        });
+
+        const reviews: ReviewDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
+            const author: AuthorDtoOut = {
+                id: reviewFromDB.author.id,
+                userName: reviewFromDB.author.userName,
+                image: reviewFromDB.author.image ? this.imageToBase64(reviewFromDB.author.image) : null
+            };
+            return {
+                id: reviewFromDB.id,
+                title: reviewFromDB.title,
+                content: reviewFromDB.review,
+                author: author
+            };
+        });
+
+        const movie = new Movie(
+            movieFromDB.id,
+            movieFromDB.title,
+            movieFromDB.description,
+            movieFromDB.genres,
+            movieFromDB.directors,
+            movieFromDB.actors,
+            movieFromDB.premiereDate,
+            movieFromDB.duration,
+            movieFromDB.classification,
+            movieFromDB.score,
+            movieFromDB.totalReviews.length,
+            this.imageToBase64(movieFromDB.image)
+        );
+
+        const result: MovieWithReviewsDtoOut = {
+            movie: movie,
+            reviews: reviews
+        };
+
+        return result;
+    }
+
+    async getbyId(id: number): Promise<Movie> {
+        const movieFromDB = await this.repository.findOneBy({id: id});
+        if (!movieFromDB) {
+            throw createError(404, `Movie with id < ${id} > does not exist`);
         }
 
         const movie = new Movie(
@@ -30,6 +92,7 @@ export class MovieRepository implements IMovieRepository {
             movieFromDB.duration,
             movieFromDB.classification,
             movieFromDB.score,
+            movieFromDB.totalReviews.length,
             this.imageToBase64(movieFromDB.image)
         );
 
@@ -53,6 +116,7 @@ export class MovieRepository implements IMovieRepository {
                 moviesFromDB.duration,
                 moviesFromDB.classification,
                 moviesFromDB.score,
+                moviesFromDB.totalReviews.length,
                 this.imageToBase64(moviesFromDB.image)
             );
         });
@@ -81,6 +145,7 @@ export class MovieRepository implements IMovieRepository {
                 top10FromDB.duration,
                 top10FromDB.classification,
                 top10FromDB.score,
+                top10FromDB.totalReviews.length,
                 this.imageToBase64(top10FromDB.image)
             );
         });
@@ -94,7 +159,7 @@ export class MovieRepository implements IMovieRepository {
 
     async search(query: string): Promise<MoviesList[]> {
         const movies = await this.repository.find({
-            where: [{ title: ILike(`%${query}%`) }], order: {title: 'ASC'},
+            where: [{title: ILike(`%${query}%`)}], order: {title: 'ASC'},
         });
 
         if (movies.length === 0) {
@@ -109,4 +174,81 @@ export class MovieRepository implements IMovieRepository {
             image: this.imageToBase64(movie.image) || "No image available",
         }));
     }
+
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
+        const user = await this.userRepo.findOne({
+            where: {userName: userName},
+            relations: ["reviewed"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const movie = await this.repository.findOneBy({id: idMovie});
+        if (!movie) {
+            throw createError(404, `Movie does not exist`);
+        }
+
+        const hasReviewed = user.reviewed.some(reviewedMovie => reviewedMovie.id === idMovie);
+
+        if (!hasReviewed) {
+            user.reviewed.push(movie);
+
+            if (!movie.totalReviews) {
+                movie.totalReviews = [];
+            }
+            movie.totalReviews.push(puntuacion);
+        } else {
+            const reviewIndex = user.reviewed.findIndex(reviewedMovie => reviewedMovie.id === idMovie);
+            if (reviewIndex !== -1) {
+                movie.totalReviews[reviewIndex] = puntuacion;
+            }
+        }
+
+        const totalScores = movie.totalReviews.reduce((sum, score) => sum + score, 0);
+        movie.score = totalScores / movie.totalReviews.length;
+
+        const movieReview: MovieReviewDtoOut = {
+            totalReview: movie.totalReviews.length,
+            score: movie.score
+        };
+
+        await this.userRepo.save(user);
+        await this.repository.save(movie);
+
+        return movieReview
+    }
+
+    async addFavorites(userName: string, idMovie: number): Promise<string> {
+        const user = await this.userRepo.findOne({
+            where: {userName: userName},
+            relations: ["favs"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const movie = await this.repository.findOneBy({id: idMovie});
+        if (!movie) {
+            throw createError(404, `Movie does not exist`);
+        }
+
+        const isFav = user.favs.some(favMovie => favMovie.id === idMovie);
+        if (!isFav) {
+            user.favs.push(movie);
+
+            await this.userRepo.save(user);
+        } else {
+            user.favs = user.favs.filter(favMovie => favMovie.id !== idMovie);
+
+            await this.userRepo.save(user);
+        }
+
+        return !isFav ? "Movie added to favorites" : "Movie removed from favorites";
+
+    }
+
+
 }

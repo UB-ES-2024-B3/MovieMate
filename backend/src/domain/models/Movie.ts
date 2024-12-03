@@ -1,21 +1,33 @@
+import {Review} from "./Review";
+
 export class Movie {
 
     constructor(
         private _id: number,
         private _title: string,
         private _description: string,
-        private _genres: string,
-        private _directors: string,
-        private _actors: string,
+        private _genres: string[],
+        private _directors: string[],
+        private _actors: string[],
         private _premiereDate: Date,
         private _duration: number,
         private _classification: string,
         private _score: number,
-        private _image?: Buffer | string
+        private _totalReviews: number,
+        private _image?: Buffer | string,
+        private _reviews?: Review[]
     ) {
     }
 
     //Getters y setters
+    get reviews(): Review[] {
+        return this._reviews;
+    }
+
+    set reviews(value: Review[]) {
+        this._reviews = value;
+    }
+
     get id(): number {
         return this._id;
     }
@@ -40,27 +52,27 @@ export class Movie {
         this._description = value;
     }
 
-    get genres(): string {
+    get genres(): string[] {
         return this._genres;
     }
 
-    set genres(value: string) {
+    set genres(value: string[]) {
         this._genres = value;
     }
 
-    get directors(): string {
+    get directors(): string[] {
         return this._directors;
     }
 
-    set directors(value: string) {
+    set directors(value: string[]) {
         this._directors = value;
     }
 
-    get actors(): string {
+    get actors(): string[] {
         return this._actors;
     }
 
-    set actors(value: string) {
+    set actors(value: string[]) {
         this._actors = value;
     }
 
@@ -105,8 +117,4 @@ export class Movie {
         this._image = value ?? undefined;
     }
 
-    // Función para convertir la imagen a base64
-    imageToBase64(): string | null {
-        return this._image ? `data:image/jpeg;base64,${this._image.toString('base64')}` : null;
-    }
 }

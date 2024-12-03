@@ -5,16 +5,27 @@ import {UserEntity} from "../entities/UserEntity";
 import {User} from "../../domain/models/User";
 import {createHash} from 'crypto';
 import createError from 'http-errors';
-import {UpdateUserData, UsersList, UserDtoOut, UserWithProfileInfo} from "../../interfaces/Interfaces";
+import {
+    MoviesInFavsDtoOut,
+    MovieDtoOut,
+    ReviewDtoOut,
+    UpdateUserData,
+    UserDtoOut,
+    UsersList,
+    UserWithReviewsDtoOut
+} from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
+import {ReviewEntity} from "../entities/ReviewEntity";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
+    private readonly reviewRepo: Repository<ReviewEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(UserEntity);
+        this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
     }
 
     async getByEmail(email: string): Promise<UserEntity | null> {
@@ -42,7 +53,7 @@ export class UserRepository implements IUserRepository {
         user.password = createHash('sha256').update(user.password).digest('hex');
 
         // Save user using the repository
-        await this.repository.save(user);
+        await this.repository.save(this.userToUserEntity(user));
 
         // Return a success message or the new user's ID
         return "Registration successful";
@@ -107,14 +118,34 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
         await this.repository.remove(userFromDB)
-        return `user with username < ${userName} > deleted successfully`
+        return `user with username < ${userName} > deleted successfully`;
     }
 
-    async get(userName: string, auth_token: string): Promise<UserWithProfileInfo> {
+    async get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
         }
+
+        const reviewsFromDB = await this.reviewRepo.find({
+            where: {author: {id: userFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author', 'movie'],
+        });
+
+        const reviews: ReviewDtoOut[] = reviewsFromDB.map((reviewFromDB: ReviewEntity) => {
+            const movie: MovieDtoOut = {
+                id: reviewFromDB.movie.id,
+                title: reviewFromDB.movie.title,
+                image: reviewFromDB.movie.image ? this.imageToBase64(reviewFromDB.movie.image) : null
+            };
+            return {
+                id: reviewFromDB.id,
+                title: reviewFromDB.title,
+                content: reviewFromDB.review,
+                movie: movie
+            };
+        });
 
         const user: UserDtoOut = {
             id: userFromDB.id,
@@ -135,7 +166,13 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-        return {user, isOwnProfile};
+        const result: UserWithReviewsDtoOut = {
+            user: user,
+            isOwnProfile: isOwnProfile,
+            reviews: reviews
+        };
+
+        return result;
     }
 
     async sendRecoveryEmail(email: string): Promise<string> {
@@ -208,7 +245,7 @@ export class UserRepository implements IUserRepository {
 
     async search(query: string): Promise<UsersList[]> {
         const users = await this.repository.find({
-            where: [{ userName: ILike(`%${query}%`) }], order: {userName: 'ASC'},
+            where: [{userName: ILike(`%${query}%`)}], order: {userName: 'ASC'},
         });
 
         if (users.length === 0) {
@@ -222,5 +259,39 @@ export class UserRepository implements IUserRepository {
         }));
 
     }
+
+    userToUserEntity(user: User): UserEntity {
+        const userEntity = new UserEntity();
+        userEntity.userName = user.userName;
+        userEntity.email = user.email;
+        userEntity.password = user.password;
+        userEntity.favs = [];  // Al inicio siempre estara vacio
+        userEntity.gender = user.gender;
+        userEntity.birthDate = user.birthDate;
+        userEntity.description = user.description;
+        userEntity.isAdmin = user.isAdmin;
+
+        return userEntity;
+    }
+
+    async getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]> {
+        const user = await this.repository.findOne({
+            where: { userName: userName },
+            relations: ["favs"],
+        });
+
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const favoritesList: MoviesInFavsDtoOut[] = user.favs.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            image: this.imageToBase64(movie.image) || "No image available",
+        }));
+
+        return favoritesList
+    }
+
 
 }
