@@ -6,11 +6,13 @@ import { IMovieRepository } from '../../src/domain/repositories/IMovieRepository
 // @ts-ignore
 import createError from 'http-errors';
 import {number, string} from "fp-ts";
-import {MovieReviewDtoOut} from "../../src/interfaces/Interfaces";
+import {MovieReviewDtoOut, MovieWithReviewsDtoOut} from "../../src/interfaces/Interfaces";
+import {undefined} from "io-ts";
 
 // Mock del repositorio
 const mockMovieRepository: jest.Mocked<IMovieRepository> = {
     get: jest.fn(),
+    getbyId: jest.fn(),
     getAll: jest.fn(),
     getTop10: jest.fn(),
     search: jest.fn(),
@@ -42,16 +44,20 @@ describe('MovieService Unit Tests', () => {
                 null // Imagen omitida
             );
 
-            mockMovieRepository.get.mockResolvedValue(mockMovie);
+            const movieWithReview: MovieWithReviewsDtoOut={
+                movie: mockMovie, reviews: []
+            }
+
+            mockMovieRepository.get.mockResolvedValue(movieWithReview);
 
             const result = await movieService.getMovie('Inception');
 
             // Verifica que los datos devueltos sean correctos
-            expect(result.title).toBe('Inception');
-            expect(result.description).toBe('A mind-bending thriller');
-            expect(result.genres).toEqual(['Sci-Fi', 'Thriller']);
-            expect(result.directors).toEqual(['Christopher Nolan']);
-            expect(result.score).toBe(8.8);
+            expect(result.movie.title).toBe('Inception');
+            expect(result.movie.description).toBe('A mind-bending thriller');
+            expect(result.movie.genres).toEqual(['Sci-Fi', 'Thriller']);
+            expect(result.movie.directors).toEqual(['Christopher Nolan']);
+            expect(result.movie.score).toBe(8.8);
 
             // Verifica que el repositorio sea llamado correctamente
             expect(mockMovieRepository.get).toHaveBeenCalledWith('Inception');

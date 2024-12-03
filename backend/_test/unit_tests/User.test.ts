@@ -174,7 +174,7 @@ describe('UserService Unit Tests', () => {
                 image: null,
             };
 
-            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true });
+            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[] });
 
             const result = await userService.getUser(userId, authToken);
 
