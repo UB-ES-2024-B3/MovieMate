@@ -1,6 +1,15 @@
 <template>
   <div class="favorites-container">
     <h2 class="title">Películas Favoritas</h2>
+    <div
+      v-if="showMessage"
+      :class="[
+        'fixed top-4 right-4 p-4 rounded-md text-white shadow-lg',
+        toastError ? 'bg-red-500' : 'bg-green-500'
+      ]"
+    >
+      {{ message }}
+    </div>
 
     <!-- Colección de tarjetas -->
     <div v-if="favoriteMovies.length > 0" class="card-grid">
@@ -49,10 +58,23 @@ export default {
   data() {
     return {
       favoriteMovies: [], // Lista de películas favoritas
-      BASE_URL: process.env.VUE_APP_API_BASE_URL
+      BASE_URL: process.env.VUE_APP_API_BASE_URL,
+
+      showMessage: false, // Controlar la visibilidad del mensaje
+      message: "", // Mensaje a mostrar
+      toastError: false //Para enseñar si es error o no
     };
   },
   methods: {
+    displayMessage(message, error, callback) {
+      this.message = message;
+      this.showMessage = true;
+      this.toastError = error;
+      setTimeout(() => {
+        this.showMessage = false;
+        if (callback) callback();
+      }, 5000);
+    },
     // Llama a la API para obtener las películas favoritas
     async fetchFavorites() {
       try {
@@ -61,7 +83,7 @@ export default {
         this.favoriteMovies = response.data; // Guarda los favoritos en el estado
       } catch (error) {
         console.error("Error fetching favorites:", error);
-        alert("No se pudieron cargar tus películas favoritas.");
+        this.displayMessage("No se pudieron cargar tus películas favoritas.", true)
       }
     },
 
@@ -81,11 +103,11 @@ export default {
           this.favoriteMovies = this.favoriteMovies.filter(
               (movie) => movie.id !== movieId
           );
-          alert("Película eliminada de tus favoritos.");
+          this.displayMessage("Película eliminada de tus favoritos.", false)
         }
       } catch (error) {
         console.error("Error removing favorite:", error);
-        alert("No se pudo eliminar la película de favoritos.");
+        this.displayMessage("No se pudo eliminar la película de favoritos.", true)
       }
     },
   },
