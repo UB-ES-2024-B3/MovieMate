@@ -109,7 +109,7 @@ export default {
                     } else {
                         container.scrollLeft += 300;
                     }
-                }, 5000);
+                }, 3000);
             });
         },
 
