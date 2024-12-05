@@ -14,5 +14,7 @@ router.post("/", (req: Request, res: Response, next: NextFunction) => {
 router.get("/", (req: Request, res: Response, next: NextFunction) => ReviewController.getAllReviews(req, res, next));
 router.get("/:id", (req: Request, res: Response, next: NextFunction) => ReviewController.getReview(req, res, next));
 router.put("/like", (req: Request, res: Response, next: NextFunction) => ReviewController.addLike(req, res, next));
+router.put("/dislike", (req: Request, res: Response, next: NextFunction) => ReviewController.addDislike(req, res, next));
+
 
 export default router;

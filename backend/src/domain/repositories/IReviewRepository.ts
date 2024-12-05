@@ -6,4 +6,5 @@ export interface IReviewRepository {
     get(reviewId: number): Promise<ReviewDtoOut>;
     getAll(): Promise<ReviewDtoOut[]>;
     addLike(userName: string, idReview: number): Promise<string>;
+    addDislike(userName: string, idReview: number): Promise<string>;
 }

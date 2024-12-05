@@ -88,4 +88,20 @@ export class ReviewController {
             next(error);
         }
     }
+
+    static async addDislike(req: Request, res: Response, next: NextFunction){
+        try {
+            const userName = req.body.userName;
+            const idReview = parseInt(req.body.idReview);
+
+            if(!userName || isNaN(idReview)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.reviewService.addDislike(userName, idReview);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
 }
