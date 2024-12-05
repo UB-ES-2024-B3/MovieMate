@@ -71,4 +71,21 @@ export class ReviewController {
             next(e);
         }
     }
+
+    static async addLike(req: Request, res:Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const idReview = parseInt(req.body.idReview);
+
+
+            if(!userName || isNaN(idReview)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.reviewService.addLike(userName, idReview);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
 }

@@ -114,4 +114,42 @@ export class ReviewRepository implements IReviewRepository {
         return allReviews;
 
     }
+
+    async addLike(userName: string, idReview: number): Promise<string>{
+        const user = await  this.userRepo.findOne({where: {userName: userName}});
+        if(!user){
+            throw createError(404, `User does not exist`);
+        }
+
+        const review = await this.repository.findOne({where: {id: idReview}, relations:["likedBy", "dislikeBy"]});
+        if(!review){
+            throw createError(404, `Review does not exist`);
+        }
+
+        const hasLiked = review.likedBy.some(likedUser => likedUser.userName === userName);
+        const hasDisliked = review.dislikeBy.some(dislikedUser => dislikedUser.userName === userName);
+
+        if(!hasLiked){
+            review.likedBy.push(user);
+
+            if(hasDisliked){
+                review.dislikeBy = review.dislikeBy.filter(dislikedUser => dislikedUser.userName !== userName);
+                review.disLike -= 1;
+            }
+
+            review.like += 1;
+
+            await this.repository.save(review);
+
+            return "Review liked";
+        }else {
+            review.likedBy = review.likedBy.filter(likedUser => likedUser.userName !== userName);
+
+            review.like = Math.max(0, review.like -1);
+
+            await this.repository.save(review);
+
+            return "Like removed from review";
+        }
+    }
 }
