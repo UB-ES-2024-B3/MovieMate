@@ -87,3 +87,10 @@ export interface ReviewDtoIn {
     author: number;
     movie: number;
 }
+
+export interface PostDtoIn {
+    title: string;
+    post: string;
+    author: number;
+    image: Buffer | null;
+}
