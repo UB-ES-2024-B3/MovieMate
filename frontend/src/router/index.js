@@ -10,9 +10,11 @@ import MovieCard from "@/components/Movie/MovieCard.vue";
 import PublicarResena from "@/components/Movie/PublicarResena.vue";
 import PeliculasFavoritas from "@/components/User/PeliculasFavoritas.vue";
 import MovieReview from "@/components/Movie/MovieReview.vue";
+import PostCard from "@/components/Posts/PostCard.vue";
 
 const routes = [
   { path: '/', component: Home },
+  { path: '/post/:postId', component: PostCard},
   { path: '/login', component: Login },
   { path: '/user/:userName', component: PerfilUsuario},
   { path: '/register', component: Register},
