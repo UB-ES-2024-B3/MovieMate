@@ -5,7 +5,7 @@ import {PostRepository} from "../repositories/PostRepository";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
-import {PostDtoIn} from "../../interfaces/Interfaces";
+import {PostDtoIn, UpdatePostData} from "../../interfaces/Interfaces";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -107,6 +107,32 @@ export class PostController {
     static async getAllPosts(req: Request, res: Response, next: NextFunction) {
         try {
             const result = await this.postService.getAllPosts();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async updatePost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const postId = parseInt(req.params.postId);
+            const postData = req.body;
+
+            const validationResult = DtoInValidation.validateUpdatePostDto(postData);
+
+            if (!isRight(validationResult)) {
+                // Si la validación falla, devolver un error
+                throw createError(400, "Invalid post data!");
+            }
+
+            const validatedData = validationResult.right;
+
+            const postValidated: UpdatePostData = {
+                title: validatedData.title,
+                post: validatedData.post,
+            };
+
+            const result = await this.postService.updatePost(postId, postValidated);
             return res.status(200).json(result);
         } catch (e) {
             next(e);

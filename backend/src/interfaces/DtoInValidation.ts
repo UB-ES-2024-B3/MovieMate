@@ -57,6 +57,11 @@ export class DtoInValidation {
     static RecoverPasswordDtoCodec = t.type({
         password: Password,
         confirmPassword: Password
+    });
+
+    static UpdatePostDtoCodec = t.type({
+        title: t.union([t.string, t.null]),
+        post: t.union([t.string, t.null])
     })
 
 
@@ -81,5 +86,9 @@ export class DtoInValidation {
 
     static validatePostDto(data: any) {
         return DtoInValidation.PostDtoInCodec.decode(data);
+    }
+
+    static validateUpdatePostDto(data: any) {
+        return DtoInValidation.UpdatePostDtoCodec.decode(data);
     }
 }
