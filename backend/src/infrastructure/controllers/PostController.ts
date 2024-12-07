@@ -139,4 +139,14 @@ export class PostController {
         }
     }
 
+    static async deletePost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const postId = parseInt(req.params.postId);
+            const result = await this.postService.deletePost(postId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }
