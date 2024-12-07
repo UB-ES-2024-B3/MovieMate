@@ -25,4 +25,8 @@ export class PostService {
         return await this.postRepository.update(postId, post);
     }
 
+    async deletePost(postId: number): Promise<string> {
+        return await this.postRepository.delete(postId);
+    }
+
 }

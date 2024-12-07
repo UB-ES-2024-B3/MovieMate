@@ -14,5 +14,6 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => PostControl
 router.get("/:id", (req: Request, res: Response, next: NextFunction) => PostController.getPost(req, res, next));
 
 router.put("/update/:postId", (req: Request, res: Response, next: NextFunction) => PostController.updatePost(req, res, next));
+router.delete("/:postId", (req: Request, res: Response, next: NextFunction) => PostController.deletePost(req, res, next));
 
 export default router;

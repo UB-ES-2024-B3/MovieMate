@@ -106,4 +106,17 @@ export class PostRepository implements IPostRepository {
 
         return "Post updated";
     }
+
+    async delete(postId: number): Promise<string> {
+        const postFromDB = await this.repository.findOne({where: {id: postId},
+        relations: ['author'],});
+
+        if (!postFromDB) {
+            throw createError(404, `Post with id < ${postId} > does not exist`);
+        }
+
+        await this.repository.remove(postFromDB);
+
+        return "Post Deleted";
+    }
 }
