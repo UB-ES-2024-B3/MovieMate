@@ -87,8 +87,8 @@
         <p class="text-gray-300 mb-4">{{ post.post }}</p>
 
         <!-- Reacciones -->
-        <div class="flex justify-between items-center mt-6">
-          <div class="flex space-x-4 text-gray-400">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-4 text-gray-400">
             <button class="hover:text-cyan-400 transition">
               <i class="fas fa-thumbs-up"></i>
             </button>
@@ -98,7 +98,9 @@
             <button class="hover:text-cyan-400 transition">
               <i class="fas fa-comment"></i>
             </button>
+            <span class="text-xs text-gray-500">{{ formatDate(post.createdAt) }}</span>
           </div>
+
           <button class="hover:text-cyan-400 transition text-gray-400">
             <i class="fas fa-share"></i>
           </button>
@@ -198,6 +200,10 @@ export default {
     await this.fetchPost(postId);
   },
   methods: {
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return new Date(dateString).toLocaleDateString('es-ES', options);
+    },
     displayMessage(message, error, callback) {
       this.message = message;
       this.showMessage = true;
