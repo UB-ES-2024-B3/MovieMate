@@ -10,4 +10,7 @@ const router = Router();
 router.post("/", (req: Request, res: Response, next: NextFunction) => PostController.createPost(req, res, next));
 router.post("/uploadImage", upload.single('image'), (req: Request, res: Response, next: NextFunction) => PostController.uploadImage(req, res, next));
 
+router.get("/", (req: Request, res: Response, next: NextFunction) => PostController.getAllPosts(req, res, next));
+router.get("/:id", (req: Request, res: Response, next: NextFunction) => PostController.getPost(req, res, next));
+
 export default router;
