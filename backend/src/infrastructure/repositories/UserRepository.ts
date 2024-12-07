@@ -143,7 +143,9 @@ export class UserRepository implements IUserRepository {
                 id: reviewFromDB.id,
                 title: reviewFromDB.title,
                 content: reviewFromDB.review,
-                movie: movie
+                movie: movie,
+                like: reviewFromDB.like,
+                disLike: reviewFromDB.disLike,
             };
         });
 

@@ -41,7 +41,9 @@ export class ReviewController {
                 author: validatedData.author,
                 movie: validatedData.movie,
                 review: validatedData.review,
-                title: validatedData.title
+                title: validatedData.title,
+                like: validatedData.like,
+                disLike: validatedData.disLike,
             }
 
             const result = await this.reviewService.createReview(review);

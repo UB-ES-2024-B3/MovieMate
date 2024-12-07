@@ -41,6 +41,8 @@ export class ReviewRepository implements IReviewRepository {
         reviewToSave.review = review.review;
         reviewToSave.author = authorFromDB;
         reviewToSave.movie = movieFromDB;
+        reviewToSave.like = review.like;
+        reviewToSave.disLike = review.disLike;
 
 
         // Save review using the repository
@@ -76,6 +78,8 @@ export class ReviewRepository implements IReviewRepository {
             content: reviewFromDB.review,
             author: author,
             movie: movie,
+            like: reviewFromDB.like,
+            disLike: reviewFromDB.disLike,
         };
 
         return review;
@@ -106,6 +110,8 @@ export class ReviewRepository implements IReviewRepository {
                 content: review.review,
                 author: author,
                 movie: movie,
+                like: review.like,
+                disLike: review.disLike,
             };
 
             return reviewDto;
@@ -172,7 +178,7 @@ export class ReviewRepository implements IReviewRepository {
 
             if (hasLike) {
                 review.likedBy = review.likedBy.filter(likedUser => likedUser.userName !== userName);
-                review.like += 1;
+                review.like -= 1;
             }
 
             review.disLike += 1;
