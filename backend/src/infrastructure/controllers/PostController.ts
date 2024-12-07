@@ -92,4 +92,25 @@ export class PostController {
             next(e);
         }
     }
+
+
+    static async getPost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = parseInt(req.params.id);
+            const result = await this.postService.getPost(id);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async getAllPosts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.postService.getAllPosts();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }

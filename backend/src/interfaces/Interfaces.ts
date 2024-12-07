@@ -94,3 +94,12 @@ export interface PostDtoIn {
     author: number;
     image: Buffer | null;
 }
+
+export interface PostDtoOut {
+    id: number;
+    title: string;
+    post: string;
+    author: AuthorDtoOut,
+    image: string | null;
+
+}
