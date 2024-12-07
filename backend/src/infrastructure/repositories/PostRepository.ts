@@ -2,7 +2,7 @@ import {Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IPostRepository} from "../../domain/repositories/IPostRepository";
 import {PostEntity} from "../entities/PostEntity";
-import {AuthorDtoOut, PostDtoIn, PostDtoOut} from "../../interfaces/Interfaces";
+import {AuthorDtoOut, PostDtoIn, PostDtoOut, UpdatePostData} from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 import createError from "http-errors";
 
@@ -89,5 +89,21 @@ export class PostRepository implements IPostRepository {
             return posts;
         });
         return allPosts;
+    }
+
+    async update(postId: number, post: UpdatePostData): Promise<string> {
+        const postFromDB = await this.repository.findOne({where: {id: postId},
+        relations: ['author'],});
+
+        if (!postFromDB) {
+            throw createError(404, `Post does not exist`);
+        }
+
+        postFromDB.title = post.title || postFromDB.title;
+        postFromDB.post = post.post || postFromDB.post;
+
+        await this.repository.save(postFromDB);
+
+        return "Post updated";
     }
 }

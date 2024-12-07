@@ -109,3 +109,8 @@ export interface UsersInfoDtoOut {
     posts: PostDtoOut[];
     isOwnProfile: boolean;
 }
+
+export interface UpdatePostData {
+    title?: string;
+    post?: string;
+}
