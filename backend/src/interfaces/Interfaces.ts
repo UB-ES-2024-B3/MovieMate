@@ -101,4 +101,5 @@ export interface PostDtoOut {
     post: string;
     author: AuthorDtoOut,
     image: string | null;
+
 }

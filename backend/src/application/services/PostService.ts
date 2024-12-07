@@ -1,6 +1,8 @@
 import {inject, injectable} from "tsyringe";
 import {IPostRepository} from "../../domain/repositories/IPostRepository";
+
 import {PostDtoIn, PostDtoOut} from "../../interfaces/Interfaces"
+
 
 @injectable()
 export class PostService {
@@ -18,4 +20,5 @@ export class PostService {
     async getAllPosts(): Promise<PostDtoOut[]> {
         return await this.postRepository.getAll();
     }
+
 }

@@ -93,6 +93,7 @@ export class PostController {
         }
     }
 
+
     static async getPost(req: Request, res: Response, next: NextFunction) {
         try {
             const id = parseInt(req.params.id);
@@ -111,4 +112,5 @@ export class PostController {
             next(e);
         }
     }
+
 }
