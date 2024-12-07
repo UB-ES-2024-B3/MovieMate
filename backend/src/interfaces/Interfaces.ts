@@ -99,7 +99,13 @@ export interface PostDtoOut {
     id: number;
     title: string;
     post: string;
-    author: AuthorDtoOut,
+    author?: AuthorDtoOut,
     image: string | null;
+}
 
+export interface UsersInfoDtoOut {
+    user: UserDtoOut;
+    reviews: ReviewDtoOut[];
+    posts: PostDtoOut[];
+    isOwnProfile: boolean;
 }

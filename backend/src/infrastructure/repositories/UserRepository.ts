@@ -12,20 +12,23 @@ import {
     UpdateUserData,
     UserDtoOut,
     UsersList,
-    UserWithReviewsDtoOut
+    UserWithReviewsDtoOut, PostDtoOut, UsersInfoDtoOut
 } from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
 import {ReviewEntity} from "../entities/ReviewEntity";
+import {PostEntity} from "../entities/PostEntity";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
     private readonly reviewRepo: Repository<ReviewEntity>;
+    private readonly postRepo: Repository<PostEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(UserEntity);
         this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
+        this.postRepo = PostgreTypeOrmDataSource.getRepository(PostEntity);
     }
 
     async getByEmail(email: string): Promise<UserEntity | null> {
@@ -121,7 +124,7 @@ export class UserRepository implements IUserRepository {
         return `user with username < ${userName} > deleted successfully`;
     }
 
-    async get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut> {
+    async get(userName: string, auth_token: string): Promise<UsersInfoDtoOut> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
@@ -147,6 +150,21 @@ export class UserRepository implements IUserRepository {
             };
         });
 
+        const postsFromDB = await this.postRepo.find({
+            where: {author: {id: userFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author'],
+        });
+
+        const posts: PostDtoOut[] = postsFromDB.map((postFromDB: PostEntity) => {
+            return {
+                id: postFromDB.id,
+                title: postFromDB.title,
+                post: postFromDB.post,
+                image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null
+            }
+        })
+
         const user: UserDtoOut = {
             id: userFromDB.id,
             userName: userFromDB.userName,
@@ -166,10 +184,11 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-        const result: UserWithReviewsDtoOut = {
+        const result: UsersInfoDtoOut = {
             user: user,
             isOwnProfile: isOwnProfile,
-            reviews: reviews
+            reviews: reviews,
+            posts: posts
         };
 
         return result;

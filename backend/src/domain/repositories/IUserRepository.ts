@@ -1,5 +1,11 @@
 import {User} from "../models/User";
-import {UpdateUserData, UsersList, MoviesInFavsDtoOut, UserWithReviewsDtoOut} from "../../interfaces/Interfaces";
+import {
+    UpdateUserData,
+    UsersList,
+    MoviesInFavsDtoOut,
+    UserWithReviewsDtoOut,
+    UsersInfoDtoOut
+} from "../../interfaces/Interfaces";
 
 export interface IUserRepository {
     register(user: User): Promise<string>;
@@ -10,7 +16,7 @@ export interface IUserRepository {
 
     delete(userName: string): Promise<string>;
 
-    get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut>;
+    get(userName: string, auth_token: string): Promise<UsersInfoDtoOut>;
 
     sendRecoveryEmail(email: string): Promise<string>;
 
