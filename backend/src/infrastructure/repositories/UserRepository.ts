@@ -160,6 +160,7 @@ export class UserRepository implements IUserRepository {
             return {
                 id: postFromDB.id,
                 title: postFromDB.title,
+                createdAt: postFromDB.createdAt,
                 post: postFromDB.post,
                 image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null
             }

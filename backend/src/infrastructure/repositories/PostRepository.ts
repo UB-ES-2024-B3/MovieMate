@@ -56,6 +56,7 @@ export class PostRepository implements IPostRepository {
         const post: PostDtoOut = {
             id: postFromDB.id,
             title: postFromDB.title,
+            createdAt: postFromDB.createdAt,
             post: postFromDB.post,
             author: author,
             image: postFromDB.image ? this.imageToBase64(postFromDB.image): null
@@ -81,6 +82,7 @@ export class PostRepository implements IPostRepository {
             const posts: PostDtoOut = {
                 id: post.id,
                 title: post.title,
+                createdAt: post.createdAt,
                 post: post.post,
                 author: author,
                 image: post.image ? this.imageToBase64(post.image): null

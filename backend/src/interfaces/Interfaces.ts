@@ -97,6 +97,7 @@ export interface PostDtoIn {
 
 export interface PostDtoOut {
     id: number;
+    createdAt: Date;
     title: string;
     post: string;
     author?: AuthorDtoOut,
