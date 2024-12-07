@@ -21,9 +21,9 @@ export class PostRepository implements IPostRepository {
     }
 
     async create(post: PostDtoIn): Promise<string> {
-        const authorFromDB = await this.userRepo.findOneBy({id: post.author});
+        const authorFromDB = await this.userRepo.findOneBy({userName: post.author});
         if (!authorFromDB) {
-            throw createError(404, `User with id < ${post.author} > does not exist`);
+            throw createError(404, `User with userName < ${post.author} > does not exist`);
         }
 
         const postToSave: PostEntity = new PostEntity();

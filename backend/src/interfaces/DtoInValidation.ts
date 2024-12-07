@@ -41,7 +41,7 @@ export class DtoInValidation {
     static PostDtoInCodec = t.type({
         title: t.string,
         post: t.string,
-        author: t.number
+        author: t.string
     });
 
 

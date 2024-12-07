@@ -91,7 +91,7 @@ export interface ReviewDtoIn {
 export interface PostDtoIn {
     title: string;
     post: string;
-    author: number;
+    author: string;
     image: Buffer | null;
 }
 
