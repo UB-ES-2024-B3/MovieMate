@@ -91,3 +91,19 @@ export interface ReviewDtoIn {
     like: number;
     disLike: number;
 }
+
+export interface PostDtoIn {
+    title: string;
+    post: string;
+    author: string;
+    image: Buffer | null;
+}
+
+export interface PostDtoOut {
+    id: number;
+    title: string;
+    post: string;
+    author: AuthorDtoOut,
+    image: string | null;
+
+}

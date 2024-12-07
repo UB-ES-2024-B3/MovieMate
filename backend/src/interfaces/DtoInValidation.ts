@@ -40,6 +40,12 @@ export class DtoInValidation {
         disLike: t.number,
     });
 
+    static PostDtoInCodec = t.type({
+        title: t.string,
+        post: t.string,
+        author: t.string
+    });
+
 
     // Definimos el esquema de validación para el UpdateUserDto
     static UpdateUserDtoCodec = t.type({
@@ -73,5 +79,9 @@ export class DtoInValidation {
     // Método para validar los datos de la solicitud para RecoverPasswordDto
     static validateRecoverPasswordDto(data: any) {
         return DtoInValidation.RecoverPasswordDtoCodec.decode(data);
+    }
+
+    static validatePostDto(data: any) {
+        return DtoInValidation.PostDtoInCodec.decode(data);
     }
 }
