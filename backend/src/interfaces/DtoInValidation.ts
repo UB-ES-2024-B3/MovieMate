@@ -60,8 +60,8 @@ export class DtoInValidation {
     });
 
     static UpdatePostDtoCodec = t.type({
-        title: t.union([t.string, t.null]),
-        post: t.union([t.string, t.null])
+        title: t.union([t.string, t.undefined, t.null]),
+        post: t.union([t.string, t.undefined, t.null])
     })
 
 
