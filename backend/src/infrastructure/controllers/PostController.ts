@@ -6,11 +6,14 @@ import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
 import {PostDtoIn} from "../../interfaces/Interfaces";
+import { v4 as uuidv4 } from 'uuid';
 
 
 const multer = require("multer")
 const storage = multer.memoryStorage();
 const upload = multer({storage});
+
+const uploadedImages: Record<string, Buffer> = {};
 
 container.register(
     "IPostRepository", {
@@ -20,6 +23,34 @@ container.register(
 @autoInjectable()
 export class PostController {
     private static postService: PostService = container.resolve(PostService);
+
+    static imageToBase64(image: Buffer | null): string | null {
+        return image ? `data:image/jpeg;base64,${image.toString('base64')}` : null;
+    }
+
+    static async uploadImage(req: Request, res: Response, next: NextFunction) {
+        try {
+            if (!req.file) {
+                throw createError(400, "No image file provided");
+            }
+
+            // Validar el tipo MIME para asegurarse de que es una imagen válida
+            const validMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validMimeTypes.includes(req.file.mimetype)) {
+                throw createError(400, "Invalid image format. Only JPEG, PNG and JPG, are allowed.");
+            }
+
+            // Asignar el Buffer de la imagen si existe y es válida
+            const image = req.file.buffer;
+            const imageId = uuidv4();
+
+            uploadedImages[imageId] = image;
+
+            res.status(200).json({imageId: imageId, image: this.imageToBase64(image)});
+        } catch (e) {
+            next(e);
+        }
+    }
 
     static async createPost(req: Request, res: Response, next: NextFunction) {
         try {
@@ -37,12 +68,16 @@ export class PostController {
             const validatedData = validationResult.right;
 
 
-            // Asignar el Buffer de la imagen si existe y es válida
-            let image;
-            if (req.file) {
-                image = req.file.buffer;
-            }
+           const imageId = req.body.imageId;
+           let image;
+           if (imageId) {
+               image = uploadedImages[imageId];
+               if (!image) {
+                   throw createError(400, "Invalid image data!");
+               }
+           }
 
+           delete uploadedImages[imageId];
 
             const post: PostDtoIn = {
                 title: validatedData.title,
