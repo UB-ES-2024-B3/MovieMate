@@ -17,7 +17,7 @@
             :class="`flex-1 text-2xl p-2 flex items-center justify-center transition ${
               !isMovies ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
             }`"
-            @click="isMovies = false"
+            @click="navigateToForum"
           >
             <i class="fas fa-globe"></i>
           </button>
@@ -104,7 +104,12 @@
               <!-- Encabezado del post -->
               <div class="flex items-center mb-4">
                 <i class="fas fa-user-circle text-4xl text-gray-400 mr-4"></i>
-                <span class="font-bold text-cyan-400 text-lg">@{{ post.user }}</span>
+                <router-link
+                  :to="`/user/${post.user}`"
+                  class="font-bold text-cyan-400 text-lg hover:underline"
+                >
+                  @{{ post.user }}
+                </router-link>
               </div>
 
               <!-- Contenido del post -->
@@ -189,7 +194,7 @@ export default {
     data(){
         return{
           forumPosts: [
-            { id: 1, user: "usuario1", text: "Este es un comentario en el fórum." },
+            { id: 1, user: "Arturo", text: "Este es un comentario en el fórum." },
           ],
           isMovies: true,
           movies: [],
@@ -287,7 +292,13 @@ export default {
             if (callback) callback();
           }, 5000);
         },
-
+        navigateToForum() {
+          if (!this.isAuthenticated) {
+            this.displayMessage("Debes iniciar sesión para acceder al fórum.", true);
+            return;
+          }
+          this.isMovies = false;
+        },
         openModal() {
           if (!this.isAuthenticated) {
             this.displayMessage("Debes iniciar sesión para agregar un post.", true);
@@ -301,21 +312,29 @@ export default {
           this.newPost.content = "";
         },
 
-        publishPost() {
+        async publishPost() {
           if (!this.newPost.title || !this.newPost.content) {
             this.displayMessage("Todos los campos son obligatorios.", true);
             return;
           }
 
-          // Agregar lógica para guardar el post
-          this.forumPosts.push({
-            id: this.forumPosts.length + 1,
-            user: this.username_actual,
-            text: this.newPost.content,
-          });
-
-          this.displayMessage("Post publicado exitosamente.", false);
-          this.closeModal();
+          try {
+            const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+            const data = {
+              title: this.newPost.title,
+              post: this.newPost.content,
+              author: this.username_actual,
+            };
+            const response = await axios.post(`${BASE_URL}/post`, data);
+            console.log(response)
+            if(response.status === 200){
+              this.displayMessage(response.data, false)
+              this.closeModal()
+            }
+          } catch (error) {
+            console.error("Error publicando el post:", error);
+            this.displayMessage("Hubo un error al conectarse con el servidor.", true);
+          }
         },
     }
 }
