@@ -62,6 +62,14 @@ export class DtoInValidation {
     static UpdatePostDtoCodec = t.type({
         title: t.union([t.string, t.undefined, t.null]),
         post: t.union([t.string, t.undefined, t.null])
+    });
+
+    static CommentDtoInCodec = t.type({
+        content: t.string,
+        author: t.string,
+        post: t.union([t.number, t.undefined, t.null]),
+        review: t.union([t.number, t.undefined, t.null]),
+        comment: t.union([t.number, t.undefined, t.null])
     })
 
 
@@ -90,5 +98,9 @@ export class DtoInValidation {
 
     static validateUpdatePostDto(data: any) {
         return DtoInValidation.UpdatePostDtoCodec.decode(data);
+    }
+
+    static validateCommentDto(data: any) {
+        return DtoInValidation.CommentDtoInCodec.decode(data);
     }
 }
