@@ -16,6 +16,9 @@ export class ReviewEntity extends BaseEntity {
     @CreateDateColumn({type: "timestamp"}) // Autogenera la fecha y hora
     createdAt: Date;
 
+    @Column({default: 0})
+    totalComments: number;
+
     @ManyToOne(type => MovieEntity)
     movie: MovieEntity;
 

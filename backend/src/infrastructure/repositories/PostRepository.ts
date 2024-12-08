@@ -67,6 +67,7 @@ export class PostRepository implements IPostRepository {
             image: postFromDB.image ? this.imageToBase64(postFromDB.image): null,
             like: postFromDB.like,
             disLike: postFromDB.disLike,
+            totalComments: postFromDB.totalComments
         }
 
         return post;
@@ -95,6 +96,7 @@ export class PostRepository implements IPostRepository {
                 image: post.image ? this.imageToBase64(post.image): null,
                 like: post.like,
                 disLike: post.disLike,
+                totalComments: post.totalComments
             };
 
             return posts;

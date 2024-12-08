@@ -76,6 +76,7 @@ export class ReviewRepository implements IReviewRepository {
             content: reviewFromDB.review,
             author: author,
             movie: movie,
+            totalComments: reviewFromDB.totalComments
         };
 
         return review;
@@ -106,6 +107,7 @@ export class ReviewRepository implements IReviewRepository {
                 content: review.review,
                 author: author,
                 movie: movie,
+                totalComments: review.totalComments
             };
 
             return reviewDto;

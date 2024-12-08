@@ -1,6 +1,6 @@
 import {inject, injectable} from "tsyringe";
 import {ICommentRepository} from "../../domain/repositories/ICommentRepository";
-import {CommentDtoIn} from "../../interfaces/Interfaces";
+import {CommentDtoIn, CommentDtoOut} from "../../interfaces/Interfaces";
 
 @injectable()
 export class CommentService {
@@ -9,6 +9,26 @@ export class CommentService {
 
     async createComment(comment: CommentDtoIn): Promise<string> {
         return await this.commentRepository.create(comment);
+    }
+
+    async getComment(id: number): Promise<CommentDtoOut> {
+        return await this.commentRepository.get(id);
+    }
+
+    async getAllComments(): Promise<CommentDtoOut[]> {
+        return await this.commentRepository.getAll();
+    }
+
+    async getCommentsByPost(postId: number): Promise<CommentDtoOut[]> {
+        return await this.commentRepository.getByPost(postId);
+    }
+
+    async getCommentsByReview(reviewId: number): Promise<CommentDtoOut[]> {
+        return await this.commentRepository.getByReview(reviewId);
+    }
+
+    async getCommentsByComment(commentId: number): Promise<CommentDtoOut[]> {
+        return await this.commentRepository.getByComment(commentId);
     }
 
 }

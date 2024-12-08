@@ -37,6 +37,9 @@ export class PostEntity extends BaseEntity {
     @Column({default: 0})
     disLike: number;
 
+    @Column({default: 0})
+    totalComments: number;
+
     @ManyToMany(type => UserEntity, { cascade: true })
     @JoinTable()
     likedBy: UserEntity[];

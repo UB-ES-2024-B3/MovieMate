@@ -47,4 +47,53 @@ export class CommentController {
             next(e);
         }
     }
+
+    static async getComment(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = parseInt(req.params.id);
+            const result = await this.commentService.getComment(id);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async getAllComments(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.commentService.getAllComments();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async getCommentsByPost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const postId = parseInt(req.params.postId);
+            const result = await this.commentService.getCommentsByPost(postId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async getCommentsByReview(req: Request, res: Response, next: NextFunction) {
+        try {
+            const reviewId = parseInt(req.params.reviewId);
+            const result = await this.commentService.getCommentsByReview(reviewId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async getCommentsByComment(req: Request, res: Response, next: NextFunction) {
+        try {
+            const commentId = parseInt(req.params.commentId);
+            const result = await this.commentService.getCommentsByComment(commentId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
 }

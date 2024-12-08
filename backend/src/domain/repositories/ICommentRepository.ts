@@ -1,5 +1,10 @@
-import {CommentDtoIn} from "../../interfaces/Interfaces";
+import {CommentDtoIn, CommentDtoOut} from "../../interfaces/Interfaces";
 
 export interface ICommentRepository {
     create(comment: CommentDtoIn): Promise<string>;
+    get(id: number): Promise<CommentDtoOut>;
+    getAll(): Promise<CommentDtoOut[]>;
+    getByPost(postId: number): Promise<CommentDtoOut[]>;
+    getByReview(reviewId: number): Promise<CommentDtoOut[]>;
+    getByComment(commentId: number): Promise<CommentDtoOut[]>;
 }

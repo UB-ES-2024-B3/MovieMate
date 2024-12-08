@@ -44,6 +44,7 @@ export interface ReviewDtoOut {
     content: string;
     author?: AuthorDtoOut;
     movie?: MovieDtoOut;
+    totalComments: number;
 }
 
 export interface MovieWithReviewsDtoOut {
@@ -106,6 +107,7 @@ export interface PostDtoOut {
     image: string | null;
     like: number,
     disLike: number,
+    totalComments: number
 }
 
 export interface UsersInfoDtoOut {
@@ -126,4 +128,15 @@ export interface CommentDtoIn {
     post?: number;
     review?: number;
     comment?: number;
+}
+
+export interface CommentDtoOut {
+    id: number;
+    createdAt: Date;
+    content: string;
+    author: AuthorDtoOut;
+    post?: number;
+    review?: number;
+    comment?: number;
+    totalComments: number;
 }
