@@ -32,33 +32,66 @@
             <button class="bg-gray-800 text-white rounded py-2 px-4 mb-2">CATEGORÍA 2</button>
             <button class="bg-gray-800 text-white rounded py-2 px-4">CATEGORÍA 3</button>
           </div>
-          <div v-else>
-            <h2 class="text-white text-xl font-bold">Ordenar por:</h2>
-            <button
-              :class="`bg-gray-800 text-white rounded py-2 px-4 mb-2 ${
-                sortBy === 'recent' ? 'bg-cyan-500' : 'hover:bg-gray-700'
-              }`"
-              @click="setSortOrder('recent')"
-            >
-              Más recientes
-            </button>
-            <button
-              :class="`bg-gray-800 text-white rounded py-2 px-4 mb-2 ${
-                sortBy === 'oldest' ? 'bg-cyan-500' : 'hover:bg-gray-700'
-              }`"
-              @click="setSortOrder('oldest')"
-            >
-              Menos recientes
-            </button>
-            <button
-              :class="`bg-gray-800 text-white rounded py-2 px-4 ${
-                sortBy === 'votes' ? 'bg-cyan-500' : 'hover:bg-gray-700'
-              }`"
-              @click="setSortOrder('votes')"
-            >
-              Más votados
-            </button>
+          <div v-else class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-white text-xl font-bold mb-4">Ordenar por:</h2>
+            <div class="space-y-6">
+              <!-- Grupo Recientes/Antiguos -->
+              <div>
+                <h3 class="text-gray-300 font-semibold mb-2">Por fecha:</h3>
+                <div class="grid grid-cols-1 gap-2">
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByDate === 'recent'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('recent', 'date')"
+                  >
+                    <i class="fas fa-clock mr-2"></i> Más recientes
+                  </button>
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByDate === 'oldest'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('oldest', 'date')"
+                  >
+                    <i class="fas fa-history mr-2"></i> Menos recientes
+                  </button>
+                </div>
+              </div>
+
+              <!-- Grupo Votados -->
+              <div>
+                <h3 class="text-gray-300 font-semibold mb-2">Por votos:</h3>
+                <div class="grid grid-cols-1 gap-2">
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByVotes === 'votes'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('votes', 'votes')"
+                  >
+                    <i class="fas fa-thumbs-up mr-2"></i> Más votados
+                  </button>
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByVotes === 'less_votes'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('less_votes', 'votes')"
+                  >
+                    <i class="fas fa-thumbs-down mr-2"></i> Menos votados
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+
+
         </aside>
 
         <main class="flex-1 bg-gray-900 flex items-start justify-center pt-8">
@@ -195,12 +228,26 @@
                 <!-- Botones de interacción -->
                 <div class="flex justify-between items-center">
                   <div class="flex items-center space-x-4 text-gray-400">
-                    <button class="hover:text-cyan-400 transition">
+                    <!-- Botón de Like -->
+                    <button
+                      class="hover:text-cyan-400 transition"
+                      :class="post.likedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+                      @click="addLike(post.id)"
+                    >
                       <i class="fas fa-thumbs-up"></i>
                     </button>
-                    <button class="hover:text-cyan-400 transition">
+                    <span>{{ post.like }}</span>
+
+                    <!-- Botón de Dislike -->
+                    <button
+                      class="hover:text-cyan-400 transition"
+                      :class="post.dislikedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+                      @click="addDislike(post.id)"
+                    >
                       <i class="fas fa-thumbs-down"></i>
                     </button>
+                    <span>{{ post.disLike }}</span>
+
                     <button class="hover:text-cyan-400 transition">
                       <i class="fas fa-comment"></i>
                     </button>
@@ -318,7 +365,8 @@ export default {
           dropdownPost: null,
           showDeleteModal: false, // Controla la visibilidad del modal de confirmación
           postToDelete: null, // ID del post que se va a eliminar
-          sortBy: 'recent',
+          sortByDate: 'recent', // Estado para orden por fecha
+          sortByVotes: 'votes',
         };
     },
     created() {
@@ -333,15 +381,35 @@ export default {
     },
 
     methods:{
-      setSortOrder(order) {
-        this.sortBy = order;
+      setSortOrder(order, group) {
+        if (group === 'date') {
+          this.sortByDate = order;
+        } else if (group === 'votes') {
+          this.sortByVotes = order;
+        }
         this.sortPosts();
       },
       sortPosts() {
-        if (this.sortBy === 'recent') {
+        if (this.sortByDate === 'recent') {
           this.forumPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }else if (this.sortBy === 'oldest') {
+        } else if (this.sortByDate === 'oldest') {
           this.forumPosts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        }
+
+        if (this.sortByVotes === 'votes') {
+          this.forumPosts.sort((a, b) => {
+              if (b.like === a.like) {
+                  return a.disLike - b.disLike;
+              }
+              return b.like - a.like;
+          });
+        } else if (this.sortByVotes === 'less_votes') {
+          this.forumPosts.sort((a, b) => {
+              if (a.like === b.like) {
+                  return b.disLike - a.disLike;
+              }
+              return a.like - b.like;
+          });
         }
       },
       formatDate(dateString) {
@@ -354,10 +422,9 @@ export default {
         this.isAuthenticated = !!token;
 
         if (this.isAuthenticated) {
-          this.username_actual = sessionStorage.getItem("username");
+          this.username_actual = sessionStorage.getItem("username")
+          this.fetchPosts();
         }
-
-        this.fetchPosts();
       },
       async fetchMovies(){
           try{
@@ -375,11 +442,20 @@ export default {
       async fetchPosts() {
         try {
           const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-          const response = await axios.get(`${BASE_URL}/post`);
-          this.forumPosts = response.data;
+          const response = await axios.get(`${BASE_URL}/post/${this.username_actual}`);
+          const allPosts = response.data.allPosts;
+          const likedPosts = new Set(response.data.likedPosts || []);
+          const dislikedPosts = new Set(response.data.dislikedPosts || []);
+
+          this.forumPosts = allPosts.map(post => ({
+            ...post,
+            likedBy: likedPosts.has(post.id) ? [this.username_actual] : [],
+            dislikedBy: dislikedPosts.has(post.id) ? [this.username_actual] : [],
+          }));
+
           this.sortPosts();
         } catch (error) {
-          console.error("Error fetching posts: ", error);
+          console.error("Error fetching posts:", error);
           this.displayMessage("Hubo un error al obtener los posts.", true);
         }
       },
@@ -525,6 +601,80 @@ export default {
 
         } catch (error) {
           console.error("Error deleting post:", error);
+        }
+      },
+      async addLike(postId) {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            userName: this.username_actual, // Usuario autenticado
+            postId: postId, // ID del post
+          };
+          const post = this.forumPosts.find(post => post.id === postId);
+          //En caso que tenga un like añadido...y quiera sacarlo
+          if (post && post.likedBy.includes(this.username_actual)) {
+            const response = await axios.put(`${BASE_URL}/post/like`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Like retirado!", false);
+              post.likedBy = post.likedBy.filter(user => user !== this.username_actual);
+              post.like--;
+            }
+          } else {
+            // En caso contrario, lo añade
+            const response = await axios.put(`${BASE_URL}/post/like`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Like añadido!", false);
+              post.likedBy.push(this.username_actual);
+              post.like++;
+              // Saca el dislike si esta añadido, no puedes darle a las dos
+              if (post.dislikedBy.includes(this.username_actual)) {
+                post.dislikedBy = post.dislikedBy.filter(user => user !== this.username_actual);
+                post.disLike--;
+              }
+            }
+          }
+          this.sortPosts()
+        } catch (error) {
+          console.error("Error añadiendo/removiendo like:", error);
+          this.displayMessage("Error al procesar el like.", true);
+        }
+      },
+
+      async addDislike(postId) {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            userName: this.username_actual, // Usuario autenticado
+            postId: postId, // ID del post
+          };
+          const post = this.forumPosts.find(post => post.id === postId);
+
+          //En caso que tenga un like añadido...y quiera sacarlo
+          if (post && post.dislikedBy.includes(this.username_actual)) {
+            const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Dislike retirado!", false);
+              post.dislikedBy = post.dislikedBy.filter(user => user !== this.username_actual);
+              post.disLike--;
+            }
+          } else {
+            // En caso contrario, lo añade
+            const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Dislike registrado!", false);
+              post.dislikedBy.push(this.username_actual);
+              post.disLike++;
+              // Saca el like si esta añadido, no puedes darle a las dos
+              if (post.likedBy.includes(this.username_actual)) {
+                post.likedBy = post.likedBy.filter(user => user !== this.username_actual);
+                post.like--;
+              }
+            }
+          }
+          this.sortPosts()
+        } catch (error) {
+          console.error("Error añadiendo/removiendo dislike:", error);
+          this.displayMessage("Error al procesar el dislike.", true);
         }
       },
     }
