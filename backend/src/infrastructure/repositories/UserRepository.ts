@@ -146,7 +146,8 @@ export class UserRepository implements IUserRepository {
                 id: reviewFromDB.id,
                 title: reviewFromDB.title,
                 content: reviewFromDB.review,
-                movie: movie
+                movie: movie,
+                totalComments: reviewFromDB.totalComments
             };
         });
 
@@ -165,6 +166,7 @@ export class UserRepository implements IUserRepository {
                 image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null,
                 like: postFromDB.like,
                 disLike: postFromDB.disLike,
+                totalComments: postFromDB.totalComments
             }
         })
 
