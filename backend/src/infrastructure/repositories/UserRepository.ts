@@ -313,5 +313,39 @@ export class UserRepository implements IUserRepository {
         return favoritesList
     }
 
+    async follow(userName1: string, userName2: string): Promise<string> {
+        const user1 = await this.repository.findOne({where: { userName: userName1 }, relations: ["following"],});
+        if(!user1){
+            throw createError(404, `User ${userName1} does not exist`);
+        }
+
+        const user2 = await this.repository.findOne({where: {userName: userName2}});
+        if(!user2){
+            throw createError(404, `User ${userName1} does not exist`);
+        }
+
+
+        const isFollowing = user1.following?.some(followingUser => followingUser.id === user2.id);
+        if(isFollowing){
+            user1.following = user1.following?.filter(followingUser => followingUser.id !== user2.id) || null;
+            user2.followers = user2.followers?.filter(followerUser => followerUser.id !== user1.id) || null;
+
+            await this.repository.save(user1);
+            await this.repository.save(user2);
+
+            return `${userName1} has unfollowed ${userName2}`;
+        }else{
+            user1.following = user1.following ? [...user1.following, user2] : [user2];
+            user2.followers = user2.followers ? [...user2.followers, user1] : [user1];
+
+            await this.repository.save(user1);
+            await this.repository.save(user2);
+
+            return `${userName1} has followed ${userName2}`;
+        }
+
+
+    }
+
 
 }

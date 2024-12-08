@@ -18,7 +18,8 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     sendRecoveryEmail: jest.fn(),
     recoverPassword: jest.fn(),
     search: jest.fn(),
-    getAllFavorites: jest.fn()
+    getAllFavorites: jest.fn(),
+    follow: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {
