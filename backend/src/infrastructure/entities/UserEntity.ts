@@ -38,4 +38,12 @@ export class UserEntity extends BaseEntity {
     @ManyToMany(() => MovieEntity, {nullable: true})
     @JoinTable()  // La tabla intermedia se crea aquí
     reviewed: MovieEntity[] | null;
+
+    @ManyToMany(() => UserEntity, (user) => user.following, { nullable: true })
+    followers: UserEntity[] | null;
+
+    @ManyToMany(() => UserEntity, (user) => user.followers, { nullable: true })
+    @JoinTable() // La tabla intermedia se crea aquí
+    following: UserEntity[] | null;
+
 }

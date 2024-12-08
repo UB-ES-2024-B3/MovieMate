@@ -21,4 +21,6 @@ export interface IUserRepository {
     search(query: string): Promise<UsersList[]>;
 
     getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]>;
+
+    follow(userName1: string, userName2: string): Promise<string>;
 }
