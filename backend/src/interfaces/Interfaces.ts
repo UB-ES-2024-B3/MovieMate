@@ -140,3 +140,7 @@ export interface CommentDtoOut {
     comment?: number;
     totalComments: number;
 }
+
+export interface UpdateCommentData {
+    content: string
+}

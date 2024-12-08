@@ -6,7 +6,7 @@ import {PostEntity} from "../entities/PostEntity";
 import {UserEntity} from "../entities/UserEntity";
 import {ReviewEntity} from "../entities/ReviewEntity";
 import createError from "http-errors";
-import {AuthorDtoOut, CommentDtoIn, CommentDtoOut} from "../../interfaces/Interfaces";
+import {AuthorDtoOut, CommentDtoIn, CommentDtoOut, UpdateCommentData} from "../../interfaces/Interfaces";
 
 export class CommentRepository implements ICommentRepository {
     private readonly repository: Repository<CommentEntity>;
@@ -211,6 +211,21 @@ export class CommentRepository implements ICommentRepository {
             return comments;
         });
         return allComments;
+    }
+
+    async update(commentId: number, comment: UpdateCommentData) {
+        const commentFromDB = await this.repository.findOne({where: {id: commentId},
+            relations: ['author', 'post', 'review', 'comment'],});
+
+        if (!commentFromDB) {
+            throw createError(404, "Comment does not exist");
+        }
+
+        commentFromDB.content = comment.content || commentFromDB.content;
+
+        await this.repository.save(commentFromDB);
+
+        return "Comment updated";
     }
 
 }
