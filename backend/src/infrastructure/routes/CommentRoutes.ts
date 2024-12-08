@@ -17,6 +17,6 @@ router.get("/review/:reviewId", (req: Request, res: Response, next: NextFunction
 router.get("/comment/:commentId", (req: Request, res: Response, next: NextFunction) => CommentController.getCommentsByComment(req, res, next));
 
 router.put("/update/:commentId", (req: Request, res: Response, next: NextFunction) => CommentController.updateComment(req, res, next));
-
+router.delete("/:commentId", (req: Request, res: Response, next: NextFunction) => CommentController.deleteComment(req, res, next));
 
 export default router;

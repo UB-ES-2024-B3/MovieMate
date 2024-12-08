@@ -35,4 +35,8 @@ export class CommentService {
         return await this.commentRepository.update(commentId, comment);
     }
 
+    async deleteComment(commentId: number): Promise<string> {
+        return await this.commentRepository.delete(commentId);
+    }
+
 }

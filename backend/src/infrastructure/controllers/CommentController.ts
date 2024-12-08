@@ -122,4 +122,14 @@ export class CommentController {
         }
     }
 
+    static async deleteComment(req: Request, res: Response, next: NextFunction) {
+        try {
+            const commentId = parseInt(req.params.commentId);
+            const result = await this.commentService.deleteComment(commentId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }

@@ -228,4 +228,19 @@ export class CommentRepository implements ICommentRepository {
         return "Comment updated";
     }
 
+    async delete(commentId: number): Promise<string> {
+        const commentFromDB = await this.repository.findOne({where: {id: commentId},
+            relations: ['author', 'post', 'review', 'comment'],});
+
+        if (!commentFromDB) {
+            throw createError(404, "Comment does not exist");
+        }
+
+        commentFromDB.content = "Comentario Eliminado";
+
+        await this.repository.save(commentFromDB);
+
+        return "Comment deleted"
+    }
+
 }
