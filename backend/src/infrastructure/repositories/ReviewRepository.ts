@@ -177,7 +177,7 @@ export class ReviewRepository implements IReviewRepository {
             review.dislikeBy.push(user);
 
             if (hasLike) {
-                review.likedBy = review.likedBy.filter(likedUser => likedUser.userName !== userName);
+                review.likedBy = review.likedBy.filter(likedUser => likedUser.userName !== userName) || null;
                 review.like -= 1;
             }
 
@@ -187,7 +187,7 @@ export class ReviewRepository implements IReviewRepository {
 
             return "Review disliked";
         } else {
-            review.dislikeBy = review.dislikeBy.filter(dislikeUser => dislikeUser.userName !== userName);
+            review.dislikeBy = review.dislikeBy.filter(dislikeUser => dislikeUser.userName !== userName) || null;
 
             review.disLike = Math.max(0, review.disLike -1);
 
