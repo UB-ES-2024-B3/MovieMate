@@ -1,5 +1,6 @@
 import {BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
-import {MovieEntity} from "./MovieEntity"; // Asegúrate de importar MovieEntity
+import {MovieEntity} from "./MovieEntity";
+import {PostEntity} from "./PostEntity"; // Asegúrate de importar MovieEntity
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -46,4 +47,9 @@ export class UserEntity extends BaseEntity {
     @JoinTable() // La tabla intermedia se crea aquí
     following: UserEntity[] | null;
 
+    @ManyToMany(type => PostEntity, post => post.likedBy)
+    likedPosts: PostEntity[];
+
+    @ManyToMany(type => PostEntity, post => post.dislikeBy)
+    dislikedPosts: PostEntity[];
 }

@@ -37,11 +37,11 @@ export class PostEntity extends BaseEntity {
     @Column({default: 0})
     disLike: number;
 
-    @ManyToMany(type => UserEntity, { cascade: true })
+    @ManyToMany(type => UserEntity,user => user.likedPosts,  { cascade: true })
     @JoinTable()
     likedBy: UserEntity[];
 
-    @ManyToMany(type => UserEntity, { cascade: true })
+    @ManyToMany(type => UserEntity,user => user.dislikedPosts,  { cascade: true })
     @JoinTable()
     dislikeBy: UserEntity[];
 }

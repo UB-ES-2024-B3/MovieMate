@@ -17,8 +17,8 @@ export class PostService {
         return await this.postRepository.get(postId);
     }
 
-    async getAllPosts(): Promise<PostDtoOut[]> {
-        return await this.postRepository.getAll();
+    async getAllPosts(userName: string): Promise<{ allPosts: PostDtoOut[], likedPosts: number[], dislikedPosts: number[] }> {
+        return await this.postRepository.getAll(userName);
     }
 
     async updatePost(postId: number, post: UpdatePostData): Promise<string> {
