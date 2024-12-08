@@ -93,6 +93,8 @@ export interface PostDtoIn {
     post: string;
     author: string;
     image: Buffer | null;
+    like: number;
+    disLike: number;
 }
 
 export interface PostDtoOut {
@@ -102,6 +104,8 @@ export interface PostDtoOut {
     post: string;
     author?: AuthorDtoOut,
     image: string | null;
+    like: number,
+    disLike: number,
 }
 
 export interface UsersInfoDtoOut {

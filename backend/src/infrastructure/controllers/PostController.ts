@@ -84,6 +84,8 @@ export class PostController {
                 post: validatedData.post,
                 image: image || null,
                 author: validatedData.author,
+                like: 0,
+                disLike: 0
             }
 
             const result = await this.postService.createPost(post);
@@ -146,6 +148,39 @@ export class PostController {
             return res.status(200).json(result);
         } catch (e) {
             next(e);
+        }
+    }
+
+    static async addLike(req: Request, res:Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const postId = parseInt(req.body.postId);
+
+
+            if(!userName || isNaN(postId)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.postService.addLike(userName, postId);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
+
+    static async addDislike(req: Request, res: Response, next: NextFunction){
+        try {
+            const userName = req.body.userName;
+            const postId = parseInt(req.body.postId);
+
+            if(!userName || isNaN(postId)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.postService.addDislike(userName, postId);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
         }
     }
 

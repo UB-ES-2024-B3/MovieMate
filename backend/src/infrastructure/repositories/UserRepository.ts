@@ -162,7 +162,9 @@ export class UserRepository implements IUserRepository {
                 title: postFromDB.title,
                 createdAt: postFromDB.createdAt,
                 post: postFromDB.post,
-                image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null
+                image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null,
+                like: postFromDB.like,
+                disLike: postFromDB.disLike,
             }
         })
 
