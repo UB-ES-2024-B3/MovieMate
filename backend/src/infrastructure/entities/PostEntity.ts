@@ -1,4 +1,13 @@
-import {BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinTable,
+    ManyToMany,
+    ManyToOne,
+    PrimaryGeneratedColumn
+} from "typeorm";
 import {UserEntity} from "./UserEntity";
 import {MovieEntity} from "./MovieEntity";
 
@@ -21,4 +30,18 @@ export class PostEntity extends BaseEntity {
 
     @ManyToOne(type => UserEntity)
     author: UserEntity;
+
+    @Column({default: 0})
+    like: number;
+
+    @Column({default: 0})
+    disLike: number;
+
+    @ManyToMany(type => UserEntity, { cascade: true })
+    @JoinTable()
+    likedBy: UserEntity[];
+
+    @ManyToMany(type => UserEntity, { cascade: true })
+    @JoinTable()
+    dislikeBy: UserEntity[];
 }

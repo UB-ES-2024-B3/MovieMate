@@ -16,4 +16,7 @@ router.get("/:id", (req: Request, res: Response, next: NextFunction) => PostCont
 router.put("/update/:postId", (req: Request, res: Response, next: NextFunction) => PostController.updatePost(req, res, next));
 router.delete("/:postId", (req: Request, res: Response, next: NextFunction) => PostController.deletePost(req, res, next));
 
+router.put("/like", (req: Request, res: Response, next: NextFunction) => PostController.addLike(req, res, next));
+router.put("/dislike", (req: Request, res: Response, next: NextFunction) => PostController.addDislike(req, res, next));
+
 export default router;

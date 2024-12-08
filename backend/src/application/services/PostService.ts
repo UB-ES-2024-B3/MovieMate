@@ -29,4 +29,12 @@ export class PostService {
         return await this.postRepository.delete(postId);
     }
 
+    async addLike(userName: any, postID: number) {
+        return await this.postRepository.addLike(userName, postID);
+
+    }
+
+    async addDislike(userName: any, postId: number) {
+        return await this.postRepository.addDislike(userName, postId);
+    }
 }
