@@ -119,3 +119,11 @@ export interface UpdatePostData {
     title?: string;
     post?: string;
 }
+
+export interface CommentDtoIn {
+    content: string;
+    author: string;
+    post?: number;
+    review?: number;
+    comment?: number;
+}
