@@ -70,7 +70,9 @@ export class DtoInValidation {
         post: t.union([t.number, t.undefined, t.null]),
         review: t.union([t.number, t.undefined, t.null]),
         comment: t.union([t.number, t.undefined, t.null])
-    })
+    });
+
+    static UpdateCommentDtoCodec = t.type({content: t.string});
 
 
     // Método para validar los datos de la solicitud
@@ -102,5 +104,9 @@ export class DtoInValidation {
 
     static validateCommentDto(data: any) {
         return DtoInValidation.CommentDtoInCodec.decode(data);
+    }
+
+    static validateUpdateCommentDto(data: any) {
+        return DtoInValidation.UpdateCommentDtoCodec.decode(data);
     }
 }

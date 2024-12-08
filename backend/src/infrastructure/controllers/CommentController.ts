@@ -5,7 +5,7 @@ import {CommentRepository} from "../repositories/CommentRepository";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
-import {CommentDtoIn} from "../../interfaces/Interfaces";
+import {CommentDtoIn, UpdateCommentData} from "../../interfaces/Interfaces";
 
 const multer = require("multer")
 const storage = multer.memoryStorage();
@@ -96,4 +96,30 @@ export class CommentController {
             next(e);
         }
     }
+
+    static async updateComment(req: Request, res: Response, next: NextFunction) {
+        try {
+            const commentId = parseInt(req.params.commentId);
+            const commentData = req.body;
+
+            const validationResult = DtoInValidation.validateUpdateCommentDto(commentData);
+
+            if (!isRight(validationResult)) {
+                // Si la validación falla, devolver un error
+                throw createError(400, "Invalid comment data!");
+            }
+
+            const validatedData = validationResult.right;
+
+            const validatedComment: UpdateCommentData = {
+                content: validatedData.content
+            }
+
+            const result = await this.commentService.updateComment(commentId, validatedComment);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }
