@@ -8,4 +8,5 @@ export interface ICommentRepository {
     getByReview(reviewId: number): Promise<CommentDtoOut[]>;
     getByComment(commentId: number): Promise<CommentDtoOut[]>;
     update(commentId: number, comment: UpdateCommentData): Promise<string>;
+    delete(commentId: number): Promise<string>;
 }
