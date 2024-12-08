@@ -19,7 +19,6 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     recoverPassword: jest.fn(),
     search: jest.fn(),
     getAllFavorites: jest.fn(),
-    follow: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {
