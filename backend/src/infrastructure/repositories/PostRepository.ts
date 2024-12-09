@@ -1,8 +1,8 @@
-import {Repository} from "typeorm";
+import {In, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IPostRepository} from "../../domain/repositories/IPostRepository";
 import {PostEntity} from "../entities/PostEntity";
-import {AuthorDtoOut, PostDtoIn, PostDtoOut, UpdatePostData} from "../../interfaces/Interfaces";
+import {AuthorDtoOut, PostDtoIn, PostDtoOut, UpdatePostData, UserId} from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 import createError from "http-errors";
 
@@ -74,7 +74,18 @@ export class PostRepository implements IPostRepository {
     }
 
     async getAll(userName: string): Promise<{ allPosts: PostDtoOut[], likedPosts: number[], dislikedPosts: number[] }>{
-        const postsFromDB = await this.repository.find({relations: ['author', 'likedBy', 'dislikeBy']});
+        const userFromDB = await this.userRepo.findOne({where: {userName: userName},
+            relations: ['favs', 'reviewed', 'followers', 'following', 'likedPosts', 'dislikedPosts']});
+
+        if (!userFromDB) {
+            throw createError(404, "User does not exist");
+        }
+
+        const followingIds = userFromDB.following?.map(f => f.id) || [];
+        const allIds: number[] = [...followingIds, userFromDB.id];
+
+        const postsFromDB = await this.repository.find({where: {author: {id: In(allIds)}}, relations: ['author', 'likedBy', 'dislikeBy'],
+        order: {createdAt: "DESC"}});
 
         if (!postsFromDB) {
             throw createError(404, `No posts found`);

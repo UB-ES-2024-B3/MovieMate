@@ -144,3 +144,7 @@ export interface CommentDtoOut {
 export interface UpdateCommentData {
     content: string
 }
+
+export interface UserId {
+    id: number;
+}
