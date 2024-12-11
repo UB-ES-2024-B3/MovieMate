@@ -1,8 +1,8 @@
-import {Repository} from "typeorm";
+import {In, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IPostRepository} from "../../domain/repositories/IPostRepository";
 import {PostEntity} from "../entities/PostEntity";
-import {AuthorDtoOut, PostDtoIn, PostDtoOut, UpdatePostData} from "../../interfaces/Interfaces";
+import {AuthorDtoOut, PostDtoIn, PostDtoOut, UpdatePostData, UserId} from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 import createError from "http-errors";
 
@@ -67,17 +67,32 @@ export class PostRepository implements IPostRepository {
             image: postFromDB.image ? this.imageToBase64(postFromDB.image): null,
             like: postFromDB.like,
             disLike: postFromDB.disLike,
+            totalComments: postFromDB.totalComments
         }
 
         return post;
     }
 
-    async getAll(): Promise<PostDtoOut[]> {
-        const postsFromDB = await this.repository.find({relations: ['author']});
+    async getAll(userName: string): Promise<{ allPosts: PostDtoOut[], likedPosts: number[], dislikedPosts: number[] }>{
+        const userFromDB = await this.userRepo.findOne({where: {userName: userName},
+            relations: ['favs', 'reviewed', 'followers', 'following', 'likedPosts', 'dislikedPosts']});
+
+        if (!userFromDB) {
+            throw createError(404, "User does not exist");
+        }
+
+        const followingIds = userFromDB.following?.map(f => f.id) || [];
+        const allIds: number[] = [...followingIds, userFromDB.id];
+
+        const postsFromDB = await this.repository.find({where: {author: {id: In(allIds)}}, relations: ['author', 'likedBy', 'dislikeBy'],
+        order: {createdAt: "DESC"}});
 
         if (!postsFromDB) {
             throw createError(404, `No posts found`);
         }
+
+        const likedPosts: number[] = [];
+        const dislikedPosts: number[] = [];
 
         const allPosts = postsFromDB.map((post: PostEntity) => {
             const author: AuthorDtoOut = {
@@ -95,11 +110,20 @@ export class PostRepository implements IPostRepository {
                 image: post.image ? this.imageToBase64(post.image): null,
                 like: post.like,
                 disLike: post.disLike,
+                totalComments: post.totalComments
             };
+
+            if(post.likedBy?.some(user => user.userName == userName)){
+                likedPosts.push(post.id);
+            }
+
+            if(post.dislikeBy?.some(user => user.userName === userName)){
+                dislikedPosts.push(post.id);
+            }
 
             return posts;
         });
-        return allPosts;
+        return {allPosts, likedPosts, dislikedPosts};
     }
 
     async update(postId: number, post: UpdatePostData): Promise<string> {
@@ -132,12 +156,12 @@ export class PostRepository implements IPostRepository {
     }
 
     async addLike(userName: string, postId: number): Promise<string>{
-        const user = await  this.userRepo.findOne({where: {userName: userName}});
+        const user = await this.userRepo.findOne({ where: { userName } });
         if(!user){
             throw createError(404, `User does not exist`);
         }
 
-        const post = await this.repository.findOne({where: {id: postId}, relations:["likedBy", "dislikeBy"]});
+        const post = await this.repository.findOne({ where: { id: postId }, relations: ["likedBy", "dislikeBy"] });
         if(!post){
             throw createError(404, `Review does not exist`);
         }
@@ -157,14 +181,17 @@ export class PostRepository implements IPostRepository {
 
             await this.repository.save(post);
 
+            console.log(post.likedBy);
+
             return "Post liked";
         }else {
             post.likedBy = post.likedBy.filter(likedUser => likedUser.userName !== userName);
 
+
             post.like = Math.max(0, post.like -1);
 
             await this.repository.save(post);
-
+            console.log(post.likedBy);
             return "Like removed from post";
         }
     }

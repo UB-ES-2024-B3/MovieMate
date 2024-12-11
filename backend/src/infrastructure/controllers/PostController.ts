@@ -108,7 +108,13 @@ export class PostController {
 
     static async getAllPosts(req: Request, res: Response, next: NextFunction) {
         try {
-            const result = await this.postService.getAllPosts();
+            const userName = req.params.userName;
+
+            if(!userName){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.postService.getAllPosts(userName);
             return res.status(200).json(result);
         } catch (e) {
             next(e);

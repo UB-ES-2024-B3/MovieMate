@@ -19,4 +19,12 @@ export class ReviewService {
     async getAllReviews(): Promise<ReviewDtoOut[]> {
         return await this.ReviewRepository.getAll();
     }
+
+    async addLike(userName: string, idReview: number): Promise<string>{
+        return await this.ReviewRepository.addLike(userName, idReview);
+    }
+
+    async addDislike(userName: string, idReview: number): Promise<string>{
+        return await this.ReviewRepository.addDislike(userName, idReview);
+    }
 }

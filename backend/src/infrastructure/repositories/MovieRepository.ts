@@ -48,7 +48,10 @@ export class MovieRepository implements IMovieRepository {
                 id: reviewFromDB.id,
                 title: reviewFromDB.title,
                 content: reviewFromDB.review,
-                author: author
+                author: author,
+                like: reviewFromDB.like,
+                disLike: reviewFromDB.disLike,
+                totalComments: reviewFromDB.totalComments
             };
         });
 
