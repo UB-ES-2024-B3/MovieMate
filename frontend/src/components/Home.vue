@@ -32,12 +32,66 @@
             <button class="bg-gray-800 text-white rounded py-2 px-4 mb-2">CATEGORÍA 2</button>
             <button class="bg-gray-800 text-white rounded py-2 px-4">CATEGORÍA 3</button>
           </div>
-          <div v-else>
-            <h2 class="text-white text-xl font-bold">FÓRUM</h2>
-            <button class="mt-4 bg-gray-800 text-white rounded py-2 px-4 mb-2">TEMA 1</button>
-            <button class="bg-gray-800 text-white rounded py-2 px-4 mb-2">TEMA 2</button>
-            <button class="bg-gray-800 text-white rounded py-2 px-4">TEMA 3</button>
+          <div v-else class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-white text-xl font-bold mb-4">Ordenar por:</h2>
+            <div class="space-y-6">
+              <!-- Grupo Recientes/Antiguos -->
+              <div>
+                <h3 class="text-gray-300 font-semibold mb-2">Por fecha:</h3>
+                <div class="grid grid-cols-1 gap-2">
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByDate === 'recent'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('recent', 'date')"
+                  >
+                    <i class="fas fa-clock mr-2"></i> Más recientes
+                  </button>
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByDate === 'oldest'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('oldest', 'date')"
+                  >
+                    <i class="fas fa-history mr-2"></i> Menos recientes
+                  </button>
+                </div>
+              </div>
+
+              <!-- Grupo Votados -->
+              <div>
+                <h3 class="text-gray-300 font-semibold mb-2">Por votos:</h3>
+                <div class="grid grid-cols-1 gap-2">
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByVotes === 'votes'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('votes', 'votes')"
+                  >
+                    <i class="fas fa-thumbs-up mr-2"></i> Más votados
+                  </button>
+                  <button
+                    :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                      sortByVotes === 'less_votes'
+                        ? 'bg-cyan-500 hover:bg-cyan-600'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }`"
+                    @click="setSortOrder('less_votes', 'votes')"
+                  >
+                    <i class="fas fa-thumbs-down mr-2"></i> Menos votados
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+
+
         </aside>
 
         <main class="flex-1 bg-gray-900 flex items-start justify-center pt-8">
@@ -99,38 +153,111 @@
               </button>
             </div>
           </section>
-          <section v-else class="w-full px-6">
-            <div v-for="post in forumPosts" :key="post.id" class="bg-gray-800 text-white p-6 rounded-lg mb-4 shadow-md flex flex-col w-full">
-              <!-- Encabezado del post -->
-              <div class="flex items-center mb-4">
-                <i class="fas fa-user-circle text-4xl text-gray-400 mr-4"></i>
+          <section v-else class="w-full px-6 flex flex-col h-full">
+            <!-- Contenedor con Scroll -->
+            <div class="overflow-y-auto flex-1 pr-4" style="max-height: calc(100vh - 10rem);">
+              <div
+                v-for="post in forumPosts"
+                :key="post.id"
+                class="bg-gray-800 text-white p-6 rounded-lg mb-4 shadow-md flex flex-col w-full"
+              >
+                <!-- Encabezado del post -->
+                <div class="flex items-center justify-between mb-4">
+                  <!-- Información del Usuario -->
+                  <div class="flex items-center">
+                    <!-- Imagen del Usuario -->
+                    <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-400 flex-shrink-0">
+                      <img
+                        v-if="post.author.image"
+                        :src="post.author.image"
+                        alt="Profile"
+                        class="w-full h-full object-cover"
+                      />
+                      <i v-else class="fas fa-user-circle text-4xl text-gray-400"></i>
+                    </div>
+
+                    <!-- Nombre del Usuario -->
+                    <router-link
+                      :to="`/user/${post.author.userName}`"
+                      class="font-bold text-cyan-400 text-lg hover:underline ml-4"
+                    >
+                      @{{ post.author.userName }}
+                    </router-link>
+                  </div>
+
+                  <!-- Menú desplegable para tus posts -->
+                  <div v-if="post.author.userName === username_actual" class="relative">
+                    <button
+                      class="text-gray-400 hover:text-cyan-400"
+                      @click.stop="toggleDropdown(post.id)"
+                    >
+                      <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div
+                      v-if="dropdownPost === post.id"
+                      class="absolute right-0 bg-gray-700 text-white rounded shadow-md w-32"
+                      @mouseleave="closeDropdown"
+                    >
+                      <button
+                        class="block w-full px-4 py-2 text-left hover:bg-gray-600"
+                        @click="editPost(post)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="block w-full px-4 py-2 text-left hover:bg-gray-600"
+                        @click="deletePost(post.id)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Título del post con router-link -->
                 <router-link
-                  :to="`/user/${post.user}`"
-                  class="font-bold text-cyan-400 text-lg hover:underline"
+                  :to="{ path: `/post/${post.id}` }"
+                  class="text-xl font-bold text-cyan-400 mb-2 hover:underline"
                 >
-                  @{{ post.user }}
+                  {{ post.title }}
                 </router-link>
-              </div>
 
-              <!-- Contenido del post -->
-              <p class="text-gray-300 mb-4">{{ post.text }}</p>
+                <!-- Contenido del post -->
+                <p class="text-gray-300 mb-4">{{ post.post }}</p>
 
-              <!-- Botones de interacción -->
-              <div class="flex justify-between items-center">
-                <div class="flex space-x-4 text-gray-400">
-                  <button class="hover:text-cyan-400 transition">
-                    <i class="fas fa-thumbs-up"></i>
-                  </button>
-                  <button class="hover:text-cyan-400 transition">
-                    <i class="fas fa-thumbs-down"></i>
-                  </button>
-                  <button class="hover:text-cyan-400 transition">
-                    <i class="fas fa-comment"></i>
+                <!-- Botones de interacción -->
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center space-x-4 text-gray-400">
+                    <!-- Botón de Like -->
+                    <button
+                      class="hover:text-cyan-400 transition"
+                      :class="post.likedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+                      @click="addLike(post.id)"
+                    >
+                      <i class="fas fa-thumbs-up"></i>
+                    </button>
+                    <span>{{ post.like }}</span>
+
+                    <!-- Botón de Dislike -->
+                    <button
+                      class="hover:text-cyan-400 transition"
+                      :class="post.dislikedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+                      @click="addDislike(post.id)"
+                    >
+                      <i class="fas fa-thumbs-down"></i>
+                    </button>
+                    <span>{{ post.disLike }}</span>
+
+                    <button class="hover:text-cyan-400 transition">
+                      <i class="fas fa-comment"></i>
+                    </button>
+                    <span class="text-xs text-gray-500">{{ formatDate(post.createdAt) }}</span>
+                  </div>
+
+                  <button class="hover:text-cyan-400 transition text-gray-400">
+                    <i class="fas fa-share"></i>
                   </button>
                 </div>
-                <button class="hover:text-cyan-400 transition text-gray-400">
-                  <i class="fas fa-share"></i>
-                </button>
               </div>
             </div>
 
@@ -142,10 +269,12 @@
               <i class="fas fa-plus"></i>
             </button>
 
-            <!-- Modal -->
+            <!-- Modal Add -->
             <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
               <div class="bg-gray-800 rounded-lg w-96 p-6">
-                <h2 class="text-white text-xl font-bold mb-4">Agregar Post</h2>
+                <h2 class="text-white text-xl font-bold mb-4">
+                  {{ isEditing ? "Editar Post" : "Agregar Post" }}
+                </h2>
 
                 <!-- Campo Título -->
                 <label class="text-white text-sm mb-2 block" for="title">Título</label>
@@ -177,7 +306,32 @@
                     class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-500"
                     @click="publishPost"
                   >
-                    Publicar
+                    {{ isEditing ? "Editar" : "Publicar" }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="showDeleteModal"
+              class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            >
+              <div class="bg-gray-800 rounded-lg w-96 p-6">
+                <h2 class="text-white text-xl font-bold mb-4">¿Seguro que quiere eliminar este post?</h2>
+
+                <!-- Botones de Confirmación -->
+                <div class="flex justify-end space-x-4">
+                  <button
+                    class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                    @click="closeDeleteModal"
+                  >
+                    No
+                  </button>
+                  <button
+                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
+                    @click="confirmDelete"
+                  >
+                    Sí
                   </button>
                 </div>
               </div>
@@ -193,9 +347,7 @@ export default {
     name: "HomeView",
     data(){
         return{
-          forumPosts: [
-            { id: 1, user: "Arturo", text: "Este es un comentario en el fórum." },
-          ],
+          forumPosts: [],
           isMovies: true,
           movies: [],
           autoScroll: null,
@@ -209,16 +361,16 @@ export default {
             title: "",
             content: "",
           },
+          isEditing: false,
+          dropdownPost: null,
+          showDeleteModal: false, // Controla la visibilidad del modal de confirmación
+          postToDelete: null, // ID del post que se va a eliminar
+          sortByDate: 'recent', // Estado para orden por fecha
+          sortByVotes: 'votes',
         };
     },
     created() {
-      // Verificamos si el token y el nombre de usuario están en sessionStorage
-      const token = sessionStorage.getItem("auth_token");
-      this.isAuthenticated = !!token;
-
-      if (this.isAuthenticated) {
-        this.username_actual = sessionStorage.getItem("username");
-      }
+      this.initializeComponent();
     },
     mounted() {
         this.fetchMovies();
@@ -229,113 +381,302 @@ export default {
     },
 
     methods:{
-        async fetchMovies(){
-            try{
-                const BASE_URL = process.env['VUE_APP_API_BASE_URL']
-                const response = await axios.get(`${BASE_URL}/movie/top10`, );
-                this.movies = response.data;
+      setSortOrder(order, group) {
+        if (group === 'date') {
+          this.sortByDate = order;
+        } else if (group === 'votes') {
+          this.sortByVotes = order;
+        }
+        this.sortPosts();
+      },
+      sortPosts() {
+        if (this.sortByDate === 'recent') {
+          this.forumPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (this.sortByDate === 'oldest') {
+          this.forumPosts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        }
 
-                this.$nextTick(() => {
-                    this.startAutoScroll();
-                })
-            }catch (error){
-                console.error("Error fetching movies: ", error);
+        if (this.sortByVotes === 'votes') {
+          this.forumPosts.sort((a, b) => {
+              if (b.like === a.like) {
+                  return a.disLike - b.disLike;
+              }
+              return b.like - a.like;
+          });
+        } else if (this.sortByVotes === 'less_votes') {
+          this.forumPosts.sort((a, b) => {
+              if (a.like === b.like) {
+                  return b.disLike - a.disLike;
+              }
+              return a.like - b.like;
+          });
+        }
+      },
+      formatDate(dateString) {
+        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString('es-ES', options);
+      },
+      initializeComponent() {
+        // Verificamos si el token y el nombre de usuario están en sessionStorage
+        const token = sessionStorage.getItem("auth_token");
+        this.isAuthenticated = !!token;
+
+        if (this.isAuthenticated) {
+          this.username_actual = sessionStorage.getItem("username")
+          this.fetchPosts();
+        }
+      },
+      async fetchMovies(){
+          try{
+              const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+              const response = await axios.get(`${BASE_URL}/movie/top10`, );
+              this.movies = response.data;
+
+              this.$nextTick(() => {
+                  this.startAutoScroll();
+              })
+          }catch (error){
+              console.error("Error fetching movies: ", error);
+          }
+      },
+      async fetchPosts() {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const response = await axios.get(`${BASE_URL}/post/${this.username_actual}`);
+          const allPosts = response.data.allPosts;
+          const likedPosts = new Set(response.data.likedPosts || []);
+          const dislikedPosts = new Set(response.data.dislikedPosts || []);
+
+          this.forumPosts = allPosts.map(post => ({
+            ...post,
+            likedBy: likedPosts.has(post.id) ? [this.username_actual] : [],
+            dislikedBy: dislikedPosts.has(post.id) ? [this.username_actual] : [],
+          }));
+
+          this.sortPosts();
+        } catch (error) {
+          console.error("Error fetching posts:", error);
+          this.displayMessage("Hubo un error al obtener los posts.", true);
+        }
+      },
+      scrollLeft(){
+          const container = this.$refs.scrollContainer;
+          if (!container) return;
+          container.scrollLeft -= 300;
+          this.restartAutoScroll();
+      },
+
+      scrollRight(){
+          const container = this.$refs.scrollContainer;
+          if (!container) return;
+          container.scrollLeft += 300;
+          this.restartAutoScroll();
+      },
+
+      startAutoScroll(){
+          this.$nextTick(() => {
+              const container = this.$refs.scrollContainer;
+              if (!container) return;
+              this.autoScroll = setInterval(() => {
+                  if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+                      container.scrollLeft = 0;
+                  } else {
+                      container.scrollLeft += 300;
+                  }
+              }, 3000);
+          });
+      },
+
+      stopAutoScroll(){
+          if(this.autoScroll){
+              clearInterval(this.autoScroll);
+              this.autoScroll = null;
+          }
+      },
+
+      restartAutoScroll(){
+          this.stopAutoScroll();
+          this.startAutoScroll();
+      },
+
+      displayMessage(message, error, callback) {
+        this.message = message;
+        this.showMessage = true;
+        this.toastError = error;
+        setTimeout(() => {
+          this.showMessage = false;
+          if (callback) callback();
+        }, 5000);
+      },
+      navigateToForum() {
+        if (!this.isAuthenticated) {
+          this.displayMessage("Debes iniciar sesión para acceder al fórum.", true);
+          return;
+        }
+        this.isMovies = false;
+      },
+      openModal() {
+        if (!this.isAuthenticated) {
+          this.displayMessage("Debes iniciar sesión para agregar un post.", true);
+          return;
+        }
+        this.isEditing = false;
+        this.showModal = true;
+        this.newPost = { title: "", content: "" };
+      },
+      editPost(post) {
+        if (!this.isAuthenticated) {
+          this.displayMessage("Debes iniciar sesión para editar un post.", true);
+          return;
+        }
+        this.dropdownPost = post.id;
+        this.isEditing = true;
+        this.newPost = { id: post.id, title: post.title, content: post.post };
+        this.showModal = true;
+      },
+      closeModal() {
+        this.showModal = false;
+        this.newPost.title = "";
+        this.newPost.content = "";
+      },
+
+      async publishPost() {
+        if (!this.newPost.title || !this.newPost.content) {
+          this.displayMessage("Todos los campos son obligatorios.", true);
+          return;
+        }
+
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const data = {
+            title: this.newPost.title,
+            post: this.newPost.content,
+            author: this.username_actual,
+          };
+          let response = null;
+          if (this.isEditing) {
+            response = await axios.put(`${BASE_URL}/post/update/${this.newPost.id}`, data);
+            if (response.status === 200) {
+              this.displayMessage("Post editado exitosamente.", false);
             }
-        },
-
-        scrollLeft(){
-            const container = this.$refs.scrollContainer;
-            if (!container) return;
-            container.scrollLeft -= 300;
-            this.restartAutoScroll();
-        },
-
-        scrollRight(){
-            const container = this.$refs.scrollContainer;
-            if (!container) return;
-            container.scrollLeft += 300;
-            this.restartAutoScroll();
-        },
-
-        startAutoScroll(){
-            this.$nextTick(() => {
-                const container = this.$refs.scrollContainer;
-                if (!container) return;
-                this.autoScroll = setInterval(() => {
-                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
-                        container.scrollLeft = 0;
-                    } else {
-                        container.scrollLeft += 300;
-                    }
-                }, 3000);
-            });
-        },
-
-        stopAutoScroll(){
-            if(this.autoScroll){
-                clearInterval(this.autoScroll);
-                this.autoScroll = null;
+          } else {
+            response = await axios.post(`${BASE_URL}/post`, data);
+            if (response.status === 200) {
+              this.displayMessage("Post publicado exitosamente.", false);
             }
-        },
-
-        restartAutoScroll(){
-            this.stopAutoScroll();
-            this.startAutoScroll();
-        },
-
-        displayMessage(message, error, callback) {
-          this.message = message;
-          this.showMessage = true;
-          this.toastError = error;
-          setTimeout(() => {
-            this.showMessage = false;
-            if (callback) callback();
-          }, 5000);
-        },
-        navigateToForum() {
-          if (!this.isAuthenticated) {
-            this.displayMessage("Debes iniciar sesión para acceder al fórum.", true);
-            return;
           }
-          this.isMovies = false;
-        },
-        openModal() {
-          if (!this.isAuthenticated) {
-            this.displayMessage("Debes iniciar sesión para agregar un post.", true);
-            return;
-          }
-          this.showModal = true;
-        },
-        closeModal() {
-          this.showModal = false;
-          this.newPost.title = "";
-          this.newPost.content = "";
-        },
+          await this.fetchPosts();
+          this.closeModal()
+        } catch (error) {
+          console.error("Error publicando el post:", error);
+          this.displayMessage("Hubo un error al conectarse con el servidor.", true);
+        }
+      },
+      toggleDropdown(postId) {
+        this.dropdownPost = this.dropdownPost === postId ? null : postId;
+      },
+      async deletePost(postId) {
+        this.postToDelete = postId;
+        this.showDeleteModal = true;
+      },
 
-        async publishPost() {
-          if (!this.newPost.title || !this.newPost.content) {
-            this.displayMessage("Todos los campos son obligatorios.", true);
-            return;
-          }
+      closeDeleteModal() {
+        this.postToDelete = null;
+        this.showDeleteModal = false;
+      },
 
-          try {
-            const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-            const data = {
-              title: this.newPost.title,
-              post: this.newPost.content,
-              author: this.username_actual,
-            };
-            const response = await axios.post(`${BASE_URL}/post`, data);
-            console.log(response)
-            if(response.status === 200){
-              this.displayMessage(response.data, false)
-              this.closeModal()
+      closeDropdown() {
+        this.dropdownPost = null;
+      },
+
+      async confirmDelete() {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const response = await axios.delete(`${BASE_URL}/post/${this.postToDelete}`);
+          if (response.status === 200) {
+            this.displayMessage("Post eliminado correctamente.", true);
+          }
+          this.showDeleteModal = false;
+          await this.fetchPosts();
+
+        } catch (error) {
+          console.error("Error deleting post:", error);
+        }
+      },
+      async addLike(postId) {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            userName: this.username_actual, // Usuario autenticado
+            postId: postId, // ID del post
+          };
+          const post = this.forumPosts.find(post => post.id === postId);
+          //En caso que tenga un like añadido...y quiera sacarlo
+          if (post && post.likedBy.includes(this.username_actual)) {
+            const response = await axios.put(`${BASE_URL}/post/like`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Like retirado!", false);
+              post.likedBy = post.likedBy.filter(user => user !== this.username_actual);
+              post.like--;
             }
-          } catch (error) {
-            console.error("Error publicando el post:", error);
-            this.displayMessage("Hubo un error al conectarse con el servidor.", true);
+          } else {
+            // En caso contrario, lo añade
+            const response = await axios.put(`${BASE_URL}/post/like`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Like añadido!", false);
+              post.likedBy.push(this.username_actual);
+              post.like++;
+              // Saca el dislike si esta añadido, no puedes darle a las dos
+              if (post.dislikedBy.includes(this.username_actual)) {
+                post.dislikedBy = post.dislikedBy.filter(user => user !== this.username_actual);
+                post.disLike--;
+              }
+            }
           }
-        },
+          this.sortPosts()
+        } catch (error) {
+          console.error("Error añadiendo/removiendo like:", error);
+          this.displayMessage("Error al procesar el like.", true);
+        }
+      },
+
+      async addDislike(postId) {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            userName: this.username_actual, // Usuario autenticado
+            postId: postId, // ID del post
+          };
+          const post = this.forumPosts.find(post => post.id === postId);
+
+          //En caso que tenga un like añadido...y quiera sacarlo
+          if (post && post.dislikedBy.includes(this.username_actual)) {
+            const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Dislike retirado!", false);
+              post.dislikedBy = post.dislikedBy.filter(user => user !== this.username_actual);
+              post.disLike--;
+            }
+          } else {
+            // En caso contrario, lo añade
+            const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Dislike registrado!", false);
+              post.dislikedBy.push(this.username_actual);
+              post.disLike++;
+              // Saca el like si esta añadido, no puedes darle a las dos
+              if (post.likedBy.includes(this.username_actual)) {
+                post.likedBy = post.likedBy.filter(user => user !== this.username_actual);
+                post.like--;
+              }
+            }
+          }
+          this.sortPosts()
+        } catch (error) {
+          console.error("Error añadiendo/removiendo dislike:", error);
+          this.displayMessage("Error al procesar el dislike.", true);
+        }
+      },
     }
 }
 </script>

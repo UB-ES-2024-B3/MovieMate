@@ -219,4 +219,23 @@ export class UserController {
             next(e);
         }
     }
+
+    static async follow(req: Request, res: Response, next: NextFunction){
+        try{
+            const userName1 = req.params.userName1;
+            const userName2 = req.params.userName2;
+            if(!userName1){
+                throw createError(404, `Parameters are incorrect`);
+            }
+
+            if(!userName2){
+                throw createError(404, `Parameters are incorrect`);
+            }
+
+            const result = await this.userService.follow(userName1, userName2);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
 }

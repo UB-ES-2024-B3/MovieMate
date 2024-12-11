@@ -1,7 +1,7 @@
 import {inject, injectable} from "tsyringe";
 import {IPostRepository} from "../../domain/repositories/IPostRepository";
 
-import {PostDtoIn, PostDtoOut} from "../../interfaces/Interfaces"
+import {PostDtoIn, PostDtoOut, UpdatePostData} from "../../interfaces/Interfaces"
 
 
 @injectable()
@@ -17,8 +17,24 @@ export class PostService {
         return await this.postRepository.get(postId);
     }
 
-    async getAllPosts(): Promise<PostDtoOut[]> {
-        return await this.postRepository.getAll();
+    async getAllPosts(userName: string): Promise<{ allPosts: PostDtoOut[], likedPosts: number[], dislikedPosts: number[] }> {
+        return await this.postRepository.getAll(userName);
     }
 
+    async updatePost(postId: number, post: UpdatePostData): Promise<string> {
+        return await this.postRepository.update(postId, post);
+    }
+
+    async deletePost(postId: number): Promise<string> {
+        return await this.postRepository.delete(postId);
+    }
+
+    async addLike(userName: any, postID: number) {
+        return await this.postRepository.addLike(userName, postID);
+
+    }
+
+    async addDislike(userName: any, postId: number) {
+        return await this.postRepository.addDislike(userName, postId);
+    }
 }

@@ -30,6 +30,9 @@ export class ReviewEntity extends BaseEntity {
 
     @Column({default: 0})
     disLike: number;
+  
+    @Column({default: 0})
+    totalComments: number;
 
     @ManyToOne(type => MovieEntity)
     movie: MovieEntity;

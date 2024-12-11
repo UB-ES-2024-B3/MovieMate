@@ -5,7 +5,7 @@ import {PostRepository} from "../repositories/PostRepository";
 import {DtoInValidation} from "../../interfaces/DtoInValidation";
 import {isRight} from 'fp-ts/lib/Either';
 import createError from "http-errors";
-import {PostDtoIn} from "../../interfaces/Interfaces";
+import {PostDtoIn, UpdatePostData} from "../../interfaces/Interfaces";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -84,6 +84,8 @@ export class PostController {
                 post: validatedData.post,
                 image: image || null,
                 author: validatedData.author,
+                like: 0,
+                disLike: 0
             }
 
             const result = await this.postService.createPost(post);
@@ -106,10 +108,85 @@ export class PostController {
 
     static async getAllPosts(req: Request, res: Response, next: NextFunction) {
         try {
-            const result = await this.postService.getAllPosts();
+            const userName = req.params.userName;
+
+            if(!userName){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.postService.getAllPosts(userName);
             return res.status(200).json(result);
         } catch (e) {
             next(e);
+        }
+    }
+
+    static async updatePost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const postId = parseInt(req.params.postId);
+            const postData = req.body;
+
+            const validationResult = DtoInValidation.validateUpdatePostDto(postData);
+
+            if (!isRight(validationResult)) {
+                // Si la validación falla, devolver un error
+                throw createError(400, "Invalid post data!");
+            }
+
+            const validatedData = validationResult.right;
+
+            const postValidated: UpdatePostData = {
+                title: validatedData.title,
+                post: validatedData.post,
+            };
+
+            const result = await this.postService.updatePost(postId, postValidated);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async deletePost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const postId = parseInt(req.params.postId);
+            const result = await this.postService.deletePost(postId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async addLike(req: Request, res:Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const postId = parseInt(req.body.postId);
+
+
+            if(!userName || isNaN(postId)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.postService.addLike(userName, postId);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
+
+    static async addDislike(req: Request, res: Response, next: NextFunction){
+        try {
+            const userName = req.body.userName;
+            const postId = parseInt(req.body.postId);
+
+            if(!userName || isNaN(postId)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.postService.addDislike(userName, postId);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
         }
     }
 

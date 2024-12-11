@@ -19,6 +19,7 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     recoverPassword: jest.fn(),
     search: jest.fn(),
     getAllFavorites: jest.fn(),
+    follow: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {
@@ -174,7 +175,7 @@ describe('UserService Unit Tests', () => {
                 image: null,
             };
 
-            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[] });
+            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[], posts:[], });
 
             const result = await userService.getUser(userId, authToken);
 

@@ -80,6 +80,7 @@ export class ReviewRepository implements IReviewRepository {
             movie: movie,
             like: reviewFromDB.like,
             disLike: reviewFromDB.disLike,
+            totalComments: reviewFromDB.totalComments
         };
 
         return review;
@@ -112,6 +113,7 @@ export class ReviewRepository implements IReviewRepository {
                 movie: movie,
                 like: review.like,
                 disLike: review.disLike,
+                totalComments: review.totalComments
             };
 
             return reviewDto;

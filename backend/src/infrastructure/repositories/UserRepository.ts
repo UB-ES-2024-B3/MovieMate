@@ -12,20 +12,23 @@ import {
     UpdateUserData,
     UserDtoOut,
     UsersList,
-    UserWithReviewsDtoOut
+    UserWithReviewsDtoOut, PostDtoOut, UsersInfoDtoOut
 } from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
 import {ReviewEntity} from "../entities/ReviewEntity";
+import {PostEntity} from "../entities/PostEntity";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
     private readonly reviewRepo: Repository<ReviewEntity>;
+    private readonly postRepo: Repository<PostEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(UserEntity);
         this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
+        this.postRepo = PostgreTypeOrmDataSource.getRepository(PostEntity);
     }
 
     async getByEmail(email: string): Promise<UserEntity | null> {
@@ -121,7 +124,7 @@ export class UserRepository implements IUserRepository {
         return `user with username < ${userName} > deleted successfully`;
     }
 
-    async get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut> {
+    async get(userName: string, auth_token: string): Promise<UsersInfoDtoOut> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
@@ -146,8 +149,28 @@ export class UserRepository implements IUserRepository {
                 movie: movie,
                 like: reviewFromDB.like,
                 disLike: reviewFromDB.disLike,
+                totalComments: reviewFromDB.totalComments
             };
         });
+
+        const postsFromDB = await this.postRepo.find({
+            where: {author: {id: userFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author'],
+        });
+
+        const posts: PostDtoOut[] = postsFromDB.map((postFromDB: PostEntity) => {
+            return {
+                id: postFromDB.id,
+                title: postFromDB.title,
+                createdAt: postFromDB.createdAt,
+                post: postFromDB.post,
+                image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null,
+                like: postFromDB.like,
+                disLike: postFromDB.disLike,
+                totalComments: postFromDB.totalComments
+            }
+        })
 
         const user: UserDtoOut = {
             id: userFromDB.id,
@@ -168,10 +191,11 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-        const result: UserWithReviewsDtoOut = {
+        const result: UsersInfoDtoOut = {
             user: user,
             isOwnProfile: isOwnProfile,
-            reviews: reviews
+            reviews: reviews,
+            posts: posts
         };
 
         return result;
@@ -293,6 +317,40 @@ export class UserRepository implements IUserRepository {
         }));
 
         return favoritesList
+    }
+
+    async follow(userName1: string, userName2: string): Promise<string> {
+        const user1 = await this.repository.findOne({where: { userName: userName1 }, relations: ["following"],});
+        if(!user1){
+            throw createError(404, `User ${userName1} does not exist`);
+        }
+
+        const user2 = await this.repository.findOne({where: {userName: userName2}});
+        if(!user2){
+            throw createError(404, `User ${userName1} does not exist`);
+        }
+
+
+        const isFollowing = user1.following?.some(followingUser => followingUser.id === user2.id);
+        if(isFollowing){
+            user1.following = user1.following?.filter(followingUser => followingUser.id !== user2.id) || null;
+            user2.followers = user2.followers?.filter(followerUser => followerUser.id !== user1.id) || null;
+
+            await this.repository.save(user1);
+            await this.repository.save(user2);
+
+            return `${userName1} has unfollowed ${userName2}`;
+        }else{
+            user1.following = user1.following ? [...user1.following, user2] : [user2];
+            user2.followers = user2.followers ? [...user2.followers, user1] : [user1];
+
+            await this.repository.save(user1);
+            await this.repository.save(user2);
+
+            return `${userName1} has followed ${userName2}`;
+        }
+
+
     }
 
 
