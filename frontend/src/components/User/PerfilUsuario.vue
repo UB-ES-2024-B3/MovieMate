@@ -46,9 +46,14 @@
 
               <!-- Botones de seguidores/seguidos -->
               <div class="flex mt-2 space-x-4">
-                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">0 FOLLOWERS</button>
-                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">0 FOLLOWING</button>
+                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
+                  {{ this.followersCount || 0 }} FOLLOWERS
+                </button>
+                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
+                  {{ this.followingCount || 0 }} FOLLOWING
+                </button>
               </div>
+
 
               <!-- Botón editar o seguir -->
               <router-link v-if="isLogged" to="/editar">
@@ -118,9 +123,11 @@ export default {
     return {
       user: null,
       isLogged: null, // Si es el propio perfil
-      isFollowing: false, // Estado del botón de seguir
+      isFollowing: this.fetchFollowingCount(), // Estado del botón de seguir
       followMessage: null, // Mensaje de éxito/error
       showConfirmation: false, // Control del modal
+      followersCount: 0,
+      followingCount: 0,
     };
   },
 
@@ -138,6 +145,41 @@ export default {
   },
 
   methods: {
+    async fetchFollowingCount() {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.get(`${BASE_URL}/user/${this.$route.params.userName}/following`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const followingList = response.data; // Assuming the API returns an array of following users
+        this.followingCount = followingList.length; // Count the number of users
+
+      } catch (error) {
+        console.error("Error fetching the following list:", error);
+      }
+    },
+
+    async fetchFollowersCount() {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.get(`${BASE_URL}/user/${this.$route.params.userName}/followers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const followersList = response.data; // Assuming the API returns an array of followers
+        this.followersCount = followersList.length; // Count the number of followers
+        // Comprueba si el username del perfil actual está en la lista de followings
+        const currentProfileUserName = sessionStorage.getItem("username");
+        this.isFollowing = followersList.some((username) => username === currentProfileUserName);
+        return this.isFollowing
+      } catch (error) {
+        console.error("Error fetching the followers list:", error);
+      }
+    },
+
     async fetchUserData() {
       try {
         const token = sessionStorage.getItem("auth_token");
@@ -146,7 +188,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const { user, isOwnProfile, isFollowing } = response.data;
+        const { user, isOwnProfile, isFollowing} = response.data;
 
         this.user = {
           id: user.id,
@@ -156,8 +198,12 @@ export default {
           isAdmin: user.isAdmin,
           image: user.image,
         };
-        this.isLogged = isOwnProfile; // Determina si es el propio perfil
-        this.isFollowing = isFollowing; // Estado inicial del botón de seguir
+        this.isLogged = isOwnProfile;
+        this.isFollowing = isFollowing;
+
+        // Set follower and following counts
+        await this.fetchFollowingCount();
+        await this.fetchFollowersCount()
       } catch (error) {
         console.error("Error al obtener los datos del usuario:", error);
       }
@@ -167,17 +213,19 @@ export default {
       const token = sessionStorage.getItem("auth_token");
       const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
       const userName1 = sessionStorage.getItem("username");
-      const userName2 = this.user.userName;
+      const userName2 = this.user.userName; // Usuario a seguir
 
       try {
         await axios.put(`${BASE_URL}/user/${userName2}/${userName1}`, null, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        this.isFollowing = !this.isFollowing;
+        await this.fetchUserData();
         this.followMessage = this.isFollowing
             ? "Ahora sigues a este usuario."
             : "Has dejado de seguir a este usuario.";
+
+
         setTimeout(() => (this.followMessage = null), 3000);
       } catch (error) {
         console.error("Error al seguir/dejar de seguir al usuario:", error);
