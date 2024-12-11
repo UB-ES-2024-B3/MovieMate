@@ -238,4 +238,19 @@ export class UserController {
             next(error);
         }
     }
+
+    static async getFollowers(req: Request, res: Response, next: NextFunction){
+        try{
+            const userName = req.params.userName;
+
+            if(!userName){
+                throw createError(404, `Parameters are incorrect`);
+            }
+
+            const result = await this.userService.getFollowers(userName);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
 }
