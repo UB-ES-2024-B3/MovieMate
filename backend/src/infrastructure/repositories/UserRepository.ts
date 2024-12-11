@@ -166,7 +166,7 @@ export class UserRepository implements IUserRepository {
                 image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null,
                 like: postFromDB.like,
                 disLike: postFromDB.disLike,
-                totalComments: postFromDB.totalComments
+                totalComments: postFromDB.totalComments,
             }
         })
 
@@ -179,7 +179,8 @@ export class UserRepository implements IUserRepository {
             gender: userFromDB.gender,
             description: userFromDB.description,
             isAdmin: userFromDB.isAdmin,
-            image: this.imageToBase64(userFromDB.image) // Convertir la imagen a base64 o null
+            image: this.imageToBase64(userFromDB.image), // Convertir la imagen a base64 o null
+            totalFollowers: userFromDB.totalFollowers
         };
 
         const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
@@ -334,6 +335,8 @@ export class UserRepository implements IUserRepository {
             user1.following = user1.following?.filter(followingUser => followingUser.id !== user2.id) || null;
             user2.followers = user2.followers?.filter(followerUser => followerUser.id !== user1.id) || null;
 
+            user2.totalFollowers = Math.max(0, user2.totalFollowers-1);
+
             await this.repository.save(user1);
             await this.repository.save(user2);
 
@@ -341,6 +344,8 @@ export class UserRepository implements IUserRepository {
         }else{
             user1.following = user1.following ? [...user1.following, user2] : [user2];
             user2.followers = user2.followers ? [...user2.followers, user1] : [user1];
+
+            user2.totalFollowers += 1;
 
             await this.repository.save(user1);
             await this.repository.save(user2);
