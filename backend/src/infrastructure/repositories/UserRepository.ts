@@ -168,7 +168,7 @@ export class UserRepository implements IUserRepository {
                 image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null,
                 like: postFromDB.like,
                 disLike: postFromDB.disLike,
-                totalComments: postFromDB.totalComments
+                totalComments: postFromDB.totalComments,
             }
         })
 
@@ -181,7 +181,9 @@ export class UserRepository implements IUserRepository {
             gender: userFromDB.gender,
             description: userFromDB.description,
             isAdmin: userFromDB.isAdmin,
-            image: this.imageToBase64(userFromDB.image) // Convertir la imagen a base64 o null
+            image: this.imageToBase64(userFromDB.image), // Convertir la imagen a base64 o null
+            totalFollowers: userFromDB.totalFollowers,
+            totalFollowing: userFromDB.totalFollowing,
         };
 
         const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
@@ -336,6 +338,9 @@ export class UserRepository implements IUserRepository {
             user1.following = user1.following?.filter(followingUser => followingUser.id !== user2.id) || null;
             user2.followers = user2.followers?.filter(followerUser => followerUser.id !== user1.id) || null;
 
+            user1.totalFollowing = Math.max(0, user1.totalFollowing-1);
+            user2.totalFollowers = Math.max(0, user2.totalFollowers-1);
+
             await this.repository.save(user1);
             await this.repository.save(user2);
 
@@ -344,6 +349,9 @@ export class UserRepository implements IUserRepository {
             user1.following = user1.following ? [...user1.following, user2] : [user2];
             user2.followers = user2.followers ? [...user2.followers, user1] : [user1];
 
+            user1.totalFollowing += 1;
+            user2.totalFollowers += 1;
+
             await this.repository.save(user1);
             await this.repository.save(user2);
 
@@ -351,6 +359,31 @@ export class UserRepository implements IUserRepository {
         }
 
 
+    }
+    async getFollowers(userName: string): Promise<string[]> {
+        const user = await this.repository.findOne({
+            where: { userName: userName }, relations: ['followers'],
+        });
+
+        if (!user) {
+            throw createError(404, `User ${userName} does not exist`);
+        }
+
+        const followers = user.followers.map(follower => follower.userName);
+
+        return followers;
+    }
+
+    async getFollowing(userName: string): Promise<string[]> {
+        const user = await this.repository.findOne({where: {userName: userName}, relations:['following']});
+
+        if(!user){
+            throw createError(404, `User ${userName} does not exist`);
+        }
+
+        const following = user.following.map(following => following.userName);
+
+        return following;
     }
 
 

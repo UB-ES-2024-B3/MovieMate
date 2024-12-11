@@ -31,6 +31,12 @@ export class UserEntity extends BaseEntity {
     @Column({type: 'bytea', nullable: true})
     image: Buffer;
 
+    @Column({default: 0})
+    totalFollowers: number;
+
+    @Column({default: 0})
+    totalFollowing: number;
+
     // Relación ManyToMany con MovieEntity
     @ManyToMany(() => MovieEntity, {nullable: true})
     @JoinTable()  // La tabla intermedia se crea aquí
@@ -40,9 +46,11 @@ export class UserEntity extends BaseEntity {
     @JoinTable()  // La tabla intermedia se crea aquí
     reviewed: MovieEntity[] | null;
 
+    // Usuarios que te siguen
     @ManyToMany(() => UserEntity, (user) => user.following, { nullable: true })
     followers: UserEntity[] | null;
 
+    // Usuarios a los que sigues
     @ManyToMany(() => UserEntity, (user) => user.followers, { nullable: true })
     @JoinTable() // La tabla intermedia se crea aquí
     following: UserEntity[] | null;

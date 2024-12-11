@@ -51,4 +51,12 @@ export class UserService {
     async follow(userName1: string, userName2: string) {
         return await this.userRepository.follow(userName1, userName2);
     }
+
+    async getFollowers(userName: string) {
+        return await this.userRepository.getFollowers(userName);
+    }
+
+    async getFollowing(userName: string) {
+        return await this.userRepository.getFollowing(userName);
+    }
 }

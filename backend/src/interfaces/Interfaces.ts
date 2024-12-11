@@ -24,6 +24,8 @@ export interface UserDtoOut {
     description: string | null;
     isAdmin: boolean;
     image: string | null;
+    totalFollowers: number;
+    totalFollowing: number;
 }
 
 export interface AuthorDtoOut {
