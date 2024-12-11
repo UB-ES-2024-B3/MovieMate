@@ -43,9 +43,9 @@ export class PostRepository implements IPostRepository {
         return "Post Published";
     }
 
-    async get(postId: number): Promise<PostDtoOut> {
+    async get(postId: number): Promise<{ post: PostDtoOut, likedUsers: string[], dislikedUsers: string[] }> {
         const postFromDB = await this.repository.findOne({where: {id: postId},
-        relations: ['author'],});
+        relations: ['author', `likedBy`, 'dislikeBy'],});
 
         if (!postFromDB) {
             throw createError(404, `Post does not exist`);
@@ -70,7 +70,10 @@ export class PostRepository implements IPostRepository {
             totalComments: postFromDB.totalComments
         }
 
-        return post;
+        const likedUsers = postFromDB.likedBy.map(user => user.userName);
+        const dislikedUsers = postFromDB.dislikeBy.map(user => user.userName);
+
+        return {post, likedUsers, dislikedUsers};
     }
 
     async getAll(userName: string): Promise<{ allPosts: PostDtoOut[], likedPosts: number[], dislikedPosts: number[] }>{
