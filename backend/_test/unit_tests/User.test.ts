@@ -21,6 +21,7 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     getAllFavorites: jest.fn(),
     follow: jest.fn(),
     getFollowers: jest.fn(),
+    getFollowing: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {
@@ -175,6 +176,7 @@ describe('UserService Unit Tests', () => {
                 isAdmin: false,
                 image: null,
                 totalFollowers: 0,
+                totalFollowing: 0,
             };
 
             mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[], posts:[], });

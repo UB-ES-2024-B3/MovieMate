@@ -31,4 +31,6 @@ export interface IUserRepository {
     follow(userName1: string, userName2: string): Promise<string>;
 
     getFollowers(userName: string): Promise<string[]>;
+
+    getFollowing(userName: string): Promise<string[]>;
 }
