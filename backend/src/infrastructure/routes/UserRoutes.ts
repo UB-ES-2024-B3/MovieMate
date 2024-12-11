@@ -40,6 +40,8 @@ router.put("/passwordRecovery", (req: Request, res: Response, next: NextFunction
 router.get("/:userName/favorites", (req: Request, res: Response, next: NextFunction)=> UserController.getAllFavorites(req, res, next));
 router.put("/:userName2/:userName1", (req: Request, res: Response, next: NextFunction) => UserController.follow(req, res, next));
 router.get("/:userName/followers", (req: Request, res: Response, next: NextFunction)=> UserController.getFollowers(req, res, next));
+router.get("/:userName/following", (req: Request, res: Response, next: NextFunction)=> UserController.getFollowing(req, res, next));
+
 
 
 export default router;

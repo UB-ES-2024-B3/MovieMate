@@ -56,4 +56,7 @@ export class UserService {
         return await this.userRepository.getFollowers(userName);
     }
 
+    async getFollowing(userName: string) {
+        return await this.userRepository.getFollowing(userName);
+    }
 }

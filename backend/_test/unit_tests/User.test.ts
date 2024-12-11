@@ -21,6 +21,7 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     getAllFavorites: jest.fn(),
     follow: jest.fn(),
     getFollowers: jest.fn(),
+    getFollowing: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {

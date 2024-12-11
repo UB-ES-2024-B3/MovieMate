@@ -372,5 +372,17 @@ export class UserRepository implements IUserRepository {
         return followers;
     }
 
+    async getFollowing(userName: string): Promise<string[]> {
+        const user = await this.repository.findOne({where: {userName: userName}, relations:['following']});
+
+        if(!user){
+            throw createError(404, `User ${userName} does not exist`);
+        }
+
+        const following = user.following.map(following => following.userName);
+
+        return following;
+    }
+
 
 }
