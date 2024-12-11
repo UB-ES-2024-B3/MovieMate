@@ -175,6 +175,7 @@ describe('UserService Unit Tests', () => {
                 isAdmin: false,
                 image: null,
                 totalFollowers: 0,
+                totalFollowing: 0,
             };
 
             mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[], posts:[], });

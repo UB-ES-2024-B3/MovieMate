@@ -55,4 +55,5 @@ export class UserService {
     async getFollowers(userName: string) {
         return await this.userRepository.getFollowers(userName);
     }
+
 }
