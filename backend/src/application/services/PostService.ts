@@ -13,7 +13,7 @@ export class PostService {
         return await this.postRepository.create(post);
     }
 
-    async getPost(postId: number): Promise<PostDtoOut> {
+    async getPost(postId: number): Promise<{post: PostDtoOut, likedUsers: string[], dislikedUsers: string[] }> {
         return await this.postRepository.get(postId);
     }
 
