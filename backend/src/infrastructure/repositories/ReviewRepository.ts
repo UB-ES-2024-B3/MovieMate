@@ -41,6 +41,8 @@ export class ReviewRepository implements IReviewRepository {
         reviewToSave.review = review.review;
         reviewToSave.author = authorFromDB;
         reviewToSave.movie = movieFromDB;
+        reviewToSave.like = review.like;
+        reviewToSave.disLike = review.disLike;
 
 
         // Save review using the repository
@@ -76,6 +78,8 @@ export class ReviewRepository implements IReviewRepository {
             content: reviewFromDB.review,
             author: author,
             movie: movie,
+            like: reviewFromDB.like,
+            disLike: reviewFromDB.disLike,
             totalComments: reviewFromDB.totalComments
         };
 
@@ -107,6 +111,8 @@ export class ReviewRepository implements IReviewRepository {
                 content: review.review,
                 author: author,
                 movie: movie,
+                like: review.like,
+                disLike: review.disLike,
                 totalComments: review.totalComments
             };
 
@@ -116,4 +122,82 @@ export class ReviewRepository implements IReviewRepository {
         return allReviews;
 
     }
+
+    async addLike(userName: string, idReview: number): Promise<string>{
+        const user = await  this.userRepo.findOne({where: {userName: userName}});
+        if(!user){
+            throw createError(404, `User does not exist`);
+        }
+
+        const review = await this.repository.findOne({where: {id: idReview}, relations:["likedBy", "dislikeBy"]});
+        if(!review){
+            throw createError(404, `Review does not exist`);
+        }
+
+        const hasLiked = review.likedBy.some(likedUser => likedUser.userName === userName);
+        const hasDisliked = review.dislikeBy.some(dislikedUser => dislikedUser.userName === userName);
+
+        if(!hasLiked){
+            review.likedBy.push(user);
+
+            if(hasDisliked){
+                review.dislikeBy = review.dislikeBy.filter(dislikedUser => dislikedUser.userName !== userName);
+                review.disLike -= 1;
+            }
+
+            review.like += 1;
+
+            await this.repository.save(review);
+
+            return "Review liked";
+        }else {
+            review.likedBy = review.likedBy.filter(likedUser => likedUser.userName !== userName);
+
+            review.like = Math.max(0, review.like -1);
+
+            await this.repository.save(review);
+
+            return "Like removed from review";
+        }
+    }
+
+    async addDislike(userName: string, idReview: number): Promise<string> {
+        const user = await this.userRepo.findOne({where: {userName: userName}});
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const review = await this.repository.findOne({where: {id: idReview}, relations: ["likedBy", "dislikeBy"]});
+        if (!review) {
+            throw createError(404, `Review does not exist`);
+        }
+
+        const hasLike = review.likedBy.some(likedUser => likedUser.userName === userName);
+        const hasDislike = review.dislikeBy.some(dislikeUser => dislikeUser.userName === userName);
+
+        if (!hasDislike) {
+            review.dislikeBy.push(user);
+
+            if (hasLike) {
+                review.likedBy = review.likedBy.filter(likedUser => likedUser.userName !== userName) || null;
+                review.like -= 1;
+            }
+
+            review.disLike += 1;
+
+            await this.repository.save(review);
+
+            return "Review disliked";
+        } else {
+            review.dislikeBy = review.dislikeBy.filter(dislikeUser => dislikeUser.userName !== userName) || null;
+
+            review.disLike = Math.max(0, review.disLike -1);
+
+            await this.repository.save(review);
+
+            return "Dislike removed from review";
+        }
+    }
+
+
 }
