@@ -4,7 +4,7 @@ import {
     UsersList,
     MoviesInFavsDtoOut,
     UserWithReviewsDtoOut,
-    UsersInfoDtoOut
+    UsersInfoDtoOut, AuthorDtoOut
 } from "../../interfaces/Interfaces";
 
 export interface IUserRepository {
@@ -30,7 +30,7 @@ export interface IUserRepository {
 
     follow(userName1: string, userName2: string): Promise<string>;
 
-    getFollowers(userName: string): Promise<string[]>;
+    getFollowers(userName: string): Promise<AuthorDtoOut[]>;
 
-    getFollowing(userName: string): Promise<string[]>;
+    getFollowing(userName: string): Promise<AuthorDtoOut[]>;
 }

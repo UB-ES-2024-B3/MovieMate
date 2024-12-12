@@ -12,7 +12,7 @@ import {
     UpdateUserData,
     UserDtoOut,
     UsersList,
-    UserWithReviewsDtoOut, PostDtoOut, UsersInfoDtoOut
+    UserWithReviewsDtoOut, PostDtoOut, UsersInfoDtoOut, AuthorDtoOut
 } from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
@@ -360,7 +360,7 @@ export class UserRepository implements IUserRepository {
 
 
     }
-    async getFollowers(userName: string): Promise<string[]> {
+    async getFollowers(userName: string): Promise<AuthorDtoOut[]> {
         const user = await this.repository.findOne({
             where: { userName: userName }, relations: ['followers'],
         });
@@ -369,19 +369,27 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User ${userName} does not exist`);
         }
 
-        const followers = user.followers.map(follower => follower.userName);
+        const followers: AuthorDtoOut[] = user.followers.map(follower => ({
+            id: follower.id,
+            userName: follower.userName,
+            image: follower.image ? this.imageToBase64(follower.image) : null
+        }));
 
         return followers;
     }
 
-    async getFollowing(userName: string): Promise<string[]> {
+    async getFollowing(userName: string): Promise<AuthorDtoOut[]> {
         const user = await this.repository.findOne({where: {userName: userName}, relations:['following']});
 
         if(!user){
             throw createError(404, `User ${userName} does not exist`);
         }
 
-        const following = user.following.map(following => following.userName);
+        const following: AuthorDtoOut[] = user.following.map(following => ({
+            id: following.id,
+            userName: following.userName,
+            image: following.image ? this.imageToBase64(following.image) : null
+        }));
 
         return following;
     }
