@@ -1,4 +1,4 @@
-import {Between, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual, Repository} from "typeorm";
+import {Between, FindOptionsWhere, ILike, MoreThanOrEqual, Raw, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
@@ -6,7 +6,8 @@ import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
 import {
     AuthorDtoOut,
-    Filters, GetMoviesFilteredDtoOut, MovieDtoOut,
+    Filters,
+    GetMoviesFilteredDtoOut,
     MovieReviewDtoOut,
     MoviesList,
     MovieWithReviewsDtoOut,
@@ -259,24 +260,24 @@ export class MovieRepository implements IMovieRepository {
             let where: FindOptionsWhere<MovieEntity> | Array<FindOptionsWhere<MovieEntity>> = {};
 
             // Filtrar por géneros
-            if (filters.genres && filters.genres.length > 0) {
-                where.genres = filters.genres.length > 1 ? In(filters.genres) : filters.genres[0];
+            if (filters.genres) {
+                where.genres = Raw((alias) => `${alias} @> :genres`, {genres: JSON.stringify([filters.genres])});
             }
 
             // Filtrar por directores
-            if (filters.directors && filters.directors.length > 0) {
-                where.directors = filters.directors.length > 1 ? In(filters.directors) : filters.directors[0];
+            if (filters.directors) {
+                where.directors = Raw((alias) => `${alias} @> :directors`, {directors: JSON.stringify([filters.directors])});
             }
 
             // Filtrar por actores
-            if (filters.actors && filters.actors.length > 0) {
-                where.actors = filters.actors.length > 1 ? In(filters.actors) : filters.actors[0];
+            if (filters.actors) {
+                where.actors = Raw((alias) => `${alias} @> :actors`, {actors: JSON.stringify([filters.actors])});
             }
 
             // Filtrar por año de estreno
             if (filters.premiereYear) {
-                const startOfYear = new Date(filters.premiereYear, 0, 1); // 1 de enero
-                const endOfYear = new Date(filters.premiereYear, 11, 31, 23, 59, 59); // 31 de diciembre
+                const startOfYear = new Date(filters.premiereYear, 0, 1);
+                const endOfYear = new Date(filters.premiereYear, 11, 31, 23, 59, 59);
                 where.premiereDate = Between(startOfYear, endOfYear);
             }
 
@@ -296,15 +297,8 @@ export class MovieRepository implements IMovieRepository {
             }
 
             // Filtrar por rango de total de reseñas
-            if (filters.totalReviews && filters.totalReviews.length === 2) {
-                const [minReviews, maxReviews] = filters.totalReviews;
-                if (minReviews != null && maxReviews != null) {
-                    where.totalReviews = Between(minReviews, maxReviews);
-                } else if (minReviews != null) {
-                    where.totalReviews = MoreThanOrEqual(minReviews);
-                } else if (maxReviews != null) {
-                    where.totalReviews = LessThanOrEqual(maxReviews);
-                }
+            if (filters.totalReviews) {
+                where.totalReviews = MoreThanOrEqual(filters.totalReviews);
             }
 
             const skip = (n - 1) * maxPageSize;
@@ -321,6 +315,10 @@ export class MovieRepository implements IMovieRepository {
 
             // Construcción de la respuesta
             const totalPages = Math.ceil(total / maxPageSize);
+
+            if (total == 0) {
+                n = 0
+            }
 
             const dtoOut: GetMoviesFilteredDtoOut = {
                 movies: moviesFromDb.map(movie => ({

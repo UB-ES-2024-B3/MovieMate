@@ -37,7 +37,7 @@ export class MovieService {
     }
 
     async getMoviesFiltered(n: number, maxPageSize: number, filters: Filters) {
-        return await this.getMoviesFiltered(n, maxPageSize, filters)
+        return await this.movieRepository.getMoviesFiltered(n, maxPageSize, filters)
     }
 }
 
