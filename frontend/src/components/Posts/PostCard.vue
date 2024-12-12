@@ -213,6 +213,15 @@
         </div>
       </div>
 
+      <div class="sticky bottom-6 right-6 flex justify-end">
+        <button
+          class="bg-cyan-600 text-white text-4xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-cyan-500"
+          @click=addComment
+        >
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
 
       <!-- Modal para editar el post -->
       <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -564,6 +573,7 @@ export default {
           await this.getComments(this.post.id);
           await this.fetchPost(this.post.id);
           this.showAddCommentModal = false;
+          this.sortPosts()
         }
       } catch (error) {
         console.error("Error adding comment:", error);

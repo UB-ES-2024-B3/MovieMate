@@ -84,6 +84,104 @@
           <i class="fas fa-arrow-left mr-2"></i> Volver
         </button>
 
+        <div
+          v-if="parentComment"
+          class="bg-gray-800 text-white p-6 rounded-lg shadow-md flex flex-col w-full max-w-4xl mx-auto mb-6"
+        >
+          <div class="flex items-center justify-between">
+            <!-- Información del Usuario -->
+            <div class="flex items-center">
+              <!-- Imagen del Usuario -->
+              <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-400 flex-shrink-0">
+                <img
+                  v-if="parentComment.author.image"
+                  :src="parentComment.author.image"
+                  alt="Profile"
+                  class="w-full h-full object-cover"
+                />
+                <i v-else class="fas fa-user-circle text-4xl text-gray-400"></i>
+              </div>
+
+              <!-- Nombre del Usuario -->
+              <router-link
+                :to="`/user/${parentComment.author.userName}`"
+                class="font-bold text-cyan-400 text-lg hover:underline ml-4"
+              >
+                @{{ parentComment.author.userName }}
+              </router-link>
+            </div>
+
+            <!-- Dropdown para editar/eliminar -->
+            <div
+              v-if="parentComment.author.userName === username_actual && parentComment.content !== 'Comentario Eliminado'"
+              class="relative"
+            >
+              <button
+                class="text-gray-400 hover:text-cyan-400"
+                @click="toggleDropdown(parentComment.id)"
+              >
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div
+                v-if="dropdownVisible === parentComment.id"
+                class="absolute top-0 right-0 bg-gray-700 text-white rounded shadow-md w-32"
+                @mouseleave="closeDropdown"
+              >
+                <button
+                  class="block w-full px-4 py-2 text-left hover:bg-gray-600"
+                  @click="openEditParentModal"
+                >
+                  Editar
+                </button>
+                <button
+                  class="block w-full px-4 py-2 text-left hover:bg-gray-600"
+                  @click="openDeleteParentModal"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Contenido del comentario -->
+          <p class="text-gray-300 mt-4 mb-4">{{ parentComment.content }}</p>
+
+          <!-- Información adicional -->
+          <div class="flex items-center space-x-4 text-gray-400">
+            <button
+              class="hover:text-cyan-400 transition"
+              :class="parentComment.likedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+              @click="addLikeToParentComment"
+            >
+              <i class="fas fa-thumbs-up"></i>
+            </button>
+            <span>{{ parentComment.like }}</span>
+
+            <!-- Botón de Dislike -->
+            <button
+              class="hover:text-cyan-400 transition"
+              :class="parentComment.dislikeBy.includes(username_actual) ? 'text-cyan-400' : ''"
+              @click="addDislikeToParentComment"
+            >
+              <i class="fas fa-thumbs-down"></i>
+            </button>
+            <span>{{ parentComment.disLike }}</span>
+            <button
+              class="hover:text-cyan-400 transition"
+              @click="openReplyModal(parentComment.id)"
+            >
+              <i class="fas fa-comment"></i>
+            </button>
+            <span>{{ parentComment.totalComments }}</span>
+            <p class="text-sm text-gray-400">{{ formatDate(parentComment.createdAt) }}</p>
+          </div>
+        </div>
+
+        <div v-else class="text-center">
+          <p class="text-xl font-semibold">Cargando comentarios...</p>
+        </div>
+
         <div v-if="loading" class="text-center">
           <p class="text-xl font-semibold">Cargando comentarios...</p>
         </div>
@@ -182,6 +280,17 @@
           </div>
         </div>
 
+        <div class="fixed bottom-6 right-6 flex justify-end">
+          <button
+            class="bg-cyan-600 text-white text-4xl rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-cyan-500"
+            @click="openReplyModal(commentId)"
+          >
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+
+
+
         <!-- Modal de respuesta -->
         <div
           v-if="showReplyModal"
@@ -259,6 +368,62 @@
             </div>
           </div>
         </div>
+
+        <!-- PARENT MODALS -->
+        <div
+          v-if="showEditParentModal"
+          class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        >
+          <div class="bg-gray-800 rounded-lg w-96 p-6">
+            <h2 class="text-white text-xl font-bold mb-4">Editar Comentario</h2>
+            <label class="text-white text-sm mb-2 block" for="parentContent">Contenido</label>
+            <textarea
+              id="parentContent"
+              v-model="editParentData.content"
+              class="w-full mb-4 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              rows="4"
+            ></textarea>
+            <div class="flex justify-end space-x-4">
+              <button
+                class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                @click="closeEditParentModal"
+              >
+                Cancelar
+              </button>
+              <button
+                class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-500"
+                @click="confirmEditParentComment"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="showDeleteParentModal"
+          class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        >
+          <div class="bg-gray-800 rounded-lg w-96 p-6">
+            <h2 class="text-white text-xl font-bold mb-4">¿Eliminar este comentario?</h2>
+            <p class="text-gray-300 mb-4">Esta acción no se puede deshacer.</p>
+            <div class="flex justify-end space-x-4">
+              <button
+                class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                @click="closeDeleteParentModal"
+              >
+                Cancelar
+              </button>
+              <button
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
+                @click="confirmDeleteParentComment"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
@@ -271,7 +436,7 @@ export default {
   data() {
     return {
       loading: true,
-      commentId: null,
+      commentId: "",
       forumComments: [],
       showReplyModal: false,
       replyContent: "",
@@ -290,6 +455,15 @@ export default {
       //Sorts
       sortByDate: 'recent',
       sortByVotes: 'votes',
+
+      //Parent
+      parentComment: null,
+      showEditParentModal: false,
+      showDeleteParentModal: false,
+      editParentData: {
+        id: "",
+        content: "",
+      },
     };
   },
   methods: {
@@ -400,6 +574,9 @@ export default {
         const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
         const response = await axios.get(`${BASE_URL}/comment/comment/${commentId}`);
         this.forumComments = response.data;
+        const parentResponse = await axios.get(`${BASE_URL}/comment/${commentId}`);
+        this.parentComment = parentResponse.data;
+        console.log(this.parentComment)
       } catch (error) {
         console.error("Error fetching comments:", error);
       } finally {
@@ -414,7 +591,7 @@ export default {
       this.$router.push(`/comment/${commentId}`);
     },
     openReplyModal(parentId) {
-      this.replyingTo = parentId;
+      this.replyingTo = Number(parentId);
       this.replyContent = "";
       this.showReplyModal = true;
     },
@@ -430,6 +607,7 @@ export default {
           content: this.replyContent,
           author: this.username_actual,
         };
+        console.log(payload)
         await axios.post(`${BASE_URL}/comment/`, payload);
         this.closeReplyModal();
         await this.fetchComments(this.replyingTo);
@@ -498,10 +676,133 @@ export default {
         this.displayMessage("Error al procesar el dislike.", true);
       }
     },
+
+    //Parent Calls:
+    openEditParentModal() {
+      this.editParentData = { id: this.parentComment.id, content: this.parentComment.content };
+      this.showEditParentModal = true;
+    },
+    closeEditParentModal() {
+      this.showEditParentModal = false;
+    },
+    async confirmEditParentComment() {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = { content: this.editParentData.content };
+        const response = await axios.put(`${BASE_URL}/comment/update/${this.editParentData.id}`, payload);
+
+        if (response.status === 200) {
+          this.parentComment.content = this.editParentData.content; // Actualiza el contenido localmente
+          this.displayMessage("Comentario editado correctamente.", false);
+          this.closeEditParentModal();
+        }
+      } catch (error) {
+        console.error("Error editando el comentario:", error);
+        this.displayMessage("Error al editar el comentario.", true);
+      }
+    },
+
+    // Abrir modal de eliminación
+    openDeleteParentModal() {
+      this.showDeleteParentModal = true;
+    },
+    closeDeleteParentModal() {
+      this.showDeleteParentModal = false;
+    },
+    async confirmDeleteParentComment() {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.delete(`${BASE_URL}/comment/${this.parentComment.id}`);
+
+        if (response.status === 200) {
+          this.parentComment.content = "Comentario Eliminado"; // Marca el comentario como eliminado
+          this.displayMessage("Comentario eliminado correctamente.", false);
+          this.closeDeleteParentModal();
+        }
+      } catch (error) {
+        console.error("Error eliminando el comentario:", error);
+        this.displayMessage("Error al eliminar el comentario.", true);
+      }
+    },
+
+    async addLikeToParentComment() {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = { userName: this.username_actual, commentId: this.parentComment.id };
+
+        if (this.parentComment.likedBy.includes(this.username_actual)) {
+          // Si ya dio like, se elimina
+          const response = await axios.put(`${BASE_URL}/comment/like`, payload);
+          if (response.status === 200) {
+            this.parentComment.likedBy = this.parentComment.likedBy.filter(
+              (user) => user !== this.username_actual
+            );
+            this.parentComment.like--;
+            this.displayMessage("¡Like retirado!", false);
+          }
+        } else {
+          // Si no dio like, se añade
+          const response = await axios.put(`${BASE_URL}/comment/like`, payload);
+          if (response.status === 200) {
+            this.parentComment.likedBy.push(this.username_actual);
+            this.parentComment.like++;
+            // Quita el dislike si lo tiene
+            if (this.parentComment.dislikeBy.includes(this.username_actual)) {
+              this.parentComment.dislikeBy = this.parentComment.dislikeBy.filter(
+                (user) => user !== this.username_actual
+              );
+              this.parentComment.disLike--;
+            }
+            this.displayMessage("¡Like añadido!", false);
+          }
+        }
+      } catch (error) {
+        console.error("Error gestionando el like:", error);
+        this.displayMessage("Error al procesar el like.", true);
+      }
+    },
+
+    async addDislikeToParentComment() {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = { userName: this.username_actual, commentId: this.parentComment.id };
+
+        if (this.parentComment.dislikeBy.includes(this.username_actual)) {
+          // Si ya dio dislike, se elimina
+          const response = await axios.put(`${BASE_URL}/comment/dislike`, payload);
+          if (response.status === 200) {
+            this.parentComment.dislikeBy = this.parentComment.dislikeBy.filter(
+              (user) => user !== this.username_actual
+            );
+            this.parentComment.disLike--;
+            this.displayMessage("¡Dislike retirado!", false);
+          }
+        } else {
+          // Si no dio dislike, se añade
+          const response = await axios.put(`${BASE_URL}/comment/dislike`, payload);
+          if (response.status === 200) {
+            this.parentComment.dislikeBy.push(this.username_actual);
+            this.parentComment.disLike++;
+            // Quita el like si lo tiene
+            if (this.parentComment.likedBy.includes(this.username_actual)) {
+              this.parentComment.likedBy = this.parentComment.likedBy.filter(
+                (user) => user !== this.username_actual
+              );
+              this.parentComment.like--;
+            }
+            this.displayMessage("¡Dislike añadido!", false);
+          }
+        }
+      } catch (error) {
+        console.error("Error gestionando el dislike:", error);
+        this.displayMessage("Error al procesar el dislike.", true);
+      }
+    },
   },
   watch: {
     // Observa los cambios en el parámetro de la ruta
     "$route.params.commentId"(newCommentId) {
+      this.commentId = newCommentId;
       this.fetchComments(newCommentId);
     },
   },
