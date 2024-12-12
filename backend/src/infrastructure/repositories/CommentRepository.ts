@@ -66,7 +66,7 @@ export class CommentRepository implements ICommentRepository {
 
     async get(id: number): Promise<CommentDtoOut> {
         const commentFromDB = await this.repository.findOne({where: {id: id},
-        relations: ['author', 'post', 'review', 'comment'],});
+        relations: ['author', 'post', 'review', 'comment', 'likedBy', 'dislikeBy'],});
 
         if (!commentFromDB) {
             throw createError(404, `Comment does not exist`)
@@ -78,6 +78,8 @@ export class CommentRepository implements ICommentRepository {
             image: commentFromDB.author.image ? this.imageToBase64(commentFromDB.author.image) : null
         };
 
+        const likedByIds: string[] = commentFromDB.likedBy.map(user => user.userName);
+        const dislikedByIds: string[] = commentFromDB.dislikeBy.map(user => user.userName);
 
         const comment: CommentDtoOut = {
             id: commentFromDB.id,
@@ -89,14 +91,16 @@ export class CommentRepository implements ICommentRepository {
             comment: commentFromDB.comment? commentFromDB.comment.id: null,
             totalComments: commentFromDB.totalComments,
             like: commentFromDB.like,
-            disLike: commentFromDB.disLike
+            disLike: commentFromDB.disLike,
+            likedBy: likedByIds,
+            dislikeBy: dislikedByIds,
         }
 
         return comment;
     }
 
-    async getAll(): Promise<CommentDtoOut[]> {
-        const commentsFromDB = await this.repository.find({relations: ['author', 'post', 'review', 'comment']});
+    async getAll(): Promise< CommentDtoOut[] > {
+        const commentsFromDB = await this.repository.find({relations: ['author', 'post', 'review', 'comment', 'likedBy', 'dislikeBy']});
 
         if (!commentsFromDB) {
             throw createError(404, "No comments found");
@@ -109,6 +113,9 @@ export class CommentRepository implements ICommentRepository {
                 image: comment.author.image ? this.imageToBase64(comment.author.image) : null
             };
 
+            const likedByIds: string[] = comment.likedBy.map(user => user.userName);
+            const dislikedByIds: string[] = comment.dislikeBy.map(user => user.userName);
+
             const comments: CommentDtoOut = {
                 id: comment.id,
                 createdAt: comment.createdAt,
@@ -120,6 +127,8 @@ export class CommentRepository implements ICommentRepository {
                 totalComments: comment.totalComments,
                 like: comment.like,
                 disLike: comment.disLike,
+                likedBy: likedByIds,
+                dislikeBy: dislikedByIds,
             };
 
             return comments;
@@ -128,7 +137,7 @@ export class CommentRepository implements ICommentRepository {
     }
 
     async getByPost(postId: number): Promise<CommentDtoOut[]> {
-        const commentsFromDB = await this.repository.find({where: {post: {id: postId}}, relations: ['author', 'post', 'review', 'comment']});
+        const commentsFromDB = await this.repository.find({where: {post: {id: postId}}, relations: ['author', 'post', 'review', 'comment', 'likedBy', 'dislikeBy']});
 
         if (!commentsFromDB) {
             throw createError(404, "No comments found");
@@ -141,6 +150,9 @@ export class CommentRepository implements ICommentRepository {
                 image: comment.author.image ? this.imageToBase64(comment.author.image) : null
             };
 
+            const likedByIds: string[] = comment.likedBy.map(user => user.userName);
+            const dislikedByIds: string[] = comment.dislikeBy.map(user => user.userName);
+
             const comments: CommentDtoOut = {
                 id: comment.id,
                 createdAt: comment.createdAt,
@@ -152,6 +164,8 @@ export class CommentRepository implements ICommentRepository {
                 totalComments: comment.totalComments,
                 like: comment.like,
                 disLike: comment.disLike,
+                likedBy: likedByIds,
+                dislikeBy: dislikedByIds,
             };
 
             return comments;
@@ -160,7 +174,7 @@ export class CommentRepository implements ICommentRepository {
     }
 
     async getByReview(reviewId: number): Promise<CommentDtoOut[]> {
-        const commentsFromDB = await this.repository.find({where: {review: {id: reviewId}}, relations: ['author', 'post', 'review', 'comment']});
+        const commentsFromDB = await this.repository.find({where: {review: {id: reviewId}}, relations: ['author', 'post', 'review', 'comment', 'likedBy', 'dislikeBy']});
 
         if (!commentsFromDB) {
             throw createError(404, "No comments found");
@@ -173,37 +187,8 @@ export class CommentRepository implements ICommentRepository {
                 image: comment.author.image ? this.imageToBase64(comment.author.image) : null
             };
 
-            const comments: CommentDtoOut = {
-                id: comment.id,
-                createdAt: comment.createdAt,
-                content: comment.content,
-                author: author,
-                post: comment.post? comment.post.id: null,
-                review: comment.review? comment.review.id: null,
-                comment: comment.comment? comment.comment.id: null,
-                totalComments: comment.totalComments,
-                like: comment.like,
-                disLike: comment.disLike
-            };
-
-            return comments;
-        });
-        return allComments;
-    }
-
-    async getByComment(commentId: number): Promise<CommentDtoOut[]> {
-        const commentsFromDB = await this.repository.find({where: {comment: {id: commentId}}, relations: ['author', 'post', 'review', 'comment']});
-
-        if (!commentsFromDB) {
-            throw createError(404, "No comments found");
-        }
-
-        const allComments = commentsFromDB.map((comment: CommentEntity) => {
-            const author: AuthorDtoOut = {
-                id: comment.author.id,
-                userName: comment.author.userName,
-                image: comment.author.image ? this.imageToBase64(comment.author.image) : null
-            };
+            const likedByIds: string[] = comment.likedBy.map(user => user.userName);
+            const dislikedByIds: string[] = comment.dislikeBy.map(user => user.userName);
 
             const comments: CommentDtoOut = {
                 id: comment.id,
@@ -216,6 +201,45 @@ export class CommentRepository implements ICommentRepository {
                 totalComments: comment.totalComments,
                 like: comment.like,
                 disLike: comment.disLike,
+                likedBy: likedByIds,
+                dislikeBy: dislikedByIds,
+            };
+
+            return comments;
+        });
+        return allComments;
+    }
+
+    async getByComment(commentId: number): Promise<CommentDtoOut[]> {
+        const commentsFromDB = await this.repository.find({where: {comment: {id: commentId}}, relations: ['author', 'post', 'review', 'comment', 'likedBy', 'dislikeBy']});
+
+        if (!commentsFromDB) {
+            throw createError(404, "No comments found");
+        }
+
+        const allComments = commentsFromDB.map((comment: CommentEntity) => {
+            const author: AuthorDtoOut = {
+                id: comment.author.id,
+                userName: comment.author.userName,
+                image: comment.author.image ? this.imageToBase64(comment.author.image) : null
+            };
+
+            const likedByIds: string[] = comment.likedBy.map(user => user.userName);
+            const dislikedByIds: string[] = comment.dislikeBy.map(user => user.userName);
+
+            const comments: CommentDtoOut = {
+                id: comment.id,
+                createdAt: comment.createdAt,
+                content: comment.content,
+                author: author,
+                post: comment.post? comment.post.id: null,
+                review: comment.review? comment.review.id: null,
+                comment: comment.comment? comment.comment.id: null,
+                totalComments: comment.totalComments,
+                like: comment.like,
+                disLike: comment.disLike,
+                likedBy: likedByIds,
+                dislikeBy: dislikedByIds
             };
 
             return comments;
