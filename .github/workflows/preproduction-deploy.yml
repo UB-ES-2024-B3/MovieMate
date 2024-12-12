@@ -35,21 +35,21 @@ jobs:
         echo "ACR_PASSWORD=$(echo $acr_credentials | jq -r .password)" >> $GITHUB_ENV
 
     # 4. Ensure Database Container is Running
-    - name: Start Database Container if not running
-      run: |
-        # Check if the database container is already running
-        if [ "$(docker ps -q -f name=pre-db-container)" ]; then
-          echo "Database container is already running."
-        else
-          echo "Starting database container..."
-          docker run -d \
-            --name pre-db-container \
-            -e POSTGRES_DB="es-b3-database" \
-            -e POSTGRES_USER="user" \
-            -e POSTGRES_PASSWORD="12345" \
-            -p 5432:5432 \
-            postgres:latest
-        fi
+#    - name: Start Database Container if not running
+#      run: |
+#        # Check if the database container is already running
+#        if [ "$(docker ps -q -f name=pre-db-container)" ]; then
+#          echo "Database container is already running."
+#        else
+#          echo "Starting database container..."
+#          docker run -d \
+#            --name pre-db-container \
+#            -e POSTGRES_DB="es-b3-database" \
+#            -e POSTGRES_USER="user" \
+#            -e POSTGRES_PASSWORD="12345" \
+#            -p 5432:5432 \
+#            postgres:latest
+#        fi
 
     # 5. Build and push Docker images
     - name: Log in to ACR
