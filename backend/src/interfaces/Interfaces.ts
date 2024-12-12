@@ -1,4 +1,5 @@
 import {Movie} from "../domain/models/Movie";
+import {Column} from "typeorm";
 
 export interface UpdateUserData {
     userName?: string;
@@ -157,4 +158,15 @@ export interface UpdateCommentData {
 
 export interface UserId {
     id: number;
+}
+
+export interface Filters {
+    genres: string[];
+    directors: string[];
+    actors: string[];
+    premiereYear: number;
+    duration: number;
+    classification: string;
+    score: number;
+    totalReviews: number[];
 }
