@@ -1,6 +1,7 @@
 import {BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
 import {MovieEntity} from "./MovieEntity";
-import {PostEntity} from "./PostEntity"; // Asegúrate de importar MovieEntity
+import {PostEntity} from "./PostEntity";
+import {CommentEntity} from "./CommentEntity"; // Asegúrate de importar MovieEntity
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -60,4 +61,10 @@ export class UserEntity extends BaseEntity {
 
     @ManyToMany(type => PostEntity, post => post.dislikeBy)
     dislikedPosts: PostEntity[];
+
+    @ManyToMany(type => CommentEntity, comment => comment.likedBy)
+    likedComment: CommentEntity[];
+
+    @ManyToMany(type => CommentEntity, comment => comment.dislikeBy)
+    dislikedComment: CommentEntity[];
 }

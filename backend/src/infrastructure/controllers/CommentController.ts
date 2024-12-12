@@ -132,4 +132,35 @@ export class CommentController {
         }
     }
 
+    static async addLike(req: Request, res:Response, next: NextFunction){
+        try {
+            const userName = req.body.userName;
+            const commentID = parseInt(req.body.commentId);
+
+            if(!userName || isNaN(commentID)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.commentService.addLike(userName, commentID);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
+
+    static async addDislike(req: Request, res:Response, next: NextFunction){
+        try {
+            const userName = req.body.userName;
+            const commentID = parseInt(req.body.commentId);
+
+            if(!userName || isNaN(commentID)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.commentService.addDislike(userName, commentID);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
 }
