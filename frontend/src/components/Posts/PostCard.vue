@@ -4,28 +4,61 @@
     <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between h-full">
       <div class="space-y-6">
         <div>
-          <h2 class="text-gray-300 font-semibold mb-2">Ordenar por fecha:</h2>
-          <div class="grid grid-cols-1 gap-2">
-            <button
-              :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
-                sortByDate === 'recent'
-                  ? 'bg-cyan-500 hover:bg-cyan-600'
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`"
-              @click="sortPosts('recent')"
-            >
-              <i class="fas fa-clock mr-2"></i> Más recientes
-            </button>
-            <button
-              :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
-                sortByDate === 'oldest'
-                  ? 'bg-cyan-500 hover:bg-cyan-600'
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`"
-              @click="sortPosts('oldest')"
-            >
-              <i class="fas fa-history mr-2"></i> Menos recientes
-            </button>
+          <h2 class="text-white text-xl font-bold mb-4">Ordenar por:</h2>
+          <div class="space-y-6">
+            <!-- Grupo Recientes/Antiguos -->
+            <div>
+              <h3 class="text-gray-300 font-semibold mb-2">Por fecha:</h3>
+              <div class="grid grid-cols-1 gap-2">
+                <button
+                  :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                    sortByDate === 'recent'
+                      ? 'bg-cyan-500 hover:bg-cyan-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`"
+                  @click="setSortOrder('recent', 'date')"
+                >
+                  <i class="fas fa-clock mr-2"></i> Más recientes
+                </button>
+                <button
+                  :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                    sortByDate === 'oldest'
+                      ? 'bg-cyan-500 hover:bg-cyan-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`"
+                  @click="setSortOrder('oldest', 'date')"
+                >
+                  <i class="fas fa-history mr-2"></i> Menos recientes
+                </button>
+              </div>
+            </div>
+
+            <!-- Grupo Votados -->
+            <div>
+              <h3 class="text-gray-300 font-semibold mb-2">Por votos:</h3>
+              <div class="grid grid-cols-1 gap-2">
+                <button
+                  :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                    sortByVotes === 'votes'
+                      ? 'bg-cyan-500 hover:bg-cyan-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`"
+                  @click="setSortOrder('votes', 'votes')"
+                >
+                  <i class="fas fa-thumbs-up mr-2"></i> Más votados
+                </button>
+                <button
+                  :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                    sortByVotes === 'less_votes'
+                      ? 'bg-cyan-500 hover:bg-cyan-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`"
+                  @click="setSortOrder('less_votes', 'votes')"
+                >
+                  <i class="fas fa-thumbs-down mr-2"></i> Menos votados
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -174,6 +207,8 @@
             class="bg-gray-700 rounded-lg p-4 shadow-md"
             @reply="replyToComment"
             @navigateToComment="navigateToComment"
+            @like-comment="addLikeComment"
+            @dislike-comment="addDislikeComment"
           />
         </div>
       </div>
@@ -294,7 +329,8 @@ export default {
       dropdownVisible: false,
       showAddCommentModal: false,
       //Sorts
-      sortByDate: 'recent'
+      sortByDate: 'recent',
+      sortByVotes: 'votes',
     };
   },
   async created() {
@@ -303,12 +339,35 @@ export default {
     await this.getComments(postId)
   },
   methods: {
-    sortPosts(order) {
-      this.sortByDate = order;
+    setSortOrder(order, group) {
+      if (group === 'date') {
+        this.sortByDate = order;
+      } else if (group === 'votes') {
+        this.sortByVotes = order;
+      }
+      this.sortPosts();
+    },
+    sortPosts() {
       if (this.sortByDate === 'recent') {
         this.comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       } else if (this.sortByDate === 'oldest') {
         this.comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      }
+
+      if (this.sortByVotes === 'votes') {
+        this.comments.sort((a, b) => {
+            if (b.like === a.like) {
+                return a.disLike - b.disLike;
+            }
+            return b.like - a.like;
+        });
+      } else if (this.sortByVotes === 'less_votes') {
+        this.comments.sort((a, b) => {
+            if (a.like === b.like) {
+                return b.disLike - a.disLike;
+            }
+            return a.like - b.like;
+        });
       }
     },
     formatDate(dateString) {
@@ -422,7 +481,71 @@ export default {
       console.log(commentId)
       this.$router.push({ path: `/comment/${commentId}` });
     },
+    async addLikeComment(commentId, callback) {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = { userName: this.username_actual, commentId };
+        const comment = this.comments.find((c) => c.id === commentId);
 
+        if (comment.likedBy.includes(this.username_actual)) {
+          const response = await axios.put(`${BASE_URL}/comment/like`, payload);
+          if (response.status === 200) {
+            this.displayMessage("¡Like retirado!", false);
+            comment.likedBy = comment.likedBy.filter((user) => user !== this.username_actual);
+            comment.like--;
+          }
+        } else {
+          const response = await axios.put(`${BASE_URL}/comment/like`, payload);
+          if (response.status === 200) {
+            this.displayMessage("¡Like añadido!", false);
+            comment.likedBy.push(this.username_actual);
+            comment.like++;
+            if (comment.dislikeBy.includes(this.username_actual)) {
+              comment.dislikeBy = comment.dislikeBy.filter((user) => user !== this.username_actual);
+              comment.disLike--;
+            }
+          }
+        }
+
+        if (callback) await callback(); // Llama al callback en el hijo
+      } catch (error) {
+        console.error("Error añadiendo/removiendo like:", error);
+        this.displayMessage("Error al procesar el like.", true);
+      }
+    },
+
+    async addDislikeComment(commentId, callback) {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = { userName: this.username_actual, commentId };
+        const comment = this.comments.find((c) => c.id === commentId);
+
+        if (comment.dislikeBy.includes(this.username_actual)) {
+          const response = await axios.put(`${BASE_URL}/comment/dislike`, payload);
+          if (response.status === 200) {
+            this.displayMessage("¡Dislike retirado!", false);
+            comment.dislikeBy = comment.dislikeBy.filter((user) => user !== this.username_actual);
+            comment.disLike--;
+          }
+        } else {
+          const response = await axios.put(`${BASE_URL}/comment/dislike`, payload);
+          if (response.status === 200) {
+            this.displayMessage("¡Dislike añadido!", false);
+            comment.dislikeBy.push(this.username_actual);
+            comment.disLike++;
+            if (comment.likedBy.includes(this.username_actual)) {
+              comment.likedBy = comment.likedBy.filter((user) => user !== this.username_actual);
+              comment.like--;
+            }
+          }
+        }
+
+        if (callback) await callback(); // Llama al callback en el hijo
+      } catch (error) {
+        console.error("Error añadiendo/removiendo dislike:", error);
+        this.displayMessage("Error al procesar el dislike.", true);
+      }
+    },
     async submitComment() {
       if (!this.newComment.trim()) this.displayMessage("El comentario no puede estar vacio", true);
 
