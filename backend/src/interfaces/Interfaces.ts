@@ -160,14 +160,14 @@ export interface UserId {
 }
 
 export interface Filters {
-    genres: string;
-    directors: string;
-    actors: string;
-    premiereYear: number;
-    duration: number;
-    classification: string;
-    score: number;
-    totalReviews: number;
+    genres?: string;
+    directors?: string;
+    actors?: string;
+    premiereYear?: number;
+    duration?: number;
+    classification?: string;
+    score?: number;
+    totalReviews?: number;
 }
 
 export interface GetMoviesFilteredDtoOut {
