@@ -68,6 +68,25 @@
         <div class="flex items-center space-x-4 text-gray-400">
           <button
             class="hover:text-cyan-400 transition"
+            :class="comment.likedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+            @click="handleLike"
+          >
+            <i class="fas fa-thumbs-up"></i>
+          </button>
+          <span>{{ localLike }}</span>
+
+          <!-- Botón de Dislike -->
+          <button
+            class="hover:text-cyan-400 transition"
+            :class="comment.dislikeBy.includes(username_actual) ? 'text-cyan-400' : ''"
+            @click="handleDislike"
+          >
+            <i class="fas fa-thumbs-down"></i>
+          </button>
+          <span>{{ localDislike }}</span>
+
+          <button
+            class="hover:text-cyan-400 transition"
             @click="addComment"
           >
             <i class="fas fa-comment"></i>
@@ -180,6 +199,8 @@ export default {
       showAddCommentModal: false,
       localTotalComments: this.comment.totalComments,
       localContent: this.comment.content,
+      localLike: this.comment.like,
+      localDislike: this.comment.disLike,
       showModal: false,
       showDeleteModal: false,
       editCommentData: {
@@ -296,10 +317,18 @@ export default {
         const response = await axios.get(`${BASE_URL}/comment/${this.comment.id}`);
         this.localTotalComments = response.data.totalComments;
         this.localContent = response.data.content;
+        this.localDislike = response.data.disLike;
+        this.localLike = response.data.like;
       } catch (error) {
         console.error("Error fetching updated comment:", error);
       }
-    }
+    },
+    async handleLike() {
+      this.$emit("like-comment", this.comment.id, this.fetchUpdatedComment);
+    },
+    async handleDislike() {
+      this.$emit("dislike-comment", this.comment.id, this.fetchUpdatedComment);
+    },
   },
 };
 </script>
