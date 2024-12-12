@@ -36,4 +36,4 @@ jobs:
       - name: Run unit tests
         working-directory: ./backend
         run: npm run test:unit
-        continue-on-error: ${{ contains(['develop', 'pre-production'], github.ref_name) }}
+        continue-on-error: ${{ github.ref_name == 'develop' || github.ref_name == 'pre-production' }}
