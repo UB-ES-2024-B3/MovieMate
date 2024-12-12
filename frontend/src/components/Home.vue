@@ -248,9 +248,11 @@
                     </button>
                     <span>{{ post.disLike }}</span>
 
-                    <button class="hover:text-cyan-400 transition">
+                    <button class="hover:text-cyan-400 transition" @click="openCommentModal(post.id)">
                       <i class="fas fa-comment"></i>
                     </button>
+                    <span>{{ post.totalComments }}</span>
+
                     <span class="text-xs text-gray-500">{{ formatDate(post.createdAt) }}</span>
                   </div>
 
@@ -336,6 +338,32 @@
                 </div>
               </div>
             </div>
+
+            <div v-if="showCommentModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div class="bg-gray-800 rounded-lg w-96 p-6">
+                <h2 class="text-white text-xl font-bold mb-4">Añadir Comentario</h2>
+                <textarea
+                  v-model="newComment.content"
+                  placeholder="Escribe tu comentario aquí..."
+                  class="w-full mb-4 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  rows="4"
+                ></textarea>
+                <div class="flex justify-end space-x-4">
+                  <button
+                    class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                    @click="closeCommentModal"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-500"
+                    @click="submitComment"
+                  >
+                    Comentar
+                  </button>
+                </div>
+              </div>
+            </div>
           </section>
         </main>
       </div>
@@ -356,6 +384,8 @@ export default {
           showMessage: false, // Controlar la visibilidad del mensaje
           message: "", // Mensaje a mostrar
           toastError: false, //Para enseñar si es error o no
+
+          //Posts
           showModal: false,
           newPost: {
             title: "",
@@ -363,10 +393,21 @@ export default {
           },
           isEditing: false,
           dropdownPost: null,
-          showDeleteModal: false, // Controla la visibilidad del modal de confirmación
-          postToDelete: null, // ID del post que se va a eliminar
-          sortByDate: 'recent', // Estado para orden por fecha
+
+          //Deletes
+          showDeleteModal: false,
+          postToDelete: null,
+
+          //Sorts
+          sortByDate: 'recent',
           sortByVotes: 'votes',
+
+          //Comments
+          showCommentModal: false,
+          newComment: {
+            content: "",
+            postId: null,
+          },
         };
     },
     created() {
@@ -442,7 +483,7 @@ export default {
       async fetchPosts() {
         try {
           const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
-          const response = await axios.get(`${BASE_URL}/post/${this.username_actual}`);
+          const response = await axios.get(`${BASE_URL}/post/all/${this.username_actual}`);
           const allPosts = response.data.allPosts;
           const likedPosts = new Set(response.data.likedPosts || []);
           const dislikedPosts = new Set(response.data.dislikedPosts || []);
@@ -661,7 +702,7 @@ export default {
             // En caso contrario, lo añade
             const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
             if (response.status === 200) {
-              this.displayMessage("¡Dislike registrado!", false);
+              this.displayMessage("¡Dislike añadido!", false);
               post.dislikedBy.push(this.username_actual);
               post.disLike++;
               // Saca el like si esta añadido, no puedes darle a las dos
@@ -675,6 +716,38 @@ export default {
         } catch (error) {
           console.error("Error añadiendo/removiendo dislike:", error);
           this.displayMessage("Error al procesar el dislike.", true);
+        }
+      },
+      openCommentModal(postId) {
+        this.newComment = { content: "", postId };
+        this.showCommentModal = true;
+      },
+      closeCommentModal() {
+        this.showCommentModal = false;
+        this.newComment = { content: "", postId: null };
+      },
+      async submitComment() {
+        if (!this.newComment.content.trim()) {
+          this.displayMessage("El comentario no puede estar vacío.", true);
+          return;
+        }
+
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            content: this.newComment.content,
+            author: this.username_actual,
+            post: this.newComment.postId,
+          };
+          const response = await axios.post(`${BASE_URL}/comment`, payload);
+          if (response.status === 200) {
+            this.displayMessage("Comentario añadido correctamente.", false);
+            this.fetchPosts();
+            this.closeCommentModal();
+          }
+        } catch (error) {
+          console.error("Error añadiendo comentario:", error);
+          this.displayMessage("Hubo un error al añadir el comentario.", true);
         }
       },
     }
