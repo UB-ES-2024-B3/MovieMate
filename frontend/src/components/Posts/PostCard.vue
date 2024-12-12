@@ -2,11 +2,37 @@
   <div class="flex h-screen">
     <!-- Lado izquierdo -->
     <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between h-full">
-      <!-- Menú lateral (opcional, puedes llenarlo según tu necesidad) -->
+      <div class="space-y-6">
+        <div>
+          <h2 class="text-gray-300 font-semibold mb-2">Ordenar por fecha:</h2>
+          <div class="grid grid-cols-1 gap-2">
+            <button
+              :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                sortByDate === 'recent'
+                  ? 'bg-cyan-500 hover:bg-cyan-600'
+                  : 'bg-gray-700 hover:bg-gray-600'
+              }`"
+              @click="sortPosts('recent')"
+            >
+              <i class="fas fa-clock mr-2"></i> Más recientes
+            </button>
+            <button
+              :class="`w-full py-3 px-4 text-white font-medium rounded transition ${
+                sortByDate === 'oldest'
+                  ? 'bg-cyan-500 hover:bg-cyan-600'
+                  : 'bg-gray-700 hover:bg-gray-600'
+              }`"
+              @click="sortPosts('oldest')"
+            >
+              <i class="fas fa-history mr-2"></i> Menos recientes
+            </button>
+          </div>
+        </div>
+      </div>
     </aside>
 
     <!-- Contenido Principal -->
-    <main class="flex-1 bg-gray-900 p-6">
+      <main class="flex flex-col flex-1 bg-gray-900 p-6">
       <div
         v-if="showMessage"
         :class="[
@@ -44,9 +70,12 @@
             </div>
 
             <!-- Nombre del Usuario -->
-            <span class="font-bold text-cyan-400 text-lg ml-4">
+            <router-link
+              :to="`/user/${post.author.userName}`"
+              class="font-bold text-cyan-400 text-lg hover:underline ml-4"
+            >
               @{{ post.author.userName }}
-            </span>
+            </router-link>
           </div>
 
           <!-- Opciones de editar/eliminar si el post pertenece al usuario actual -->
@@ -89,15 +118,34 @@
         <!-- Reacciones -->
         <div class="flex justify-between items-center">
           <div class="flex items-center space-x-4 text-gray-400">
-            <button class="hover:text-cyan-400 transition">
+            <!-- Botón de Like -->
+            <button
+              class="hover:text-cyan-400 transition"
+              :class="post.likedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+              @click="addLike(post.id)"
+            >
               <i class="fas fa-thumbs-up"></i>
             </button>
-            <button class="hover:text-cyan-400 transition">
+            <span>{{ post.like }}</span>
+
+            <!-- Botón de Dislike -->
+            <button
+              class="hover:text-cyan-400 transition"
+              :class="post.dislikedBy.includes(username_actual) ? 'text-cyan-400' : ''"
+              @click="addDislike(post.id)"
+            >
               <i class="fas fa-thumbs-down"></i>
             </button>
-            <button class="hover:text-cyan-400 transition">
+            <span>{{ post.disLike }}</span>
+
+            <button
+              class="hover:text-cyan-400 transition"
+              @click="addComment"
+            >
               <i class="fas fa-comment"></i>
             </button>
+            <span>{{ post.totalComments }}</span>
+
             <span class="text-xs text-gray-500">{{ formatDate(post.createdAt) }}</span>
           </div>
 
@@ -106,11 +154,30 @@
           </button>
         </div>
       </div>
-
-      <!-- Mensaje de carga -->
       <div v-else class="text-white text-center">
         Cargando post...
       </div>
+
+      <div class="flex-1 bg-gray-800 p-6 rounded-lg shadow-md overflow-y-auto mt-2">
+        <h3 class="text-cyan-400 text-xl font-bold mb-4">Comentarios</h3>
+
+        <div v-if="comments.length === 0" class="text-center text-gray-400 py-8">
+          No hay comentarios aún
+        </div>
+
+        <div v-else class="space-y-4">
+          <comment-item
+            v-for="comment in comments"
+            :key="comment.id"
+            :comment="comment"
+            :level="0"
+            class="bg-gray-700 rounded-lg p-4 shadow-md"
+            @reply="replyToComment"
+            @navigateToComment="navigateToComment"
+          />
+        </div>
+      </div>
+
 
       <!-- Modal para editar el post -->
       <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -168,6 +235,34 @@
           </div>
         </div>
       </div>
+      <div
+        v-if="showAddCommentModal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      >
+        <div class="bg-gray-800 rounded-lg w-96 p-6">
+          <h2 class="text-white text-xl font-bold mb-4">Agregar Comentario</h2>
+          <textarea
+            v-model="newComment"
+            placeholder="Escribe tu comentario..."
+            class="w-full mb-4 p-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            rows="4"
+          ></textarea>
+          <div class="flex justify-end space-x-4">
+            <button
+              class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+              @click="closeAddCommentModal"
+            >
+              Cancelar
+            </button>
+            <button
+              class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-500"
+              @click="submitComment"
+            >
+              Publicar
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -176,12 +271,16 @@
 
 <script>
 import axios from "axios";
+import CommentItem from "@/components/Comment/CommentCard.vue";
 
 export default {
   name: "PostCard",
+  components: {CommentItem},
   data() {
     return {
       post: null,
+      comments: [],
+      newComment: "",
       username_actual: sessionStorage.getItem("username"),
       showMessage: false, // Controlar la visibilidad del mensaje
       message: "", // Mensaje a mostrar
@@ -193,13 +292,25 @@ export default {
       },
       showDeleteModal: false,
       dropdownVisible: false,
+      showAddCommentModal: false,
+      //Sorts
+      sortByDate: 'recent'
     };
   },
   async created() {
     const postId = this.$route.params.postId; // Obtiene el ID del post de la URL
     await this.fetchPost(postId);
+    await this.getComments(postId)
   },
   methods: {
+    sortPosts(order) {
+      this.sortByDate = order;
+      if (this.sortByDate === 'recent') {
+        this.comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (this.sortByDate === 'oldest') {
+        this.comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      }
+    },
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleDateString('es-ES', options);
@@ -217,10 +328,19 @@ export default {
       try {
         const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
         const response = await axios.get(`${BASE_URL}/post/${postId}`);
-        this.post = response.data;
+        this.post = response.data.post;
+        this.post.likedBy = response.data.likedUsers;
+        this.post.dislikedBy = response.data.dislikedUsers;
       } catch (error) {
         console.error("Error fetching post:", error);
       }
+    },
+    addComment() {
+      this.showAddCommentModal = true;
+    },
+    closeAddCommentModal() {
+      this.newComment = "";
+      this.showAddCommentModal = false;
     },
     toggleDropdown() {
       this.dropdownVisible = !this.dropdownVisible;
@@ -259,6 +379,74 @@ export default {
         console.error("Error updating post:", error);
       }
     },
+    async getComments(postId){
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.get(
+          `${BASE_URL}/comment/post/${postId}`
+        );
+        console.log(response.data)
+        this.comments = this.mapComments(response.data);
+      } catch (error) {
+        console.error("Error updating post:", error);
+      }
+    },
+    mapComments(comments) {
+      const map = {};
+      comments.forEach((comment) => {
+        comment.replies = [];
+        map[comment.id] = comment;
+      });
+      comments.forEach((comment) => {
+        if (comment.parentId) {
+          map[comment.parentId].replies.push(comment);
+        }
+      });
+      return comments.filter((comment) => !comment.parentId);
+    },
+    async replyToComment({ parentId, content }) {
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = {
+          comment: parentId,
+          content: content,
+          author: this.username_actual,
+        };
+        await axios.post(`${BASE_URL}/comment/`, payload);
+        await this.getComments(this.post.id);
+      } catch (error) {
+        console.error("Error replying to comment:", error);
+      }
+    },
+    navigateToComment(commentId) {
+      console.log(commentId)
+      this.$router.push({ path: `/comment/${commentId}` });
+    },
+
+    async submitComment() {
+      if (!this.newComment.trim()) this.displayMessage("El comentario no puede estar vacio", true);
+
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = {
+          post: this.post.id,
+          content: this.newComment,
+          author: this.username_actual,
+        };
+        const response = await axios.post(`${BASE_URL}/comment/`, payload);
+
+        if (response.status === 200) {
+          this.newComment = "";
+          this.displayMessage("Comentario agregado correctamente.", false);
+          await this.getComments(this.post.id);
+          await this.fetchPost(this.post.id);
+          this.showAddCommentModal = false;
+        }
+      } catch (error) {
+        console.error("Error adding comment:", error);
+        this.displayMessage("Error al agregar el comentario.", true);
+      }
+    },
     async confirmDelete() {
       try {
         const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
@@ -274,6 +462,77 @@ export default {
     navigateToForum() {
       this.$router.push({ path: "/", query: { view: "forum" } });
     },
+
+    async addLike(postId) {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            userName: this.username_actual, // Usuario autenticado
+            postId: postId, // ID del post
+          };
+          //En caso que tenga un like añadido...y quiera sacarlo
+          if (this.post.likedBy.includes(this.username_actual)) {
+            const response = await axios.put(`${BASE_URL}/post/like`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Like retirado!", false);
+              this.post.likedBy = this.post.likedBy.filter(user => user !== this.username_actual);
+              this.post.like--;
+            }
+          } else {
+            // En caso contrario, lo añade
+            const response = await axios.put(`${BASE_URL}/post/like`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Like añadido!", false);
+              this.post.likedBy.push(this.username_actual);
+              this.post.like++;
+              // Saca el dislike si esta añadido, no puedes darle a las dos
+              if (this.post.dislikedBy.includes(this.username_actual)) {
+                this.post.dislikedBy = this.post.dislikedBy.filter(user => user !== this.username_actual);
+                this.post.disLike--;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error añadiendo/removiendo like:", error);
+          this.displayMessage("Error al procesar el like.", true);
+        }
+      },
+
+      async addDislike(postId) {
+        try {
+          const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+          const payload = {
+            userName: this.username_actual, // Usuario autenticado
+            postId: postId, // ID del post
+          };
+
+          //En caso que tenga un like añadido...y quiera sacarlo
+          if (this.post.dislikedBy.includes(this.username_actual)) {
+            const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Dislike retirado!", false);
+              this.post.dislikedBy = this.post.dislikedBy.filter(user => user !== this.username_actual);
+              this.post.disLike--;
+            }
+          } else {
+            // En caso contrario, lo añade
+            const response = await axios.put(`${BASE_URL}/post/dislike`, payload);
+            if (response.status === 200) {
+              this.displayMessage("¡Dislike añadido!", false);
+              this.post.dislikedBy.push(this.username_actual);
+              this.post.disLike++;
+              // Saca el like si esta añadido, no puedes darle a las dos
+              if (this.post.likedBy.includes(this.username_actual)) {
+                this.post.likedBy = this.post.likedBy.filter(user => user !== this.username_actual);
+                this.post.like--;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error añadiendo/removiendo dislike:", error);
+          this.displayMessage("Error al procesar el dislike.", true);
+        }
+      },
   },
 };
 </script>
@@ -282,4 +541,3 @@ export default {
 <style scoped>
 
 </style>
-
