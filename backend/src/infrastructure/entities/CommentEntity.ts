@@ -26,6 +26,12 @@ export class CommentEntity extends BaseEntity {
     @Column({default: 0})
     totalComments: number;
 
+    @Column({default: 0})
+    like: number;
+
+    @Column({default: 0})
+    disLike: number;
+
     @ManyToOne(type => UserEntity)
     author: UserEntity;
 
@@ -37,4 +43,12 @@ export class CommentEntity extends BaseEntity {
 
     @ManyToOne(type => CommentEntity)
     comment: CommentEntity;
+
+    @ManyToMany(type => UserEntity,user => user.likedComment,  { cascade: true })
+    @JoinTable()
+    likedBy: UserEntity[];
+
+    @ManyToMany(type => UserEntity,user => user.dislikedComment,  { cascade: true })
+    @JoinTable()
+    dislikeBy: UserEntity[];
 }

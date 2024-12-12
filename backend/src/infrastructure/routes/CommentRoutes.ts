@@ -1,5 +1,6 @@
 import {NextFunction, Request, Response, Router} from "express";
 import {CommentController} from "../controllers/CommentController";
+import {ReviewController} from "../controllers/ReviewController";
 
 
 const multer = require("multer")
@@ -18,5 +19,9 @@ router.get("/comment/:commentId", (req: Request, res: Response, next: NextFuncti
 
 router.put("/update/:commentId", (req: Request, res: Response, next: NextFunction) => CommentController.updateComment(req, res, next));
 router.delete("/:commentId", (req: Request, res: Response, next: NextFunction) => CommentController.deleteComment(req, res, next));
+
+router.put("/like", (req: Request, res: Response, next: NextFunction) => CommentController.addLike(req, res, next));
+router.put("/dislike", (req: Request, res: Response, next: NextFunction) => CommentController.addDislike(req, res, next));
+
 
 export default router;

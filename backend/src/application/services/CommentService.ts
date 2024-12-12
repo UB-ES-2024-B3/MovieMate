@@ -39,4 +39,12 @@ export class CommentService {
         return await this.commentRepository.delete(commentId);
     }
 
+    async addLike(userName: string, commentId: number): Promise<string>{
+        return await this.commentRepository.addLike(userName, commentId);
+    }
+
+    async addDislike(userName: string, commentId: number): Promise<string>{
+        return await this.commentRepository.addDislike(userName, commentId);
+    }
+
 }

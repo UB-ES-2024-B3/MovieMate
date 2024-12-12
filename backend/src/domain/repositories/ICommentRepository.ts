@@ -9,4 +9,6 @@ export interface ICommentRepository {
     getByComment(commentId: number): Promise<CommentDtoOut[]>;
     update(commentId: number, comment: UpdateCommentData): Promise<string>;
     delete(commentId: number): Promise<string>;
+    addLike(userName: string, commentId: number): Promise<string>;
+    addDislike(userName: string, commentId: number): Promise<string>
 }

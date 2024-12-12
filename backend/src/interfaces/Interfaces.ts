@@ -145,6 +145,8 @@ export interface CommentDtoOut {
     review?: number;
     comment?: number;
     totalComments: number;
+    like: number;
+    disLike: number;
 }
 
 export interface UpdateCommentData {

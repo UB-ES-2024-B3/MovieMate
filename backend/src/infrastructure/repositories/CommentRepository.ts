@@ -87,7 +87,9 @@ export class CommentRepository implements ICommentRepository {
             post: commentFromDB.post? commentFromDB.post.id: null,
             review: commentFromDB.review? commentFromDB.review.id: null,
             comment: commentFromDB.comment? commentFromDB.comment.id: null,
-            totalComments: commentFromDB.totalComments
+            totalComments: commentFromDB.totalComments,
+            like: commentFromDB.like,
+            disLike: commentFromDB.disLike
         }
 
         return comment;
@@ -115,7 +117,9 @@ export class CommentRepository implements ICommentRepository {
                 post: comment.post? comment.post.id: null,
                 review: comment.review? comment.review.id: null,
                 comment: comment.comment? comment.comment.id: null,
-                totalComments: comment.totalComments
+                totalComments: comment.totalComments,
+                like: comment.like,
+                disLike: comment.disLike,
             };
 
             return comments;
@@ -145,7 +149,9 @@ export class CommentRepository implements ICommentRepository {
                 post: comment.post? comment.post.id: null,
                 review: comment.review? comment.review.id: null,
                 comment: comment.comment? comment.comment.id: null,
-                totalComments: comment.totalComments
+                totalComments: comment.totalComments,
+                like: comment.like,
+                disLike: comment.disLike,
             };
 
             return comments;
@@ -175,7 +181,9 @@ export class CommentRepository implements ICommentRepository {
                 post: comment.post? comment.post.id: null,
                 review: comment.review? comment.review.id: null,
                 comment: comment.comment? comment.comment.id: null,
-                totalComments: comment.totalComments
+                totalComments: comment.totalComments,
+                like: comment.like,
+                disLike: comment.disLike
             };
 
             return comments;
@@ -205,7 +213,9 @@ export class CommentRepository implements ICommentRepository {
                 post: comment.post? comment.post.id: null,
                 review: comment.review? comment.review.id: null,
                 comment: comment.comment? comment.comment.id: null,
-                totalComments: comment.totalComments
+                totalComments: comment.totalComments,
+                like: comment.like,
+                disLike: comment.disLike,
             };
 
             return comments;
@@ -241,6 +251,83 @@ export class CommentRepository implements ICommentRepository {
         await this.repository.save(commentFromDB);
 
         return "Comment deleted"
+    }
+
+    async addLike(userName: string, commentId: number): Promise<string>{
+        const user = await this.userRepository.findOne({ where: { userName } });
+        if(!user){
+            throw createError(404, `User does not exist`);
+        }
+
+        const comment = await this.repository.findOne({ where: { id: commentId }, relations: ["likedBy", "dislikeBy"] });
+        if(!comment){
+            throw createError(404, `Comment does not exist`);
+        }
+
+        const hasLiked = comment.likedBy.some(likedUser => likedUser.userName === userName);
+        const hasDisliked = comment.dislikeBy.some(dislikedUser => dislikedUser.userName === userName);
+
+        if(!hasLiked){
+            comment.likedBy.push(user);
+
+            if(hasDisliked){
+                comment.dislikeBy = comment.dislikeBy.filter(dislikedUser => dislikedUser.userName !== userName);
+                comment.disLike -= 1;
+            }
+
+            comment.like += 1;
+
+            await this.repository.save(comment);
+
+            return "Comment liked";
+        }else {
+            comment.likedBy = comment.likedBy.filter(likedUser => likedUser.userName !== userName);
+
+
+            comment.like = Math.max(0, comment.like -1);
+
+            await this.repository.save(comment);
+            console.log(comment.likedBy);
+            return "Like removed from post";
+        }
+    }
+
+    async addDislike(userName: string, commentId: number): Promise<string> {
+        const user = await this.userRepository.findOne({where: {userName: userName}});
+        if (!user) {
+            throw createError(404, `User does not exist`);
+        }
+
+        const comment = await this.repository.findOne({where: {id: commentId}, relations: ["likedBy", "dislikeBy"]});
+        if (!comment) {
+            throw createError(404, `Comment does not exist`);
+        }
+
+        const hasLike = comment.likedBy.some(likedUser => likedUser.userName === userName);
+        const hasDislike = comment.dislikeBy.some(dislikeUser => dislikeUser.userName === userName);
+
+        if (!hasDislike) {
+            comment.dislikeBy.push(user);
+
+            if (hasLike) {
+                comment.likedBy = comment.likedBy.filter(likedUser => likedUser.userName !== userName) || null;
+                comment.like -= 1;
+            }
+
+            comment.disLike += 1;
+
+            await this.repository.save(comment);
+
+            return "comment disliked";
+        } else {
+            comment.dislikeBy = comment.dislikeBy.filter(dislikeUser => dislikeUser.userName !== userName) || null;
+
+            comment.disLike = Math.max(0, comment.disLike -1);
+
+            await this.repository.save(comment);
+
+            return "Dislike removed from comment";
+        }
     }
 
 }
