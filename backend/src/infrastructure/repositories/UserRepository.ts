@@ -12,20 +12,23 @@ import {
     UpdateUserData,
     UserDtoOut,
     UsersList,
-    UserWithReviewsDtoOut
+    UserWithReviewsDtoOut, PostDtoOut, UsersInfoDtoOut, AuthorDtoOut
 } from "../../interfaces/Interfaces";
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import {EnviromentUtils} from "../../../context/env";
 import {ReviewEntity} from "../entities/ReviewEntity";
+import {PostEntity} from "../entities/PostEntity";
 
 export class UserRepository implements IUserRepository {
     private readonly repository: Repository<UserEntity>;
     private readonly reviewRepo: Repository<ReviewEntity>;
+    private readonly postRepo: Repository<PostEntity>;
 
     constructor() {
         this.repository = PostgreTypeOrmDataSource.getRepository(UserEntity);
         this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
+        this.postRepo = PostgreTypeOrmDataSource.getRepository(PostEntity);
     }
 
     async getByEmail(email: string): Promise<UserEntity | null> {
@@ -121,7 +124,7 @@ export class UserRepository implements IUserRepository {
         return `user with username < ${userName} > deleted successfully`;
     }
 
-    async get(userName: string, auth_token: string): Promise<UserWithReviewsDtoOut> {
+    async get(userName: string, auth_token: string): Promise<UsersInfoDtoOut> {
         const userFromDB = await this.repository.findOneBy({userName: userName});
         if (!userFromDB) {
             throw createError(404, `User with username < ${userName} > does not exist`);
@@ -143,9 +146,31 @@ export class UserRepository implements IUserRepository {
                 id: reviewFromDB.id,
                 title: reviewFromDB.title,
                 content: reviewFromDB.review,
-                movie: movie
+                movie: movie,
+                like: reviewFromDB.like,
+                disLike: reviewFromDB.disLike,
+                totalComments: reviewFromDB.totalComments
             };
         });
+
+        const postsFromDB = await this.postRepo.find({
+            where: {author: {id: userFromDB.id}},
+            order: {createdAt: 'DESC'},
+            relations: ['author'],
+        });
+
+        const posts: PostDtoOut[] = postsFromDB.map((postFromDB: PostEntity) => {
+            return {
+                id: postFromDB.id,
+                title: postFromDB.title,
+                createdAt: postFromDB.createdAt,
+                post: postFromDB.post,
+                image: postFromDB.image ? this.imageToBase64(postFromDB.image) : null,
+                like: postFromDB.like,
+                disLike: postFromDB.disLike,
+                totalComments: postFromDB.totalComments,
+            }
+        })
 
         const user: UserDtoOut = {
             id: userFromDB.id,
@@ -156,7 +181,9 @@ export class UserRepository implements IUserRepository {
             gender: userFromDB.gender,
             description: userFromDB.description,
             isAdmin: userFromDB.isAdmin,
-            image: this.imageToBase64(userFromDB.image) // Convertir la imagen a base64 o null
+            image: this.imageToBase64(userFromDB.image), // Convertir la imagen a base64 o null
+            totalFollowers: userFromDB.totalFollowers,
+            totalFollowing: userFromDB.totalFollowing,
         };
 
         const decoded = jwt.decode(auth_token) as jwt.JwtPayload;
@@ -166,10 +193,11 @@ export class UserRepository implements IUserRepository {
         if (decoded != null && decoded.userName == user.userName) {
             isOwnProfile = true;
         }
-        const result: UserWithReviewsDtoOut = {
+        const result: UsersInfoDtoOut = {
             user: user,
             isOwnProfile: isOwnProfile,
-            reviews: reviews
+            reviews: reviews,
+            posts: posts
         };
 
         return result;
@@ -291,6 +319,79 @@ export class UserRepository implements IUserRepository {
         }));
 
         return favoritesList
+    }
+
+    async follow(userName1: string, userName2: string): Promise<string> {
+        const user1 = await this.repository.findOne({where: { userName: userName1 }, relations: ["following"],});
+        if(!user1){
+            throw createError(404, `User ${userName1} does not exist`);
+        }
+
+        const user2 = await this.repository.findOne({where: {userName: userName2}});
+        if(!user2){
+            throw createError(404, `User ${userName1} does not exist`);
+        }
+
+
+        const isFollowing = user1.following?.some(followingUser => followingUser.id === user2.id);
+        if(isFollowing){
+            user1.following = user1.following?.filter(followingUser => followingUser.id !== user2.id) || null;
+            user2.followers = user2.followers?.filter(followerUser => followerUser.id !== user1.id) || null;
+
+            user1.totalFollowing = Math.max(0, user1.totalFollowing-1);
+            user2.totalFollowers = Math.max(0, user2.totalFollowers-1);
+
+            await this.repository.save(user1);
+            await this.repository.save(user2);
+
+            return `${userName1} has unfollowed ${userName2}`;
+        }else{
+            user1.following = user1.following ? [...user1.following, user2] : [user2];
+            user2.followers = user2.followers ? [...user2.followers, user1] : [user1];
+
+            user1.totalFollowing += 1;
+            user2.totalFollowers += 1;
+
+            await this.repository.save(user1);
+            await this.repository.save(user2);
+
+            return `${userName1} has followed ${userName2}`;
+        }
+
+
+    }
+    async getFollowers(userName: string): Promise<AuthorDtoOut[]> {
+        const user = await this.repository.findOne({
+            where: { userName: userName }, relations: ['followers'],
+        });
+
+        if (!user) {
+            throw createError(404, `User ${userName} does not exist`);
+        }
+
+        const followers: AuthorDtoOut[] = user.followers.map(follower => ({
+            id: follower.id,
+            userName: follower.userName,
+            image: follower.image ? this.imageToBase64(follower.image) : null
+        }));
+
+        return followers;
+    }
+
+    async getFollowing(userName: string): Promise<AuthorDtoOut[]> {
+        const user = await this.repository.findOne({where: {userName: userName}, relations:['following']});
+
+        if(!user){
+            throw createError(404, `User ${userName} does not exist`);
+        }
+
+        const following: AuthorDtoOut[] = user.following.map(following => ({
+            id: following.id,
+            userName: following.userName,
+            image: following.image ? this.imageToBase64(following.image) : null
+        }));
+
+        return following;
     }
 
 

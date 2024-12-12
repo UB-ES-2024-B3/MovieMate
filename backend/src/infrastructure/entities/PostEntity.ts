@@ -8,11 +8,11 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
-import {MovieEntity} from "./MovieEntity";
 import {UserEntity} from "./UserEntity";
+import {MovieEntity} from "./MovieEntity";
 
 @Entity()
-export class ReviewEntity extends BaseEntity {
+export class PostEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -20,10 +20,16 @@ export class ReviewEntity extends BaseEntity {
     title: string;
 
     @Column({nullable: true})
-    review: string;
+    post: string;
 
     @CreateDateColumn({type: "timestamp"}) // Autogenera la fecha y hora
     createdAt: Date;
+
+    @Column({type: 'bytea', nullable: true})
+    image: Buffer;
+
+    @ManyToOne(type => UserEntity)
+    author: UserEntity;
 
     @Column({default: 0})
     like: number;
@@ -33,18 +39,12 @@ export class ReviewEntity extends BaseEntity {
   
     @Column({default: 0})
     totalComments: number;
-
-    @ManyToOne(type => MovieEntity)
-    movie: MovieEntity;
-
-    @ManyToOne(type => UserEntity)
-    author: UserEntity;
-
-    @ManyToMany(type => UserEntity, { cascade: true })
+  
+    @ManyToMany(type => UserEntity,user => user.likedPosts,  { cascade: true })
     @JoinTable()
     likedBy: UserEntity[];
 
-    @ManyToMany(type => UserEntity, { cascade: true })
+    @ManyToMany(type => UserEntity,user => user.dislikedPosts,  { cascade: true })
     @JoinTable()
     dislikeBy: UserEntity[];
 }

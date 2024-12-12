@@ -18,7 +18,10 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     sendRecoveryEmail: jest.fn(),
     recoverPassword: jest.fn(),
     search: jest.fn(),
-    getAllFavorites: jest.fn()
+    getAllFavorites: jest.fn(),
+    follow: jest.fn(),
+    getFollowers: jest.fn(),
+    getFollowing: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {
@@ -39,7 +42,7 @@ describe('UserService Unit Tests', () => {
                 'hashedPassword123!',
                 'male',
                 'This is a test user',
-                false
+                false,
             );
 
             mockUserRepository.register.mockResolvedValue('Registration successful');
@@ -172,9 +175,11 @@ describe('UserService Unit Tests', () => {
                 description: null,
                 isAdmin: false,
                 image: null,
+                totalFollowers: 0,
+                totalFollowing: 0,
             };
 
-            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[] });
+            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[], posts:[], });
 
             const result = await userService.getUser(userId, authToken);
 

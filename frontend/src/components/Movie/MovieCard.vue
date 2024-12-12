@@ -130,8 +130,11 @@
 
           <!-- Mensaje de error -->
           <div
-              v-if="showMessage"
-              class="fixed top-4 right-4 p-4 rounded-md text-white shadow-lg bg-red-500"
+            v-if="showMessage"
+            :class="[
+              'fixed top-4 right-4 p-4 rounded-md text-white shadow-lg',
+              toastError ? 'bg-red-500' : 'bg-green-500'
+            ]"
           >
             {{ message }}
           </div>
@@ -198,9 +201,10 @@ export default {
       hasRated: false,
       showMessage: false, // Controlar la visibilidad del mensaje
       message: "", // Mensaje a mostrar
+      toastError: false, //Para enseñar si es error o no
       isAuthenticated: false,
-        user: null,
-        reviews: [],
+      user: null,
+      reviews: [],
     };
   },
   created() {
@@ -294,7 +298,7 @@ export default {
     rateMovie(rating) {
       if (!this.isAuthenticated) {
         // Mostrar mensaje si no está autenticado
-        this.displayMessage("Debes iniciar sesión para puntuar películas.");
+        this.displayMessage("Debes iniciar sesión para puntuar películas.", true);
         return;
       }
 
@@ -311,16 +315,16 @@ export default {
             if (!this.hasRated) {
               this.currentRating = rating;
               this.hasRated = true;
-              alert(`Has puntuado esta película con ${rating} estrellas.`);
+              this.displayMessage(`Has puntuado esta película con ${rating} estrellas.`, false)
               // Volver a cargar los datos de la película para obtener el nuevo rating
               this.fetchMovie(this.movie.title);
             } else {
-              alert("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.");
+              this.displayMessage("Ya has puntuado esta película. Usa 'Modificar Puntuación' para cambiar tu voto.", true)
             }
           })
           .catch((error) => {
             console.error("Error al enviar la puntuación:", error);
-            this.displayMessage("Hubo un error al enviar tu puntuación. Inténtalo de nuevo.");
+            this.displayMessage("Hubo un error al enviar tu puntuación. Inténtalo de nuevo.", true);
           });
 
     },
@@ -330,7 +334,7 @@ export default {
 
     async toggleFavorite() {
       if (!this.isAuthenticated) {
-        this.displayMessage("Debes iniciar sesión para agregar a favoritos.");
+        this.displayMessage("Debes iniciar sesión para agregar a favoritos.", true);
         return;
       }
 
@@ -348,32 +352,31 @@ export default {
           const message = this.isFavorite
               ? "Añadido a favoritos."
               : "Eliminado de favoritos.";
-          alert(message);
+
+          this.displayMessage(message, !this.isFavorite);
         } else {
           throw new Error("No se pudo procesar la solicitud.");
         }
       } catch (error) {
         console.error("Error al añadir/eliminar de favoritos:", error);
-        this.displayMessage("Hubo un error al procesar tu solicitud. Inténtalo de nuevo.");
+        this.displayMessage("Hubo un error al procesar tu solicitud. Inténtalo de nuevo.", true);
       }
       
       },
 
-    displayMessage(message) {
-      // Actualiza el mensaje y el estilo
+    displayMessage(message, error, callback) {
       this.message = message;
       this.showMessage = true;
-
-      // Oculta automáticamente el mensaje después de 3 segundos
+      this.toastError = error;
       setTimeout(() => {
         this.showMessage = false;
-        this.message = "";
-      }, 3000);
+        if (callback) callback();
+      }, 5000);
     },
 
     publicarResena(){
         if (!this.isAuthenticated) {
-            this.displayMessage("Debes iniciar sesión para publicar una reseña");
+            this.displayMessage("Debes iniciar sesión para publicar una reseña", true);
             return;
         }
 

@@ -41,6 +41,7 @@
 
         <div v-if="results && !hideResults"
              class="absolute top-full left-0 w-full bg-gray-800 rounded-lg shadow-lg mt-2 z-50 max-h-96 overflow-y-auto border border-gray-300 dark:border-gray-600">
+
           <!-- Usuarios -->
           <div v-if="results.users.length" class="p-4">
             <ul class="space-y-2">
@@ -48,55 +49,57 @@
                 v-for="user in results.users"
                 :key="user.userName"
                 class="flex items-center space-x-3 p-2 border border-gray-200 rounded-md dark:border-gray-700">
-                  <router-link
-                          :to="`/user/${user.userName}`"
-                          class="flex items-center space-x-3 w-full no-underline hover:bg-gray-700 p-2 rounded"
-                          @click="hideSearchResults">
-                      <img
-                          v-if="user?.image"
-                          :src="user.image"
-                          alt=""
-                          class="w-10 h-10 rounded-full object-cover" />
-
-                      <span v-else class="text-white text-5xl">&#128100;</span>
-                      <div>
-                          <div class="font-semibold text-cyan-400">@{{ user.userName }}</div>
-                      </div>
-                  </router-link>
+                <router-link
+                  :to="`/user/${user.userName}`"
+                  class="flex items-center space-x-3 w-full no-underline hover:bg-gray-700 p-2 rounded"
+                  @click="hideSearchResults">
+                  <img
+                    v-if="user?.image"
+                    :src="user.image"
+                    alt=""
+                    class="w-10 h-10 rounded-full object-cover" />
+                  <span v-else class="text-white text-5xl">&#128100;</span>
+                  <div>
+                    <div class="font-semibold text-cyan-400">@{{ user.userName }}</div>
+                  </div>
+                </router-link>
               </li>
             </ul>
           </div>
 
           <!-- Películas -->
-          <div v-if="results.movies.length">
+          <div v-if="results.movies.length" class="p-4">
             <ul class="space-y-2">
               <li
                 v-for="movie in results.movies"
                 :key="movie._id"
                 class="flex items-center space-x-3 p-2 border border-gray-200 rounded-md dark:border-gray-700">
-                  <router-link
-                          :to="`/movie/${movie.title}`"
-                          class="flex items-center space-x-3 w-full no-underline hover:bg-gray-700 p-2 rounded"
-                          @click="hideSearchResults">
-                    <img
-                      v-if="movie?.image"
-                      :src="movie.image"
-                      alt="Movie image"
-                      class="w-10 h-10 rounded-full object-cover" />
-                    <img
-                      v-else
-                      :src="'https://via.placeholder.com/100?text=' + movie.title"
-                      :alt="movie._title"
-                      class="h-20 object-cover rounded mb-2" />
-                    <div>
-                      <div class="font-semibold text-cyan-400">{{ movie.title }}</div>
-                    </div>
-                  </router-link>
+                <router-link
+                  :to="`/movie/${movie.title}`"
+                  class="flex items-center space-x-3 w-full no-underline hover:bg-gray-700 p-2 rounded"
+                  @click="hideSearchResults">
+                  <img
+                    v-if="movie?.image"
+                    :src="movie.image"
+                    alt="Movie image"
+                    class="w-10 h-10 rounded-full object-cover" />
+                  <span v-else class="text-white text-5xl">&#127909;</span>
+                  <div>
+                    <div class="font-semibold text-cyan-400">{{ movie.title }}</div>
+                  </div>
+                </router-link>
               </li>
             </ul>
           </div>
+
+          <!-- Mensaje de ninguna coincidencia -->
+          <div v-if="hasSearched && !results.users.length && !results.movies.length" class="p-4">
+            <p class="text-white text-center">No hay coincidencia</p>
+          </div>
         </div>
+
       </div>
+
 
 
       <router-link :to="isAuthenticated ? `/user/${username}` : '/register'">
@@ -132,9 +135,10 @@ export default {
         },
       searchQuery: "",
       loading: false,
-      errorMessage: false,
-        hideResults: false,
+      errorMessage: "",
+      hideResults: false,
       hideSearch: false,
+      hasSearched: false,
     };
   },
   created() {
@@ -162,23 +166,25 @@ export default {
           this.errorMessage = "";
           try {
             const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+            console.log(this.searchQuery)
 
-            const [usersResponse, moviesResponse] = await Promise.all([
+            const [usersResponse, moviesResponse] = await Promise.allSettled([
               axios.get(`${BASE_URL}/user/search`, { params: { query: this.searchQuery } }),
               axios.get(`${BASE_URL}/movie/search`, { params: { query: this.searchQuery } }),
             ]);
 
             this.results = {
-              users: Array.isArray(usersResponse.data) ? usersResponse.data : [],
-              movies: Array.isArray(moviesResponse.data) ? moviesResponse.data : [],
+              users: usersResponse.status === 'fulfilled' ? usersResponse.value.data : [],
+              movies: moviesResponse.status === 'fulfilled' ? moviesResponse.value.data : [],
             };
 
-            if (!this.results.users.length && !this.results.movies.length) {
-                this.errorMessage = "No results found";
-            }
+            this.hasSearched = true;
 
+            if (!this.results.users.length && !this.results.movies.length) {
+              this.errorMessage = "No hay coincidencia";
+            }
           } catch (error) {
-            this.errorMessage = error.response?.data?.error || "An error occurred.";
+            this.errorMessage = error.message || "An unexpected error occurred.";
             this.results = { users: [], movies: [] };
           } finally {
             this.loading = false;

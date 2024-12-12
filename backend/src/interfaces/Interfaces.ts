@@ -24,6 +24,8 @@ export interface UserDtoOut {
     description: string | null;
     isAdmin: boolean;
     image: string | null;
+    totalFollowers: number;
+    totalFollowing: number;
 }
 
 export interface AuthorDtoOut {
@@ -44,6 +46,9 @@ export interface ReviewDtoOut {
     content: string;
     author?: AuthorDtoOut;
     movie?: MovieDtoOut;
+    like: number;
+    disLike: number;
+    totalComments: number;
 }
 
 export interface MovieWithReviewsDtoOut {
@@ -86,4 +91,70 @@ export interface ReviewDtoIn {
     review: string;
     author: number;
     movie: number;
+    like: number;
+    disLike: number;
+}
+
+export interface PostDtoIn {
+    title: string;
+    post: string;
+    author: string;
+    image: Buffer | null;
+    like: number;
+    disLike: number;
+}
+
+export interface PostDtoOut {
+    id: number;
+    createdAt: Date;
+    title: string;
+    post: string;
+    author?: AuthorDtoOut,
+    image: string | null;
+    like: number,
+    disLike: number,
+    totalComments: number
+}
+
+export interface UsersInfoDtoOut {
+    user: UserDtoOut;
+    reviews: ReviewDtoOut[];
+    posts: PostDtoOut[];
+    isOwnProfile: boolean;
+}
+
+export interface UpdatePostData {
+    title?: string;
+    post?: string;
+}
+
+export interface CommentDtoIn {
+    content: string;
+    author: string;
+    post?: number;
+    review?: number;
+    comment?: number;
+}
+
+export interface CommentDtoOut {
+    id: number;
+    createdAt: Date;
+    content: string;
+    author: AuthorDtoOut;
+    post?: number;
+    review?: number;
+    comment?: number;
+    totalComments: number;
+    like: number;
+    disLike: number;
+    likedBy: string[];
+    dislikeBy: string[];
+}
+
+export interface UpdateCommentData {
+    content: string
+}
+
+export interface UserId {
+    id: number;
 }

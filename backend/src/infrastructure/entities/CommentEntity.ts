@@ -8,43 +8,47 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
-import {MovieEntity} from "./MovieEntity";
 import {UserEntity} from "./UserEntity";
+import {PostEntity} from "./PostEntity";
+import {ReviewEntity} from "./ReviewEntity";
 
 @Entity()
-export class ReviewEntity extends BaseEntity {
+export class CommentEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({nullable: false})
-    title: string;
-
-    @Column({nullable: true})
-    review: string;
+    content: string;
 
     @CreateDateColumn({type: "timestamp"}) // Autogenera la fecha y hora
     createdAt: Date;
+
+    @Column({default: 0})
+    totalComments: number;
 
     @Column({default: 0})
     like: number;
 
     @Column({default: 0})
     disLike: number;
-  
-    @Column({default: 0})
-    totalComments: number;
-
-    @ManyToOne(type => MovieEntity)
-    movie: MovieEntity;
 
     @ManyToOne(type => UserEntity)
     author: UserEntity;
 
-    @ManyToMany(type => UserEntity, { cascade: true })
+    @ManyToOne(type => ReviewEntity)
+    review: ReviewEntity;
+
+    @ManyToOne(type => PostEntity)
+    post: PostEntity;
+
+    @ManyToOne(type => CommentEntity)
+    comment: CommentEntity;
+
+    @ManyToMany(type => UserEntity,user => user.likedComment,  { cascade: true })
     @JoinTable()
     likedBy: UserEntity[];
 
-    @ManyToMany(type => UserEntity, { cascade: true })
+    @ManyToMany(type => UserEntity,user => user.dislikedComment,  { cascade: true })
     @JoinTable()
     dislikeBy: UserEntity[];
 }

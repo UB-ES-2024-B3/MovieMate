@@ -35,7 +35,15 @@ export class DtoInValidation {
         title: t.string,
         review: t.string,
         author: t.number,
-        movie: t.number
+        movie: t.number,
+        like: t.number,
+        disLike: t.number,
+    });
+
+    static PostDtoInCodec = t.type({
+        title: t.string,
+        post: t.string,
+        author: t.string
     });
 
 
@@ -51,7 +59,22 @@ export class DtoInValidation {
     static RecoverPasswordDtoCodec = t.type({
         password: Password,
         confirmPassword: Password
-    })
+    });
+
+    static UpdatePostDtoCodec = t.type({
+        title: t.union([t.string, t.undefined, t.null]),
+        post: t.union([t.string, t.undefined, t.null])
+    });
+
+    static CommentDtoInCodec = t.type({
+        content: t.string,
+        author: t.string,
+        post: t.union([t.number, t.undefined, t.null]),
+        review: t.union([t.number, t.undefined, t.null]),
+        comment: t.union([t.number, t.undefined, t.null])
+    });
+
+    static UpdateCommentDtoCodec = t.type({content: t.string});
 
 
     // Método para validar los datos de la solicitud
@@ -71,5 +94,21 @@ export class DtoInValidation {
     // Método para validar los datos de la solicitud para RecoverPasswordDto
     static validateRecoverPasswordDto(data: any) {
         return DtoInValidation.RecoverPasswordDtoCodec.decode(data);
+    }
+
+    static validatePostDto(data: any) {
+        return DtoInValidation.PostDtoInCodec.decode(data);
+    }
+
+    static validateUpdatePostDto(data: any) {
+        return DtoInValidation.UpdatePostDtoCodec.decode(data);
+    }
+
+    static validateCommentDto(data: any) {
+        return DtoInValidation.CommentDtoInCodec.decode(data);
+    }
+
+    static validateUpdateCommentDto(data: any) {
+        return DtoInValidation.UpdateCommentDtoCodec.decode(data);
     }
 }

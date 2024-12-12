@@ -1,5 +1,7 @@
 import {BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
-import {MovieEntity} from "./MovieEntity"; // Asegúrate de importar MovieEntity
+import {MovieEntity} from "./MovieEntity";
+import {PostEntity} from "./PostEntity";
+import {CommentEntity} from "./CommentEntity"; // Asegúrate de importar MovieEntity
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -30,6 +32,12 @@ export class UserEntity extends BaseEntity {
     @Column({type: 'bytea', nullable: true})
     image: Buffer;
 
+    @Column({default: 0})
+    totalFollowers: number;
+
+    @Column({default: 0})
+    totalFollowing: number;
+
     // Relación ManyToMany con MovieEntity
     @ManyToMany(() => MovieEntity, {nullable: true})
     @JoinTable()  // La tabla intermedia se crea aquí
@@ -38,4 +46,25 @@ export class UserEntity extends BaseEntity {
     @ManyToMany(() => MovieEntity, {nullable: true})
     @JoinTable()  // La tabla intermedia se crea aquí
     reviewed: MovieEntity[] | null;
+
+    // Usuarios que te siguen
+    @ManyToMany(() => UserEntity, (user) => user.following, { nullable: true })
+    followers: UserEntity[] | null;
+
+    // Usuarios a los que sigues
+    @ManyToMany(() => UserEntity, (user) => user.followers, { nullable: true })
+    @JoinTable() // La tabla intermedia se crea aquí
+    following: UserEntity[] | null;
+
+    @ManyToMany(type => PostEntity, post => post.likedBy)
+    likedPosts: PostEntity[];
+
+    @ManyToMany(type => PostEntity, post => post.dislikeBy)
+    dislikedPosts: PostEntity[];
+
+    @ManyToMany(type => CommentEntity, comment => comment.likedBy)
+    likedComment: CommentEntity[];
+
+    @ManyToMany(type => CommentEntity, comment => comment.dislikeBy)
+    dislikedComment: CommentEntity[];
 }
