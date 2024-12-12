@@ -170,3 +170,12 @@ export interface Filters {
     score: number;
     totalReviews: number[];
 }
+
+export interface GetMoviesFilteredDtoOut {
+    movies: MovieDtoOut[],
+    paginationInfo: {
+        moviesFound: number,
+        actualPage?: number,
+        totalPages?: number
+    }
+}

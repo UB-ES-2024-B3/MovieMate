@@ -6,7 +6,7 @@ import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
 import {
     AuthorDtoOut,
-    Filters,
+    Filters, GetMoviesFilteredDtoOut, MovieDtoOut,
     MovieReviewDtoOut,
     MoviesList,
     MovieWithReviewsDtoOut,
@@ -254,44 +254,48 @@ export class MovieRepository implements IMovieRepository {
 
     }
 
-    async getMoviesFiltered(
-        n: number,
-        maxPageSize: number,
-        filters: Filters
-    ) {
+    async getMoviesFiltered(n: number, maxPageSize: number, filters: Filters) {
         try {
             let where: FindOptionsWhere<MovieEntity> | Array<FindOptionsWhere<MovieEntity>> = {};
 
+            // Filtrar por géneros
             if (filters.genres && filters.genres.length > 0) {
-                where.genres = In(filters.genres);
+                where.genres = filters.genres.length > 1 ? In(filters.genres) : filters.genres[0];
             }
 
+            // Filtrar por directores
             if (filters.directors && filters.directors.length > 0) {
-                where.directors = In(filters.directors);
+                where.directors = filters.directors.length > 1 ? In(filters.directors) : filters.directors[0];
             }
 
+            // Filtrar por actores
             if (filters.actors && filters.actors.length > 0) {
-                where.actors = In(filters.actors);
+                where.actors = filters.actors.length > 1 ? In(filters.actors) : filters.actors[0];
             }
 
+            // Filtrar por año de estreno
             if (filters.premiereYear) {
                 const startOfYear = new Date(filters.premiereYear, 0, 1); // 1 de enero
                 const endOfYear = new Date(filters.premiereYear, 11, 31, 23, 59, 59); // 31 de diciembre
                 where.premiereDate = Between(startOfYear, endOfYear);
             }
 
+            // Filtrar por duración
             if (filters.duration) {
                 where.duration = MoreThanOrEqual(filters.duration);
             }
 
+            // Filtrar por clasificación
             if (filters.classification) {
                 where.classification = ILike(`%${filters.classification}%`);
             }
 
+            // Filtrar por puntuación mínima
             if (filters.score) {
                 where.score = MoreThanOrEqual(filters.score);
             }
 
+            // Filtrar por rango de total de reseñas
             if (filters.totalReviews && filters.totalReviews.length === 2) {
                 const [minReviews, maxReviews] = filters.totalReviews;
                 if (minReviews != null && maxReviews != null) {
@@ -315,9 +319,26 @@ export class MovieRepository implements IMovieRepository {
             // Conteo total de resultados para paginación
             const total = await MovieEntity.count({where});
 
-            return {moviesFromDb, total};
+            // Construcción de la respuesta
+            const totalPages = Math.ceil(total / maxPageSize);
+
+            const dtoOut: GetMoviesFilteredDtoOut = {
+                movies: moviesFromDb.map(movie => ({
+                    id: movie.id,
+                    title: movie.title,
+                    image: movie.image ? movie.image.toString('base64') : null,
+                })),
+                paginationInfo: {
+                    moviesFound: total,
+                    actualPage: n,
+                    totalPages: totalPages,
+                },
+            };
+
+            return dtoOut;
+
         } catch (e) {
-            throw createError(404, `Movie with this filter not found`);
+            throw createError(404, `Any movie matches this filters`);
         }
     }
 
