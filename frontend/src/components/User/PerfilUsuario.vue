@@ -46,10 +46,10 @@
 
               <!-- Botones de seguidores/seguidos -->
               <div class="flex mt-2 space-x-4">
-                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
+                <button @click="viewFollowers" class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
                   {{ this.followersCount || 0 }} FOLLOWERS
                 </button>
-                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
+                <button  @click="viewFollowings" class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
                   {{ this.followingCount || 0 }} FOLLOWING
                 </button>
               </div>
@@ -75,6 +75,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </main>
 
@@ -113,6 +114,52 @@
       </div>
     </transition>
   </div>
+
+  <!-- Modal de seguidores y seguidos -->
+  <transition name="fade">
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-gray-800 rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto shadow-lg">
+        <h3 class="text-2xl font-semibold text-white mb-4">
+          {{ showFollowersList ? 'Followers' : 'Followings' }}
+        </h3>
+
+        <!-- Lista de seguidores/seguidos -->
+        <ul class="space-y-3">
+          <li
+              v-for="item in (showFollowersList ? followers : followings)"
+              :key="item.userName"
+              class="flex items-center text-gray-300 space-x-4"
+          >
+            <router-link :to="`/user/${item.userName}`" class="flex items-center w-full hover:underline"  @click="closeModal">
+
+              <!-- Imagen de perfil -->
+              <img
+                  v-if="item?.image"
+                  :src="item.image"
+                  alt="Profile"
+                  class="w-8 h-8 rounded-full object-cover"
+              />
+              <span v-else class="w-8 h-8 flex items-center justify-center bg-gray-600 rounded-full text-white text-sm font-semibold">
+        {{ item.userName.charAt(0).toUpperCase() }}
+      </span>
+
+              <!-- Nombre de usuario -->
+              <div class="ml-3">
+                <div class="font-semibold text-cyan-400">@{{ item.userName }}</div>
+              </div>
+            </router-link>
+          </li>
+        </ul>
+
+
+        <div class="mt-4 flex justify-center space-x-4">
+          <button @click="closeModal" class="bg-cyan-600 text-white px-6 py-2 rounded-full hover:bg-cyan-700 transition duration-200">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -128,6 +175,11 @@ export default {
       showConfirmation: false, // Control del modal
       followersCount: 0,
       followingCount: 0,
+      followers: [],
+      followings: [],
+      showFollowersList: false,
+      showFollowingsList: false,
+      showModal: false,
     };
   },
 
@@ -173,7 +225,7 @@ export default {
         this.followersCount = followersList.length; // Count the number of followers
         // Comprueba si el username del perfil actual está en la lista de followings
         const currentProfileUserName = sessionStorage.getItem("username");
-        this.isFollowing = followersList.some((username) => username === currentProfileUserName);
+        this.isFollowing = followersList.some((user) => user.userName === currentProfileUserName);
         return this.isFollowing
       } catch (error) {
         console.error("Error fetching the followers list:", error);
@@ -234,6 +286,44 @@ export default {
       }
     },
 
+    async viewFollowers() {
+      try {
+        this.showFollowersList = true;
+        this.showFollowingsList = false;
+        this.showModal = true;
+        const token = sessionStorage.getItem("auth_token");
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.get(`${BASE_URL}/user/${this.user.userName}/followers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        this.followers = response.data; // Asumiendo que la API devuelve una lista de seguidores
+      } catch (error) {
+        console.error("Error fetching followers:", error);
+      }
+    },
+
+    async viewFollowings() {
+      try {
+        this.showFollowersList = false;
+        this.showFollowingsList = true;
+        this.showModal = true;
+        const token = sessionStorage.getItem("auth_token");
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const response = await axios.get(`${BASE_URL}/user/${this.user.userName}/following`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        this.followings = response.data; // Asumiendo que la API devuelve una lista de seguidos
+        console.log(this.followings);
+      } catch (error) {
+        console.error("Error fetching followings:", error);
+      }
+    },
+    closeModal() {
+      this.showModal = false;
+    },
+
     checkAuthStatus() {
       const token = sessionStorage.getItem("auth_token");
       this.isLogged = !!token;
@@ -256,6 +346,7 @@ export default {
       this.$router.push("/favorites");
     },
   },
+
 };
 </script>
 
@@ -274,5 +365,20 @@ button {
 
 button:hover {
   transform: scale(1.05);
+}
+
+/* Mejorar el estilo de la lista */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  transition: background-color 0.3s ease;
+}
+
+li:hover {
+  background-color: #2d3748;
+  cursor: pointer;
 }
 </style>
