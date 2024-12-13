@@ -29,6 +29,7 @@ describe('Update Tests', () => {
   test('should update an existing user', async () => {
     try {
       const updateResponse = await axios.put(`${baseURL}/update/${userId}`, { userName: 'updatedUser' });
+      userName = "updatedUser";
       expect(updateResponse.status).toBe(200);
     } catch (error) {
       if (error.response) {

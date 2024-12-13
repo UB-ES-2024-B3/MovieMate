@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const userBaseURL = 'http://localhost:3000/user';
 
-export const createTestUser = async (userData = {}) => {
+export const createTestUser = async () => {
     const defaultData = {
         userName: 'TestUser',
         email: 'test@example.com',
@@ -11,10 +11,7 @@ export const createTestUser = async (userData = {}) => {
         gender: 'male',
         isAdmin: false,
     };
-
-    const user = { ...defaultData, ...userData };
-
-    await axios.post(`${userBaseURL}/register`, user)
+    await axios.post(`${userBaseURL}/register`, defaultData);
 
     const response = await axios.get(`${userBaseURL}/${defaultData.userName}`);
 
