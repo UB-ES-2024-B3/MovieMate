@@ -7,6 +7,7 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watchAll",
     "test:unit": "jest _test/unit_tests/ --runInBand",
+    "test:integration_user": "jest backend/_test/integration_tests/user_tests --runInBand",
     "build": "tsc",
     "start": "node dist/main/index.js",
     "dev": "ts-node-dev --respawn src/main/index.ts"
