@@ -6,6 +6,7 @@ import {deleteTestMovie} from "../../test_utils/testUtilsMovies";
 const baseURL = 'http://localhost:3000/user';
 
 describe('Delete Tests', () => {
+    let userId: string;
     let userName: string;
 
     beforeAll(async () => {
@@ -13,23 +14,12 @@ describe('Delete Tests', () => {
         if (!existingUser) {
             const user = await createTestUser();
             userName = user.user.userName;
+            userId = user.user.id;
         } else {
             userName = existingUser.user.userName;
+            userId = existingUser.user.id;
         }
 
-        const waitForServer = async () => {
-            let retries = 5;
-            while (retries) {
-                try {
-                    await axios.get('http://localhost:3000');
-                    return;
-                } catch (err) {
-                    retries -= 1;
-                    if (retries === 0) throw new Error('Server not available');
-                    await new Promise(res => setTimeout(res, 1000));
-                }
-            }
-        };
 
     });
 
