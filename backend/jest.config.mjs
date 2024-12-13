@@ -7,4 +7,7 @@ export default {
     transform: {
         '^.+\\.ts$': ['ts-jest', { useESM: true }], // Asegúrate de usar ESM
     },
+    testMatch: [
+        '**/backend/_test/integration_tests/user_tests/**/*.test.ts'
+    ],
 };
