@@ -23,7 +23,7 @@ describe('Movies API Tests', () => {
 
 
     test('should fetch movie details successfully', async () => {
-        const response = await axios.get(`${baseURL}/Movie%204`);
+        const response = await axios.get(`${baseURL}/TestMovie`);
         expect(response.status).toBe(200);
     });
 
