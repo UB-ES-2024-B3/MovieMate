@@ -40,4 +40,4 @@ jobs:
     - name: Run autograding tests
       run: |
         docker-compose up -d
-        docker exec backend_sprint1 sh -c "npm run test:integration_users"
+        docker exec backend_sprint1 sh -c "npm run test:integration_user"
