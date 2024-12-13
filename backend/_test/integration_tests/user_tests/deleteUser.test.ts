@@ -16,6 +16,21 @@ describe('Delete Tests', () => {
         } else {
             userName = existingUser.user.userName;
         }
+
+        const waitForServer = async () => {
+            let retries = 5;
+            while (retries) {
+                try {
+                    await axios.get('http://localhost:3000');
+                    return;
+                } catch (err) {
+                    retries -= 1;
+                    if (retries === 0) throw new Error('Server not available');
+                    await new Promise(res => setTimeout(res, 1000));
+                }
+            }
+        };
+
     });
 
     afterAll(async () => {
