@@ -12,19 +12,19 @@
           <!-- Botón para volver atrás -->
           <div class="mb-4">
             <button
-                @click="goBack"
                 class="flex items-center bg-gray-800 text-[#5ce1e6] font-bold px-4 py-2 rounded-md border-2 border-[#5ce1e6] shadow-lg hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
+                @click="goBack"
             >
               <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
                   fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                    fill-rule="evenodd"
-                    d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
                     clip-rule="evenodd"
+                    d="M10 18a1 1 0 01-.707-.293l-7-7a1 1 0 010-1.414l7-7a1 1 0 011.414 1.414L4.414 10l6.293 6.293A1 1 0 0110 18z"
+                    fill-rule="evenodd"
                 />
               </svg>
               Back
@@ -44,17 +44,17 @@
 
                 <!-- Botón de Añadir a Favoritos -->
                 <button
-                    @click="toggleFavorite"
-                    @mouseover="showTooltip = true"
-                    @mouseleave="showTooltip = false"
                     class="absolute top-4 right-4 bg-gray-800 text-[#5ce1e6] p-3 rounded-full shadow-md hover:bg-[#5ce1e6] hover:text-gray-800 transition-all duration-300"
+                    @click="toggleFavorite"
+                    @mouseleave="showTooltip = false"
+                    @mouseover="showTooltip = true"
                 >
                   <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-6 w-6"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
                       :class="{ 'fill-red-500': isFavorite }"
+                      class="h-6 w-6"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                         d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
@@ -77,7 +77,7 @@
                 <p class="pt-4 text-3xl font-bold">
                   {{ movie.title }} ({{ movie.year }})
                 </p>
-                <hr class="custom-hr" />
+                <hr class="custom-hr"/>
                 <div class="text-md flex justify-between my-4">
                   <span class="font-bold">
                     {{ movie.duration }} min | {{ movie.genres.join(", ") }}
@@ -103,24 +103,24 @@
               <span
                   v-for="star in 5"
                   :key="star"
-                  class="star"
                   :class="{ selected: star <= currentRating }"
+                  class="star"
                   @click="rateMovie(star)"
               >
                 ★
               </span>
             </div>
-              <div class="flex justify-center mt-4">
-              <button @click="publicarResena" class="btn-publicar">
-                  PUBLICAR RESEÑA
+            <div class="flex justify-center mt-4">
+              <button class="btn-publicar" @click="publicarResena">
+                PUBLICAR RESEÑA
               </button>
-              </div>
+            </div>
 
             <p v-if="hasRated" class="text-center text-green-500 font-bold">
               Has puntuado esta película con {{ currentRating }} estrellas.
               <button
-                  @click="modifyRating"
                   class="ml-2 text-sm bg-cyan-500 text-white px-2 py-1 rounded"
+                  @click="modifyRating"
               >
                 Modificar Puntuación
               </button>
@@ -130,8 +130,8 @@
 
           <!-- Mensaje de error -->
           <div
-            v-if="showMessage"
-            :class="[
+              v-if="showMessage"
+              :class="[
               'fixed top-4 right-4 p-4 rounded-md text-white shadow-lg',
               toastError ? 'bg-red-500' : 'bg-green-500'
             ]"
@@ -139,33 +139,49 @@
             {{ message }}
           </div>
 
-            <div class="mt-10">
-              <div class="review-container">
-                  <div v-if= "reviews.length > 0">
-                      <div v-for="(review, index) in reviews" :key="index"
-                           class="review-card bg-gray-800 text-white rounded-md p-4 mb-4 shadow-lg">
-                          <router-link :to="`/review/${review.id}`">
-                          <h5 class="text-[#5ce1e6] font-semibold text-lg mb-2">{{ review.title }}</h5>
-                          <p class="text-gray-400 text-sm mb-4">@{{ review.author.userName}}</p>
-                          <p class="text-gray-200 mb-4">{{ review.content }}</p>
-                          <!-- Botones de Comentar y Me gusta dentro de la reseña -->
-                          <div class="flex justify-end space-x-4 mt-4">
-                            <button class="text-gray-400 hover:text-cyan-400 transition">
-                              <i class="fas fa-thumbs-up"></i>
-                            </button>
-                              <button class="text-gray-400 hover:text-cyan-400 transition">
-                              <i class="fas fa-thumbs-down"></i>
-                            </button>
-                            <button class="text-gray-400 hover:text-cyan-400 transition">
-                              <i class="fas fa-comment"></i>
-                            </button>
-                          </div>
-                          </router-link>
-                      </div>
-                  </div>
-                  <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
+          <div class="mt-10">
+            <div class="review-container">
+              <div v-if="reviews.length > 0">
+                <div v-for="(review, index) in reviews" :key="index"
+                     class="review-card bg-gray-800 text-white rounded-md p-4 mb-4 shadow-lg">
 
+                  <h5 class="text-[#5ce1e6] font-semibold text-lg mb-2">
+                    <router-link :to="`/review/${review.id}`">{{ review.title }}</router-link>
+                  </h5>
+                  <p class="text-gray-400 text-sm mb-4">@{{ review.author.userName }}</p>
+                  <p class="text-gray-200 mb-4">{{ review.content }}</p>
+                  <!-- Botones de Comentar y Me gusta dentro de la reseña -->
+                  <div class="flex justify-center items-center mt-4 space-x-4">
+                    <!-- Botón de like -->
+                    <button
+                        class="flex items-center text-gray-400 hover:text-cyan-400 transition text-3xl"
+                        @click="handleLike(review.id)"
+                    >
+                      <i class="fas fa-thumbs-up"></i>
+                      <span class="ml-2 text-base text-gray-600">{{ review.like }}</span>
+                    </button>
+
+                    <!-- Botón de dislike -->
+                    <button
+                        class="flex items-center text-gray-400 hover:text-cyan-400 transition text-3xl"
+                        @click="handleDislike(review.id)"
+                    >
+                      <i class="fas fa-thumbs-down"></i>
+                      <span class="ml-2 text-base text-gray-600">{{ review.disLike }}</span>
+                    </button>
+
+                    <!-- Botón de comentarios -->
+                    <button class="flex items-center text-gray-400 hover:text-cyan-400 transition text-3xl">
+                      <i class="fas fa-comment"></i>
+                      <span class="ml-2 text-base text-gray-600">{{ review.totalComments }}</span>
+                    </button>
+                  </div>
+
+                </div>
               </div>
+              <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
+
+            </div>
 
           </div>
         </div>
@@ -175,6 +191,7 @@
 </template>
 <script>
 import axios from "axios";
+
 const BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
 export default {
@@ -225,67 +242,67 @@ export default {
   },
 
   methods: {
-      async fetchMovie(title) {
-        try {
-          const BASE_URL = process.env.VUE_APP_API_BASE_URL;
-          const response = await axios.get(`${BASE_URL}/movie/${title}`);
+    async fetchMovie(title) {
+      try {
+        const BASE_URL = process.env.VUE_APP_API_BASE_URL;
+        const response = await axios.get(`${BASE_URL}/movie/${title}`);
 
-          // Ajusta la desestructuración con los nombres correctos
-          const { movie, reviews } = response.data;
+        // Ajusta la desestructuración con los nombres correctos
+        const {movie, reviews} = response.data;
 
-          console.log(response.data);
+        console.log(response.data);
 
-          // Asigna los datos correctamente al objeto `movie`
-          this.movie = {
-            id: movie._id,
-            title: movie._title,
-            description: movie._description,
-            genres: Array.isArray(movie._genres) ? movie._genres : [movie._genres],
-            directors: movie._directors || [],
-            actors: movie._actors || [],
-            premiereDate: movie._premiereDate || "",
-            duration: movie._duration || 0,
-            classification: movie._classification || "No clasificado",
-            score: movie._score || 0,
-            image: movie._image || "",
-            year: movie._premiereDate ? new Date(movie._premiereDate).getFullYear() : "N/A",
-          };
+        // Asigna los datos correctamente al objeto `movie`
+        this.movie = {
+          id: movie._id,
+          title: movie._title,
+          description: movie._description,
+          genres: Array.isArray(movie._genres) ? movie._genres : [movie._genres],
+          directors: movie._directors || [],
+          actors: movie._actors || [],
+          premiereDate: movie._premiereDate || "",
+          duration: movie._duration || 0,
+          classification: movie._classification || "No clasificado",
+          score: movie._score || 0,
+          image: movie._image || "",
+          year: movie._premiereDate ? new Date(movie._premiereDate).getFullYear() : "N/A",
+        };
 
-          // Asigna las reseñas, con un manejo seguro de datos
-          this.reviews = Array.isArray(reviews) ? reviews : [];
-          console.log(this.reviews);
-        } catch (error) {
-          // Manejando errores de forma más detallada
-          this.errorMessage = "Error al obtener los detalles de la película.";
-          console.error("Error fetching movie details:", error.message);
-        }
-      },
+        // Asigna las reseñas, con un manejo seguro de datos
+        this.reviews = Array.isArray(reviews) ? reviews : [];
+        console.log(this.reviews);
+      } catch (error) {
+        // Manejando errores de forma más detallada
+        this.errorMessage = "Error al obtener los detalles de la película.";
+        console.error("Error fetching movie details:", error.message);
+      }
+    },
 
     async fetchUserData(username) {
-        try {
-            console.log("user")
-            const token = sessionStorage.getItem("auth_token");
-            const BASE_URL = process.env['VUE_APP_API_BASE_URL']
-            const response = await axios.get(`${BASE_URL}/user/${username}`, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
+      try {
 
-            const { user } = response.data;
-            this.user = {
-              id: user.id || null, // Verifica si `id` existe
-              userName: user.userName || "",
-              email: user.email || "",
-              gender: user.gender || "",
-              description: user.description || "",
-              isAdmin: user.isAdmin || false,
-              image: user.image || "",
-            };
-            console.log(this.user);
-        } catch (error) {
-            this.error = 'No se puede cargar la información del usuario';
-        }
+        const token = sessionStorage.getItem("auth_token");
+        const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+        const response = await axios.get(`${BASE_URL}/user/${username}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const {user} = response.data;
+        this.user = {
+          id: user.id || null, // Verifica si `id` existe
+          userName: user.userName || "",
+          email: user.email || "",
+          gender: user.gender || "",
+          description: user.description || "",
+          isAdmin: user.isAdmin || false,
+          image: user.image || "",
+        };
+
+      } catch (error) {
+        this.error = 'No se puede cargar la información del usuario';
+      }
     },
 
     loadMovie() {
@@ -361,8 +378,8 @@ export default {
         console.error("Error al añadir/eliminar de favoritos:", error);
         this.displayMessage("Hubo un error al procesar tu solicitud. Inténtalo de nuevo.", true);
       }
-      
-      },
+
+    },
 
     displayMessage(message, error, callback) {
       this.message = message;
@@ -374,15 +391,72 @@ export default {
       }, 5000);
     },
 
-    publicarResena(){
-        if (!this.isAuthenticated) {
-            this.displayMessage("Debes iniciar sesión para publicar una reseña", true);
-            return;
-        }
+    publicarResena() {
+      if (!this.isAuthenticated) {
+        this.displayMessage("Debes iniciar sesión para publicar una reseña", true);
+        return;
+      }
 
-        let userId = this.user.id;
-        this.$router.push({ path: `/resena/${this.movie.id}/${userId}` });
-    }
+      let userId = this.user.id;
+      this.$router.push({path: `/resena/${this.movie.id}/${userId}`});
+    },
+
+    handleLike(reviewId) {
+      if (!this.isAuthenticated) {
+        this.displayMessage("Debes iniciar sesión para dar like.", true);
+        return;
+      }
+      const review = this.reviews.find(r => r.id === reviewId);
+      if (review) {
+        // Lógica para enviar la acción al backend
+        axios
+            .put(`${BASE_URL}/review/like`, {userName: this.username, idReview: reviewId})
+            .then(() => {
+              // Después de la acción PUT, obtener los datos actualizados con GET
+              return axios.get(`${BASE_URL}/review/${reviewId}`);
+            })
+            .then(response => {
+              const updatedReview = response.data;
+
+              // Actualizar el valor de likes y dislikes en la UI con los datos actualizados
+              review.like = updatedReview.like;
+              review.disLike = updatedReview.disLike;
+
+            })
+            .catch(error => {
+              console.error("Error al dar like:", error);
+            });
+      }
+    },
+
+    handleDislike(reviewId) {
+      if (!this.isAuthenticated) {
+        this.displayMessage("Debes iniciar sesión para dar dislike.", true);
+        return;
+      }
+      const review = this.reviews.find(r => r.id === reviewId);
+      if (review) {
+
+        // Lógica para enviar la acción al backend
+        axios
+            .put(`${BASE_URL}/review/dislike`, {userName: this.username, idReview: reviewId})
+            .then(() => {
+              // Después de la acción PUT, obtener los datos actualizados con GET
+              return axios.get(`${BASE_URL}/review/${reviewId}`);
+            })
+            .then(response => {
+              const updatedReview = response.data;
+
+              // Actualizar el valor de likes y dislikes en la UI con los datos actualizados
+              review.like = updatedReview.like;
+              review.disLike = updatedReview.disLike;
+
+            })
+            .catch(error => {
+              console.error("Error al dar dislike:", error);
+            });
+      }
+    },
   },
 };
 
@@ -392,7 +466,7 @@ export default {
 .stars {
   display: flex;
   justify-content: center;
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .star {
@@ -406,13 +480,13 @@ export default {
 }
 
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #222;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #222;
 }
 
 .btn-publicar {
@@ -438,7 +512,7 @@ body {
 .btn-publicar:active {
   transform: scale(0.95);
 }
-    
+
 button svg {
   transition: all 0.3s ease;
 }
@@ -446,6 +520,7 @@ button svg {
 button svg.fill-red-500 {
   transform: scale(1.1);
 }
+
 .review-container {
   height: 12rem;
   overflow-y: scroll;
