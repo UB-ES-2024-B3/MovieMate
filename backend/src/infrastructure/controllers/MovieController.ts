@@ -2,7 +2,6 @@ import {NextFunction, Request, Response} from "express";
 import {MovieService} from "../../application/services/MovieService";
 import {autoInjectable, container} from "tsyringe";
 import {MovieRepository} from "../repositories/MovieRepository";
-import {Movie} from "../../domain/models/Movie";
 import createError from "http-errors";
 
 container.register(
@@ -30,6 +29,7 @@ export class MovieController {
             next(e);
         }
     }
+
     static async getAllMovies(req: Request, res: Response, next: NextFunction) {
         try {
             const result = await this.movieService.getAllMovies();
@@ -52,7 +52,7 @@ export class MovieController {
         try {
             const query = req.query.query as string;
             if (!query) {
-                return res.status(400).json({ message: "Query parameter is required" });
+                return res.status(400).json({message: "Query parameter is required"});
             }
 
             const movies = await this.movieService.searchMovies(query);
@@ -72,7 +72,7 @@ export class MovieController {
                 throw createError(400, `Parameters are incorrect`);
             }
 
-            if(puntuacion > 5 || puntuacion < 0){
+            if (puntuacion > 5 || puntuacion < 0) {
                 throw createError(400, `Incorrect Puntuation`);
             }
 
@@ -94,6 +94,18 @@ export class MovieController {
 
             const result = await this.movieService.addFavorites(userName, idMovie);
             return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async getMoviesFiltered(req: Request, res: Response, next: NextFunction) {
+        const maxPageSize = Number(req.query.maxPageSize)
+        const pageNumber = Number(req.query.pageNumber)
+        const filters = req.body
+        try {
+            const movies = await this.movieService.getMoviesFiltered(pageNumber, maxPageSize, filters)
+            res.status(200).json(movies);
         } catch (error) {
             next(error);
         }

@@ -1,4 +1,4 @@
-import {ILike, Repository} from "typeorm";
+import {Between, FindOptionsWhere, ILike, MoreThanOrEqual, Raw, Repository} from "typeorm";
 import {PostgreTypeOrmDataSource} from "../../main/config/postgreDatabaseTypeOrm";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
 import {MovieEntity} from "../entities/MovieEntity";
@@ -6,6 +6,8 @@ import {Movie} from "../../domain/models/Movie";
 import createError from 'http-errors';
 import {
     AuthorDtoOut,
+    Filters,
+    GetMoviesFilteredDtoOut,
     MovieReviewDtoOut,
     MoviesList,
     MovieWithReviewsDtoOut,
@@ -253,5 +255,89 @@ export class MovieRepository implements IMovieRepository {
 
     }
 
+    async getMoviesFiltered(n: number, maxPageSize: number, filters: Filters) {
+        try {
+            let where: FindOptionsWhere<MovieEntity> | Array<FindOptionsWhere<MovieEntity>> = {};
+
+            // Filtrar por géneros
+            if (filters.genres) {
+                where.genres = Raw((alias) => `${alias} @> :genres`, {genres: JSON.stringify([filters.genres])});
+            }
+
+            // Filtrar por directores
+            if (filters.directors) {
+                where.directors = Raw((alias) => `${alias} @> :directors`, {directors: JSON.stringify([filters.directors])});
+            }
+
+            // Filtrar por actores
+            if (filters.actors) {
+                where.actors = Raw((alias) => `${alias} @> :actors`, {actors: JSON.stringify([filters.actors])});
+            }
+
+            // Filtrar por año de estreno
+            if (filters.premiereYear) {
+                const startOfYear = new Date(filters.premiereYear, 0, 1);
+                const endOfYear = new Date(filters.premiereYear, 11, 31, 23, 59, 59);
+                where.premiereDate = Between(startOfYear, endOfYear);
+            }
+
+            // Filtrar por duración
+            if (filters.duration) {
+                where.duration = MoreThanOrEqual(filters.duration);
+            }
+
+            // Filtrar por clasificación
+            if (filters.classification) {
+                where.classification = ILike(`%${filters.classification}%`);
+            }
+
+            // Filtrar por puntuación mínima
+            if (filters.score) {
+                where.score = MoreThanOrEqual(filters.score);
+            }
+
+            // Filtrar por rango de total de reseñas
+            if (filters.totalReviews) {
+                where.totalReviews = MoreThanOrEqual(filters.totalReviews);
+            }
+
+            const skip = (n - 1) * maxPageSize;
+
+            // Consulta principal
+            const moviesFromDb = await MovieEntity.find({
+                where,
+                skip,
+                take: maxPageSize,
+            });
+
+            // Conteo total de resultados para paginación
+            const total = await MovieEntity.count({where});
+
+            // Construcción de la respuesta
+            const totalPages = Math.ceil(total / maxPageSize);
+
+            if (total == 0) {
+                n = 0
+            }
+
+            const dtoOut: GetMoviesFilteredDtoOut = {
+                movies: moviesFromDb.map(movie => ({
+                    id: movie.id,
+                    title: movie.title,
+                    image: movie.image ? movie.image.toString('base64') : null,
+                })),
+                paginationInfo: {
+                    moviesFound: total,
+                    actualPage: n,
+                    totalPages: totalPages,
+                },
+            };
+
+            return dtoOut;
+
+        } catch (e) {
+            throw createError(404, `Any movie matches this filters`);
+        }
+    }
 
 }
