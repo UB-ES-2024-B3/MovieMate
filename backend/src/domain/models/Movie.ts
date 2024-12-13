@@ -13,7 +13,7 @@ export class Movie {
         private _duration: number,
         private _classification: string,
         private _score: number,
-        private _totalReviews: number,
+        private _totalReviews: number | number[],
         private _image?: Buffer | string,
         private _reviews?: Review[]
     ) {
@@ -117,4 +117,11 @@ export class Movie {
         this._image = value ?? undefined;
     }
 
+    get totalReviews(): number | number[] {
+        return this._totalReviews;
+    }
+
+    set totalReviews(value: number | number[]){
+        this._totalReviews = value;
+    }
 }

@@ -1,8 +1,16 @@
 import axios from 'axios';
+import {createTestUser, deleteTestUser, getUserTest} from "../../test_utils/testUtilsUsers";
+import {afterAll} from "@jest/globals";
 
 const baseURL = 'http://localhost:3000/user';
 
 describe('Registration Tests', () => {
+  let userName: string;
+
+  afterAll(async () => {
+      await deleteTestUser(userName);
+  });
+
   test('should register a user', async () => {
     const response = await axios.post(`${baseURL}/register`, {
       userName: 'testuser',
@@ -12,6 +20,7 @@ describe('Registration Tests', () => {
       gender: 'male',
       isAdmin: false,
     });
+    userName = 'testuser'
     expect(response.status).toBe(200);
     expect(response.data).toEqual("Registration successful");
   });

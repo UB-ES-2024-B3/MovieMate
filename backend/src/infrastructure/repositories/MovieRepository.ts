@@ -15,6 +15,8 @@ import {
 } from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 import {ReviewEntity} from "../entities/ReviewEntity";
+import {createHash} from "crypto";
+import {User} from "../../domain/models/User";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
@@ -25,6 +27,45 @@ export class MovieRepository implements IMovieRepository {
         this.repository = PostgreTypeOrmDataSource.getRepository(MovieEntity);
         this.userRepo = PostgreTypeOrmDataSource.getRepository(UserEntity);
         this.reviewRepo = PostgreTypeOrmDataSource.getRepository(ReviewEntity);
+    }
+
+    movieToMovieEntity(movie: Movie): MovieEntity {
+        const movieEntity = new MovieEntity();
+        movieEntity.title = movie.title;
+        movieEntity.description = movie.description;
+        movieEntity.genres = movie.genres;
+        movieEntity.directors = movie.directors;
+        movieEntity.actors = movie.actors;
+        movieEntity.premiereDate = new Date(movie.premiereDate);
+        movieEntity.duration = movie.duration;
+        movieEntity.classification = movie.classification || null;
+        movieEntity.score = movie.score || null;
+        movieEntity.totalReviews = null;
+        return movieEntity;
+    }
+
+    async createMovie(movie:Movie): Promise<string> {
+        const movieFromDB = await this.repository.findOne({where: {title: movie.title}});
+
+        if (movieFromDB) {
+            throw createError(404, `Movie with title < ${movie.title} > already exist`);
+        }
+
+        // Save movie using the repository
+        await this.repository.save(this.movieToMovieEntity(movie));
+
+        // Return a success message
+        return "Movie Added";
+    }
+
+    async deleteMovie(id: number): Promise<string> {
+        const movieFromDB = await this.repository.findOneBy({id: id});
+        if (!movieFromDB) {
+            throw createError(404, `Movie with id < ${id} > does not exist`);
+        }
+
+        await this.repository.remove(movieFromDB)
+        return `user with id < ${id} > deleted successfully`;
     }
 
     async get(title: string): Promise<MovieWithReviewsDtoOut> {

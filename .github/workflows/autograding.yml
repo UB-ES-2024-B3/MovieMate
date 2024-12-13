@@ -37,7 +37,14 @@ jobs:
       working-directory: ./backend
       run: npm install
 
-    - name: Run autograding tests
+    - name: Docker Compose Up
       run: |
         docker-compose up -d
+
+    - name: Run User Integration Test
+      run: |
         docker exec backend_sprint1 sh -c "npm run test:integration_user"
+
+    - name: Run Movie Integration Test
+      run: |
+        docker exec backend_sprint1 sh -c "npm run test:integration_movie"

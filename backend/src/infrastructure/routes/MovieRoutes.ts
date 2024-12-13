@@ -1,9 +1,13 @@
 import {NextFunction, Request, Response, Router} from "express";
 import {MovieController} from "../controllers/MovieController";
+import {UserController} from "../controllers/UserController";
 
 const router = Router();
 
 router.get("/", (req: Request, res: Response, next: NextFunction) => MovieController.getAllMovies(req, res, next));
+
+router.post("/create", (req: Request, res: Response, next: NextFunction) => MovieController.createMovie(req, res, next));
+router.delete("/:movieId", (req: Request, res: Response, next: NextFunction) => MovieController.deleteMovie(req, res, next));
 
 router.get("/search", (req: Request, res: Response, next: NextFunction) => MovieController.search(req, res, next));
 

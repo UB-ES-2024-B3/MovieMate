@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { createTestUser, deleteTestUser, getUserTest } from '../../test_utils/testUtilsUsers';
+import {afterAll} from "@jest/globals";
+import {deleteTestMovie} from "../../test_utils/testUtilsMovies";
 
 const baseURL = 'http://localhost:3000/user';
 
@@ -6,64 +9,54 @@ describe('Delete Tests', () => {
     let userName: string;
 
     beforeAll(async () => {
-        try {
-            const response = await axios.post(`${baseURL}/register`, {
-                userName: 'testUser2',
-                email: 'testuser2@example.com',
-                birthDate: '2001-01-01',
-                password: 'securepassword1234',
-                gender: 'male',
-                isAdmin: false
-            });
-
-            // Asegúrate de que userName es asignado correctamente
-            console.log('Respuesta de registro:', response.data);  // Verifica toda la respuesta
-            userName = response.data.userName || response.data.user.userName;  // Ajusta según la estructura real
-            console.log('Usuario registrado:', userName);  // Verifica que userName no esté undefined
-        } catch (error) {
-            console.error('Error en el registro:', error.response ? error.response.data : error.message);
+        const existingUser = await getUserTest('TestUser');
+        if (!existingUser) {
+            const user = await createTestUser();
+            userName = user.user.userName;
+        } else {
+            userName = existingUser.user.userName;
         }
+    });
+
+    afterAll(async () => {
+        await deleteTestUser(userName);
     });
 
     test('should delete a user', async () => {
         try {
             if (!userName) {
-                console.error('Error: userName no está definido');
-                return;
+                throw new Error('userName no está definido, no se puede ejecutar la prueba.');
             }
 
-            const deleteResponse = await axios.delete(`${baseURL}/${userName}`);  // Cambié la URL aquí
+            const deleteResponse = await axios.delete(`${baseURL}/${userName}`);
+            console.log(deleteResponse.data)
             expect(deleteResponse.status).toBe(200);
-            expect(deleteResponse.data.message).toBe('User deleted successfully');
+            expect(deleteResponse.data).toBe(`user with username < ${userName} > deleted successfully`);
+
+            // Verificar que el usuario ya no exista
+            const user = await getUserTest(userName);
+            expect(user).toBeNull();
         } catch (error) {
-            console.error('Error al eliminar el usuario:', error.response ? error.response.data : error.message);
+            console.error('Error al eliminar el usuario:', error.response?.data || error.message);
             throw error;
         }
     });
 
-    /*
     test('should return 404 when trying to delete a non-existent user', async () => {
-      const nonExistentUserName = '<nonExistentUserName>';
+        const nonExistentUserName = 'nonExistentUser';
 
-      try {
-        // Intenta hacer la solicitud de eliminación
-        await axios.delete(`http://localhost:3000/user/${nonExistentUserName}`);
-      } catch (error) {
-        // Verifica si la respuesta de error tiene la estructura esperada
-        if (error.response && error.response.data) {
-          console.log('Estructura completa de la respuesta de error:', error.response);
-
-          // Verifica que el estado de la respuesta sea 404
-          expect(error.response.status).toBe(404);
-
-          // Verifica que el mensaje de error sea el esperado
-          expect(error.response.data.message).toBe(`User with username < ${nonExistentUserName} > does not exist`);
-        } else {
-          // Si no tiene la estructura esperada, muestra el error completo
-          console.error('Error en la respuesta:', error);
+        try {
+            // Intenta eliminar un usuario inexistente
+            await axios.delete(`${baseURL}/${nonExistentUserName}`);
+        } catch (error) {
+            // Verificar el código de estado y el mensaje de error
+            if (error.response) {
+                expect(error.response.status).toBe(404);
+                expect(error.response.data.error.message).toBe(`User with username < ${nonExistentUserName} > does not exist`);
+            } else {
+                console.error('Error inesperado:', error.message);
+                throw error;
+            }
         }
-      }
     });
-*/
 });
-
