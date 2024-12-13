@@ -1,9 +1,16 @@
 name: Autograding
 
 on:
+  pull_request:
+    branches:
+      - develop
+      - pre-production
+      - main
   push:
     branches:
       - develop
+      - pre-production
+      - main
 
 jobs:
   autograde:
