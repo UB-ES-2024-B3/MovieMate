@@ -18,8 +18,8 @@ export const createTestUser = async () => {
     return response.data;
 };
 
-export const deleteTestUser = async (userId) => {
-    await axios.delete(`${userBaseURL}/${userId}`);
+export const deleteTestUser = async (userName) => {
+    await axios.delete(`${userBaseURL}/${userName}`);
 };
 
 export const getUserTest = async (userName: string) => {
