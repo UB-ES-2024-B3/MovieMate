@@ -29,7 +29,7 @@ export const getUserTest = async (userName: string) => {
                 'Content-Type': 'application/json',
             },
         });
-        return response.data; // Retorna los datos del username
+        return response.data;
     } catch (error) {
         if (error.response?.status === 404) {
             // Si el user no existe, retorna null

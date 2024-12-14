@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { createTestUser, deleteTestUser, getUserTest } from '../../test_utils/testUtilsUsers';
+import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 
 const baseURL = 'http://localhost:3000/user';
 
@@ -7,8 +8,6 @@ let userId: string;
 let userName: string;
 
 describe('Delete Tests', () => {
-
-
     beforeAll(async () => {
         const existingUser = await getUserTest('TestUser');
         if (!existingUser) {
@@ -19,8 +18,6 @@ describe('Delete Tests', () => {
             userName = existingUser.user.userName;
             userId = existingUser.user.id;
         }
-
-
     });
 
     test('should delete a user', async () => {
@@ -30,7 +27,6 @@ describe('Delete Tests', () => {
             }
 
             const deleteResponse = await axios.delete(`${baseURL}/${userName}`);
-            console.log(deleteResponse.data)
             expect(deleteResponse.status).toBe(200);
             expect(deleteResponse.data).toBe(`user with username < ${userName} > deleted successfully`);
 
