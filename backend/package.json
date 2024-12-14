@@ -10,6 +10,7 @@
     "test:integration_user": "jest _test/integration_tests/user_tests --runInBand",
     "test:integration_movie": "jest _test/integration_tests/movies_tests --runInBand",
     "test:functional_user": "jest _test/functional_tests/Users --runInBand",
+    "test:functional_movie": "jest _test/functional_tests/Movies --runInBand",
     "build": "tsc",
     "start": "node dist/main/index.js",
     "dev": "ts-node-dev --respawn src/main/index.ts"
