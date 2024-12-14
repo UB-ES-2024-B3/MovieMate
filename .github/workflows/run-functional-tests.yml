@@ -54,3 +54,6 @@ jobs:
     - name: Run Functional Test for Movie
       run: docker exec backend_sprint1 sh -c "npm run test:functional_movie"
 
+    - name: Run Functional Test for Review
+      run: docker exec backend_sprint1 sh -c "npm run test:functional_review"
+

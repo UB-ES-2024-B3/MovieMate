@@ -3,6 +3,7 @@ import app from '../../../src/main/app'; // Ajusta esta ruta según tu proyecto
 import { createTestUser, deleteTestUser, getUserTest } from '../../test_utils/testUtilsUsers';
 import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 import {PostgreTypeOrmDataSource} from "../../../src/main/config/postgreDatabaseTypeOrm";
+import axios from "axios";
 
 describe('Followers Functional Tests', () => {
   let userName: string;
@@ -78,5 +79,21 @@ describe('Followers Functional Tests', () => {
 
     expect(response.status).toBe(200); // Verifica el estado HTTP
     expect(response.body).toBe(`${userName2} has unfollowed ${userName}`);
+  });
+
+  test('shouldnt follow to the same user', async () => {
+    try {
+      const unfollowerResponse = await request(app)
+      .put(`/user/${userName}/${userName}`);
+
+      expect(unfollowerResponse.status).toBe(404);
+      expect(unfollowerResponse.body.error.message).toBe(`You can't follow yourself`);
+    } catch (error) {
+      if (error.response) {
+        console.error('Error:', error.response.data);
+      } else {
+        console.error('Error:', error.message);
+      }
+    }
   });
 });

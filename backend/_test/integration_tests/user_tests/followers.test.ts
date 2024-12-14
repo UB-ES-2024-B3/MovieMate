@@ -95,4 +95,19 @@ describe('Followers Test', () => {
       }
     }
   });
+
+  test('shouldnt follow to the same user', async () => {
+    try {
+      const unfollowerResponse = await axios.put(`${baseURL}/${userName}/${userName}`);
+
+      expect(unfollowerResponse.status).toBe(404);
+      expect(unfollowerResponse.data.error.message).toBe(`You can't follow yourself`);
+    } catch (error) {
+      if (error.response) {
+        console.error('Error:', error.response.data);
+      } else {
+        console.error('Error:', error.message);
+      }
+    }
+  });
 });
