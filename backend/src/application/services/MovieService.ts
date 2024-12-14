@@ -37,16 +37,48 @@ export class MovieService {
         return await this.movieRepository.search(query);
     }
 
-    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
         return await this.movieRepository.reviewMovie(userName, idMovie, puntuacion);
     }
 
-    async addFavorites(userName: string, idMovie: number): Promise<String> {
+    async addFavorites(userName: string, idMovie: number): Promise<String>{
         return await this.movieRepository.addFavorites(userName, idMovie);
     }
 
     async getMoviesFiltered(n: number, maxPageSize: number, filters: Filters) {
         return await this.movieRepository.getMoviesFiltered(n, maxPageSize, filters)
     }
+
+    async getAllPremiereYears(): Promise<number[]> {
+        return await this.movieRepository.getUniquePremiereYears();
+    }
+
+    async getDurationRange(): Promise<{ min: number; max: number }> {
+        return await this.movieRepository.getDurationRange();
+    }
+
+    async getScoreRange(): Promise<{ min: number; max: number }> {
+        return await this.movieRepository.getScoreRange();
+    }
+
+    async getTotalReviewsRange(): Promise<{ min: number; max: number }> {
+        return await this.movieRepository.getTotalReviewsRange();
+    }
+    async getAllActors(): Promise<string[]> {
+        return await this.movieRepository.getUniqueActors();
+    }
+
+    async getAllDirectors(): Promise<string[]> {
+        return await this.movieRepository.getUniqueDirectors();
+    }
+
+    async getAllGenres(): Promise<string[]> {
+        return await this.movieRepository.getUniqueGenres();
+    }
+
+    async getAllClassifications(): Promise<string[]> {
+        return await this.movieRepository.getUniqueClassifications();
+    }
+
 }
 

@@ -381,4 +381,83 @@ export class MovieRepository implements IMovieRepository {
         }
     }
 
+    async getUniqueActors(): Promise<string[]> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('DISTINCT jsonb_array_elements_text(movie.actors)', 'actor')
+            .getRawMany();
+
+        // Extraer solo los valores de los actores
+        return result.map(row => row.actor);
+    }
+
+    async getUniqueGenres(): Promise<string[]> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('DISTINCT jsonb_array_elements_text(movie.genres)', 'genre')
+            .getRawMany();
+
+        return result.map(row => row.genre);
+    }
+
+    async getUniqueDirectors(): Promise<string[]> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('DISTINCT jsonb_array_elements_text(movie.directors)', 'director')
+            .getRawMany();
+
+        return result.map(row => row.director);
+    }
+
+    async getUniqueClassifications(): Promise<string[]> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('DISTINCT movie.classification', 'classification')
+            .where('movie.classification IS NOT NULL') // Ignora clasificaciones nulas
+            .getRawMany();
+
+        return result.map(row => row.classification); // Extrae solo las clasificaciones
+    }
+
+    async getUniquePremiereYears(): Promise<number[]> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('DISTINCT EXTRACT(YEAR FROM movie.premiereDate)', 'year')
+            .orderBy('year', 'ASC')
+            .getRawMany();
+
+        return result.map(row => parseInt(row.year, 10)); // Devuelve los años como números
+    }
+
+    async getDurationRange(): Promise<{ min: number; max: number }> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('MIN(movie.duration)', 'minDuration')
+            .addSelect('MAX(movie.duration)', 'maxDuration')
+            .getRawOne();
+
+        return { min: parseInt(result.minDuration, 10), max: parseInt(result.maxDuration, 10) };
+    }
+
+    async getScoreRange(): Promise<{ min: number; max: number }> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('MIN(movie.score)', 'minScore')
+            .addSelect('MAX(movie.score)', 'maxScore')
+            .getRawOne();
+
+        return { min: parseFloat(result.minScore), max: parseFloat(result.maxScore) };
+    }
+
+    async getTotalReviewsRange(): Promise<{ min: number; max: number }> {
+        const result = await this.repository
+            .createQueryBuilder('movie')
+            .select('MIN(array_length(movie.totalReviews, 1))', 'minReviews')
+            .addSelect('MAX(array_length(movie.totalReviews, 1))', 'maxReviews')
+            .getRawOne();
+
+        return { min: parseInt(result.minReviews, 10), max: parseInt(result.maxReviews, 10) };
+    }
+
+
 }
