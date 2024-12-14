@@ -6,6 +6,7 @@ import {IMovieRepository} from '../../src/domain/repositories/IMovieRepository';
 // @ts-ignore
 import createError from 'http-errors';
 import {Filters, MovieWithReviewsDtoOut} from "../../src/interfaces/Interfaces";
+import {undefined} from "io-ts";
 
 // Mock del repositorio
 const mockMovieRepository: jest.Mocked<IMovieRepository> = {
@@ -18,7 +19,15 @@ const mockMovieRepository: jest.Mocked<IMovieRepository> = {
     reviewMovie: jest.fn(),
     addFavorites: jest.fn(),
     getTop10: jest.fn(),
-    getMoviesFiltered: jest.fn()
+    getMoviesFiltered: jest.fn(),
+    getDurationRange: jest.fn(),
+    getScoreRange: jest.fn(),
+    getTotalReviewsRange: jest.fn(),
+    getUniqueActors: jest.fn(),
+    getUniqueClassifications: jest.fn(),
+    getUniqueDirectors: jest.fn(),
+    getUniqueGenres: jest.fn(),
+    getUniquePremiereYears: jest.fn()
 };
 
 describe('MovieService Unit Tests', () => {
@@ -318,6 +327,178 @@ describe('MovieService Unit Tests', () => {
                 'Any movie matches this filters'
             );
             expect(mockMovieRepository.getMoviesFiltered).toHaveBeenCalledWith(1, 10, filters);
+        });
+    });
+
+    describe('getUniqueActors', () => {
+        it('should return all unique actors', async () => {
+            const mockActors = ['Leonardo DiCaprio', 'Joseph Gordon-Levitt', 'Christian Bale'];
+
+            mockMovieRepository.getUniqueActors.mockResolvedValue(mockActors);
+
+            const result = await movieService.getAllActors();
+
+            expect(result).toEqual(mockActors);
+            expect(mockMovieRepository.getUniqueActors).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return an empty array if no actors are found', async () => {
+            mockMovieRepository.getUniqueActors.mockResolvedValue([]);
+
+            const result = await movieService.getAllActors();
+
+            expect(result).toEqual([]);
+            expect(mockMovieRepository.getUniqueActors).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getUniqueDirectors', () => {
+        it('should return all unique directors', async () => {
+            const mockDirectors = ['Christopher Nolan', 'Quentin Tarantino'];
+
+            mockMovieRepository.getUniqueDirectors.mockResolvedValue(mockDirectors);
+
+            const result = await movieService.getAllDirectors();
+
+            expect(result).toEqual(mockDirectors);
+            expect(mockMovieRepository.getUniqueDirectors).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return an empty array if no directors are found', async () => {
+            mockMovieRepository.getUniqueDirectors.mockResolvedValue([]);
+
+            const result = await movieService.getAllDirectors();
+
+            expect(result).toEqual([]);
+            expect(mockMovieRepository.getUniqueDirectors).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getUniqueGenres', () => {
+        it('should return all unique genres', async () => {
+            const mockGenres = ['Action', 'Drama', 'Sci-Fi'];
+
+            mockMovieRepository.getUniqueGenres.mockResolvedValue(mockGenres);
+
+            const result = await movieService.getAllGenres();
+
+            expect(result).toEqual(mockGenres);
+            expect(mockMovieRepository.getUniqueGenres).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return an empty array if no genres are found', async () => {
+            mockMovieRepository.getUniqueGenres.mockResolvedValue([]);
+
+            const result = await movieService.getAllGenres();
+
+            expect(result).toEqual([]);
+            expect(mockMovieRepository.getUniqueGenres).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getUniqueClassifications', () => {
+        it('should return all unique classifications', async () => {
+            const mockClassifications = ['PG-13', 'R', 'PG'];
+
+            mockMovieRepository.getUniqueClassifications.mockResolvedValue(mockClassifications);
+
+            const result = await movieService.getAllClassifications();
+
+            expect(result).toEqual(mockClassifications);
+            expect(mockMovieRepository.getUniqueClassifications).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return an empty array if no classifications are found', async () => {
+            mockMovieRepository.getUniqueClassifications.mockResolvedValue([]);
+
+            const result = await movieService.getAllClassifications();
+
+            expect(result).toEqual([]);
+            expect(mockMovieRepository.getUniqueClassifications).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getUniquePremiereYears', () => {
+        it('should return all unique premiere years', async () => {
+            const mockYears = [2010, 2008, 2023];
+
+            mockMovieRepository.getUniquePremiereYears.mockResolvedValue(mockYears);
+
+            const result = await movieService.getAllPremiereYears();
+
+            expect(result).toEqual(mockYears);
+            expect(mockMovieRepository.getUniquePremiereYears).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return an empty array if no years are found', async () => {
+            mockMovieRepository.getUniquePremiereYears.mockResolvedValue([]);
+
+            const result = await movieService.getAllPremiereYears();
+
+            expect(result).toEqual([]);
+            expect(mockMovieRepository.getUniquePremiereYears).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getDurationRange', () => {
+        it('should return the duration range successfully', async () => {
+            const mockRange = { min: 90, max: 180 };
+
+            mockMovieRepository.getDurationRange.mockResolvedValue(mockRange);
+
+            const result = await movieService.getDurationRange();
+
+            expect(result).toEqual(mockRange);
+            expect(mockMovieRepository.getDurationRange).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error if the range cannot be retrieved', async () => {
+            mockMovieRepository.getDurationRange.mockRejectedValue(createError(500, 'Unable to fetch duration range'));
+
+            await expect(movieService.getDurationRange()).rejects.toThrow('Unable to fetch duration range');
+            expect(mockMovieRepository.getDurationRange).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getScoreRange', () => {
+        it('should return the score range successfully', async () => {
+            const mockRange = { min: 5.0, max: 9.8 };
+
+            mockMovieRepository.getScoreRange.mockResolvedValue(mockRange);
+
+            const result = await movieService.getScoreRange();
+
+            expect(result).toEqual(mockRange);
+            expect(mockMovieRepository.getScoreRange).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error if the range cannot be retrieved', async () => {
+            mockMovieRepository.getScoreRange.mockRejectedValue(createError(500, 'Unable to fetch score range'));
+
+            await expect(movieService.getScoreRange()).rejects.toThrow('Unable to fetch score range');
+            expect(mockMovieRepository.getScoreRange).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('getTotalReviewsRange', () => {
+        it('should return the total reviews range successfully', async () => {
+            const mockRange = { min: 1, max: 150 };
+
+            mockMovieRepository.getTotalReviewsRange.mockResolvedValue(mockRange);
+
+            const result = await movieService.getTotalReviewsRange();
+
+            expect(result).toEqual(mockRange);
+            expect(mockMovieRepository.getTotalReviewsRange).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error if the range cannot be retrieved', async () => {
+            mockMovieRepository.getTotalReviewsRange.mockRejectedValue(
+                createError(500, 'Unable to fetch total reviews range')
+            );
+
+            await expect(movieService.getTotalReviewsRange()).rejects.toThrow('Unable to fetch total reviews range');
+            expect(mockMovieRepository.getTotalReviewsRange).toHaveBeenCalledTimes(1);
         });
     });
 });
