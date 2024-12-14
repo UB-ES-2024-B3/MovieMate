@@ -2,6 +2,11 @@ import {Movie} from "../models/Movie"
 import {Filters, MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 export interface IMovieRepository {
+
+    createMovie(movie: Movie): Promise<string>;
+
+    deleteMovie(id: number):  Promise<string>;
+
     get(title: string): Promise<MovieWithReviewsDtoOut>;
 
     getbyId(id: number): Promise<Movie>;

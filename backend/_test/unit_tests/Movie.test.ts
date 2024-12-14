@@ -9,13 +9,15 @@ import {Filters, MovieWithReviewsDtoOut} from "../../src/interfaces/Interfaces";
 
 // Mock del repositorio
 const mockMovieRepository: jest.Mocked<IMovieRepository> = {
-    get: jest.fn(),
-    getbyId: jest.fn(),
-    getAll: jest.fn(),
-    getTop10: jest.fn(),
+    createMovie: jest.fn(),
+    deleteMovie: jest.fn(),
     search: jest.fn(),
+    getAll: jest.fn(),
+    getbyId: jest.fn(),
+    get: jest.fn(),
     reviewMovie: jest.fn(),
     addFavorites: jest.fn(),
+    getTop10: jest.fn(),
     getMoviesFiltered: jest.fn()
 };
 

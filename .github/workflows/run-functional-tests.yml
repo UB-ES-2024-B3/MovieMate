@@ -1,0 +1,56 @@
+name: Run Functional Tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - pre-production
+      - main
+  push:
+    branches:
+      - develop
+      - pre-production
+      - main
+
+jobs:
+  functional:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Set up Docker
+      run: |
+        curl -fsSL https://get.docker.com | sh
+        sudo usermod -aG docker $USER
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm install
+
+    - name: Start Services with Docker Compose
+      run: docker-compose up -d
+
+    - name: Wait for Backend Service to be Ready
+      run: |
+        until docker exec backend_sprint1 curl -s http://localhost:3000/health; do
+          echo "Waiting for backend to be ready..."
+          sleep 5
+        done
+      shell: bash
+
+    - name: Run Functional Test for User
+      run: docker exec backend_sprint1 sh -c "npm run test:functional_user"
+
+    - name: Run Functional Test for Movie
+      run: docker exec backend_sprint1 sh -c "npm run test:functional_movie"
+

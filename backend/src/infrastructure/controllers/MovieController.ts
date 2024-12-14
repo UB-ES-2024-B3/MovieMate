@@ -3,6 +3,12 @@ import {MovieService} from "../../application/services/MovieService";
 import {autoInjectable, container} from "tsyringe";
 import {MovieRepository} from "../repositories/MovieRepository";
 import createError from "http-errors";
+import {DtoInValidation} from "../../interfaces/DtoInValidation";
+import {isRight} from "fp-ts/Either";
+import {User} from "../../domain/models/User";
+import {Movie} from "../../domain/models/Movie";
+import * as t from "io-ts";
+import movieRoutes from "../routes/MovieRoutes";
 
 container.register(
     "IMovieRepository", {
@@ -26,6 +32,52 @@ export class MovieController {
 
             return res.status(200).json(result);
         } catch (e) {
+            next(e);
+        }
+    }
+
+    static async createMovie(req: Request, res: Response, next: NextFunction){
+        try{
+            const movieData = req.body;
+
+            // Validar los datos con la clase DtoIn
+            const validationResult = DtoInValidation.validateMovieDto(movieData);
+
+            if (!isRight(validationResult)) {
+                // Si la validación falla, devolver un error
+                throw createError(400, "Invalid movie data!");
+            }
+
+            // Si la validación es correcta, accedemos a los datos validados
+            const validatedData = validationResult.right;
+
+            const movie: Movie = new Movie(
+                null,
+                validatedData.title,
+                validatedData.description,
+                validatedData.genres,
+                validatedData.directors,
+                validatedData.actors,
+                new Date(validatedData.premiereDate),
+                validatedData.duration,
+                validatedData.classification,
+                validatedData.score,
+                validatedData.totalReviews
+            );
+
+            const result = await this.movieService.createMovie(movie);
+            return res.status(200).json(result);
+        }catch (e){
+            next(e);
+        }
+    }
+
+    static async deleteMovie(req: Request, res: Response, next: NextFunction){
+        try{
+            const movieId = parseInt(req.params.movieId);
+            const result = await this.movieService.deleteMovie(movieId);
+            return res.status(200).json(result)
+        }catch (e){
             next(e);
         }
     }
