@@ -3,9 +3,11 @@ import { createTestUser, deleteTestUser, getUserTest } from '../../test_utils/te
 
 const baseURL = 'http://localhost:3000/user';
 
+let userId: string;
+let userName: string;
+
 describe('Delete Tests', () => {
-    let userId: string;
-    let userName: string;
+
 
     beforeAll(async () => {
         const existingUser = await getUserTest('TestUser');
