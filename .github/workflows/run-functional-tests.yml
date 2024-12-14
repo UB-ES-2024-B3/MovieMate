@@ -13,7 +13,7 @@ on:
       - main
 
 jobs:
-  autograde:
+  functional:
     runs-on: ubuntu-latest
 
     steps:

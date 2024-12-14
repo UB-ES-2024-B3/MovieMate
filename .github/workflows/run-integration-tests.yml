@@ -13,7 +13,7 @@ on:
       - main
 
 jobs:
-  autograde:
+  integration:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,9 +37,20 @@ jobs:
       working-directory: ./backend
       run: npm install
 
-    - name: Run Integration Test
+    - name: Start Services with Docker Compose
+      run: docker-compose up -d
+
+    - name: Wait for Backend Service to be Ready
       run: |
-        docker-compose up -d
-        docker exec backend_sprint1 sh -c "npm run test:integration_user"
-        docker exec backend_sprint1 sh -c "npm run test:integration_movie"
+        until docker exec backend_sprint1 curl -s http://localhost:3000/health; do
+          echo "Waiting for backend to be ready..."
+          sleep 5
+        done
+      shell: bash
+
+    - name: Run Integration Test for User
+      run: docker exec backend_sprint1 sh -c "npm run test:integration_user"
+
+    - name: Run Integration Test for Movie
+      run: docker exec backend_sprint1 sh -c "npm run test:integration_movie"
 
