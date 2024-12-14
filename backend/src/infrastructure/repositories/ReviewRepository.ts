@@ -52,6 +52,19 @@ export class ReviewRepository implements IReviewRepository {
         return "Review Published";
     }
 
+    async deleteReview(reviewId:number): Promise<string> {
+        const reviewFromDB = await this.repository.findOne({where: {id: reviewId},
+            relations: ['author', 'movie'],});
+
+        if (!reviewFromDB) {
+            throw createError(404, `Review with id < ${reviewId} > does not exist`);
+        }
+
+        await this.repository.remove(reviewFromDB);
+
+        return "Review Deleted";
+    }
+
     async get(reviewId: number): Promise<ReviewDtoOut> {
         const reviewFromDB = await this.repository.findOne({where: {id: reviewId},
             relations: ['author', 'movie'],});
