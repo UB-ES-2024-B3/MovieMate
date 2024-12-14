@@ -37,8 +37,17 @@ jobs:
       working-directory: ./backend
       run: npm install
 
-    - name: Run Integration Test
+    - name: Start Services with Docker Compose
+      run: docker-compose up -d
+
+    - name: Wait for Backend Service to be Ready
       run: |
-        docker-compose up -d
-        docker exec backend_sprint1 sh -c "npm run test:functional_user"
+        until docker exec backend_sprint1 curl -s http://localhost:3000/health; do
+          echo "Waiting for backend to be ready..."
+          sleep 5
+        done
+      shell: bash
+
+    - name: Run Functional Test for User
+      run: docker exec backend_sprint1 sh -c "npm run test:functional_user"
 
