@@ -256,9 +256,45 @@
                     <span class="text-xs text-gray-500">{{ formatDate(post.createdAt) }}</span>
                   </div>
 
-                  <button class="hover:text-cyan-400 transition text-gray-400">
+                  <button class="hover:text-cyan-400 transition text-gray-400" @click="openShareModal(post.id)">
                     <i class="fas fa-share"></i>
                   </button>
+
+                  <!-- Modal para Compartir -->
+                  <transition name="fade">
+                    <div v-if="isShareModalOpen" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                      <div
+                          class="bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full transform transition-all duration-300 scale-95 hover:scale-100">
+                        <h2 class="text-xl font-semibold text-white mb-6">Compartir Post</h2>
+                        <p class="text-sm text-gray-400 mb-4">Copia el enlace para compartir este post:</p>
+                        <div class="flex items-center space-x-2">
+                          <input
+                              :value="shareLink"
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none bg-gray-900 text-white"
+                              readonly
+                              type="text"
+                          />
+                          <button
+                              class="bg-cyan-600 text-white px-6 py-3 rounded-lg hover:bg-cyan-700 transition-all duration-300"
+                              @click="copyToClipboard"
+                          >
+                            Copiar
+                          </button>
+                        </div>
+                        <button
+                            class="mt-6 text-gray-400 hover:text-white text-sm underline"
+                            @click="closeShareModal"
+                        >
+                          Cerrar
+                        </button>
+                      </div>
+                    </div>
+                  </transition>
+                  <!-- Mensaje de éxito -->
+                  <div v-if="copySuccessMessage"
+                       class="fixed bottom-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                    <p class="text-sm">Enlace copiado al portapapeles</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -408,6 +444,11 @@ export default {
             content: "",
             postId: null,
           },
+
+          // Share
+          isShareModalOpen: false, // Controla la visibilidad del modal
+          shareLink: "", // Almacena el enlace único para compartir
+          copySuccessMessage: false, // Controla la visibilidad del mensaje de éxito
         };
     },
     created() {
@@ -750,6 +791,34 @@ export default {
           this.displayMessage("Hubo un error al añadir el comentario.", true);
         }
       },
+
+      openShareModal(postId) {
+        // Genera el enlace único basado en el ID del post
+
+        this.shareLink = `${window.location.origin}/post/${postId}\``;
+        this.isShareModalOpen = true; // Abre el modal
+      },
+      closeShareModal() {
+        this.isShareModalOpen = false; // Cierra el modal
+      },
+      copyToClipboard() {
+        navigator.clipboard.writeText(this.shareLink)
+            .then(() => {
+              // Cierra el modal al copiar el enlace
+              this.isShareModalOpen = false;
+
+              // Muestra el mensaje de éxito
+              this.copySuccessMessage = true;
+
+              // Oculta el mensaje después de 2 segundos
+              setTimeout(() => {
+                this.copySuccessMessage = false;
+              }, 2000);
+            })
+            .catch(err => {
+              console.error("Error al copiar el enlace: ", err);
+            });
+      },
     }
 }
 </script>
@@ -763,5 +832,13 @@ export default {
 }
 .scroll-smooth {
   scroll-behavior: smooth;
+}
+/* Estilo del mensaje de éxito */
+.bg-green-500 {
+  background-color: #38a169;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 </style>
