@@ -116,6 +116,7 @@
               id="reviews"
               v-model="filters.reviews"
               class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+              min="0"
               placeholder="Ej. 50"
               type="number"
           />
