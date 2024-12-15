@@ -1,13 +1,9 @@
 <template>
   <div class="min-h-screen grid place-items-center font-mono bg-gray-900">
     <div class="flex w-full h-full">
-      <!-- Lateral izquierdo -->
-      <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between fixed top-16 left-0 h-[calc(100vh-64px)]">
-        <!-- Aquí puedes agregar contenido para el menú lateral -->
-      </aside>
 
       <!-- Contenido principal -->
-      <div class="ml-64 flex-grow p-8">
+      <div class="w-full">
         <div class="max-w-6xl mx-auto">
           <!-- Botón para volver atrás -->
           <div class="mb-4">
@@ -171,7 +167,7 @@
                     </button>
 
                     <!-- Botón de comentarios -->
-                    <button class="flex items-center text-gray-400 hover:text-cyan-400 transition text-3xl">
+                    <button class="flex items-center text-gray-400 hover:text-cyan-400 transition text-3xl"  @click="openCommentModal(review.id)">
                       <i class="fas fa-comment"></i>
                       <span class="ml-2 text-base text-gray-600">{{ review.totalComments }}</span>
                     </button>
@@ -181,6 +177,31 @@
               </div>
               <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
 
+              <div v-if="showCommentModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div class="bg-gray-800 rounded-lg w-96 p-6">
+                  <h2 class="text-white text-xl font-bold mb-4">Añadir Comentario</h2>
+                  <textarea
+                      v-model="newComment.content"
+                      placeholder="Escribe tu comentario aquí..."
+                      class="w-full mb-4 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      rows="4"
+                  ></textarea>
+                  <div class="flex justify-end space-x-4">
+                    <button
+                        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                        @click="closeCommentModal"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                        class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-500"
+                        @click="submitComment"
+                    >
+                      Comentar
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -191,11 +212,15 @@
 </template>
 <script>
 import axios from "axios";
+import MovieReview from "./MovieReview.vue";
 
 const BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
 export default {
   name: "MovieCard",
+  path: '/review',
+  component: {MovieReview},
+  meta: { isReviewPage: true },
   data() {
     return {
       movie: {
@@ -222,6 +247,12 @@ export default {
       isAuthenticated: false,
       user: null,
       reviews: [],
+      //Comments
+      showCommentModal: false,
+      newComment: {
+        content: "",
+        reviewId: null,
+      },
     };
   },
   created() {
@@ -310,7 +341,7 @@ export default {
       this.fetchMovie(movieTitle);
     },
     goBack() {
-      this.$router.go(-1);
+      this.$router.push({ path: "/", query: { view: "forum" } });
     },
     rateMovie(rating) {
       if (!this.isAuthenticated) {
@@ -455,6 +486,47 @@ export default {
             .catch(error => {
               console.error("Error al dar dislike:", error);
             });
+      }
+    },
+
+    openCommentModal(reviewId) {
+      this.newComment = { content: "", reviewId };
+      this.showCommentModal = true;
+    },
+    closeCommentModal() {
+      this.showCommentModal = false;
+      this.newComment = { content: "", reviewId: null };
+    },
+    async submitComment() {
+      if (!this.newComment.content.trim()) {
+        this.displayMessage("El comentario no puede estar vacío.", true);
+        return;
+      }
+
+      try {
+        const BASE_URL = process.env["VUE_APP_API_BASE_URL"];
+        const payload = {
+          content: this.newComment.content,
+          author: this.username,
+          review: this.newComment.reviewId,
+        };
+        console.log(payload);
+        const response = await axios.post(`${BASE_URL}/comment`, payload);
+        if (response.status === 200) {
+          this.displayMessage("Comentario añadido correctamente.", false);
+            // Después de la acción PUT, obtener los datos actualizados con GET
+          const response1 = axios.get(`${BASE_URL}/review/${this.newComment.reviewId}`);
+
+          const updatedReview = response.data;
+          console.log(response1);
+          // Actualizar el valor de comentarios
+          this.newComment = updatedReview;
+
+          this.closeCommentModal();
+        }
+      } catch (error) {
+        console.error("Error añadiendo comentario:", error);
+        this.displayMessage("Hubo un error al añadir el comentario.", true);
       }
     },
   },
