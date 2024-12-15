@@ -8,6 +8,8 @@ let postId: string;
 let userId: string;
 let userName: string;
 
+// hi
+
 describe('Post Test Integration', () => {
     beforeAll(async () => {
         // Crear un post de prueba con el formato esperado
