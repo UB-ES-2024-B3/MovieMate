@@ -22,4 +22,20 @@ export interface IMovieRepository {
     addFavorites(userName: string, idMovie: number): Promise<string>;
 
     getMoviesFiltered(n: number, maxPageSize: number, filters: Filters);
+
+    getUniqueActors(): Promise<string[]>;
+
+    getUniqueDirectors(): Promise<string[]>;
+
+    getUniqueGenres(): Promise<string[]>;
+
+    getUniqueClassifications(): Promise<string[]>;
+
+    getUniquePremiereYears(): Promise<number[]>;
+
+    getDurationRange(): Promise<{ min: number; max: number }>;
+
+    getScoreRange(): Promise<{ min: number; max: number }>;
+
+    getTotalReviewsRange(): Promise<{ min: number; max: number }>;
 }
