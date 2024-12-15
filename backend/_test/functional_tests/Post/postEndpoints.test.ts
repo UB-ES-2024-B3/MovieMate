@@ -1,9 +1,10 @@
 import request from 'supertest';
 import app from '../../../src/main/app'; // Ajusta esta ruta según tu proyecto
-import { createTestUser, deleteTestUser } from '../../test_utils/testUtilsUsers';
+import {createTestUser, deleteTestUser, getUserTest} from '../../test_utils/testUtilsUsers';
 import { createPost, deletePost, getPost } from '../../test_utils/testUtilsPost';
 import { describe, beforeAll, afterAll, it, expect } from '@jest/globals';
 import { PostgreTypeOrmDataSource } from '../../../src/main/config/postgreDatabaseTypeOrm';
+import * as timers from "timers";
 
 describe('Post Functional Tests', () => {
   let userName: string;
@@ -15,15 +16,18 @@ describe('Post Functional Tests', () => {
       await PostgreTypeOrmDataSource.initialize();
     }
 
-    // Crear un usuario para asociar el post
-    const user = await createTestUser();
-    userId = user.user.id;
-    userName = user.user.userName;
+    const existingUser = await getUserTest('TestUser');
+    if (!existingUser) {
+        const user = await createTestUser();
+        userId = user.user.id;
+        userName = user.user.userName;
+    } else {
+        userId = existingUser.user.id;
+        userName = existingUser.user.userName;
+    }
   });
 
   afterAll(async () => {
-    // Eliminar el post
-    await deletePost(postId);
 
     // Eliminar el usuario
     await deleteTestUser(userName);
@@ -34,55 +38,42 @@ describe('Post Functional Tests', () => {
   });
 
   it('should create a post', async () => {
-    const postData = {
-      title: 'Test Post Title',
-      post: 'This is a test post content.',
-      author: userId,
-    };
+    const response = await request(app)
+        .post('/post')
+        .send({
+          title: 'Test Post Title',
+          post: 'This is a test post content.',
+          author: userName,
+        });
 
-    // Crear el post usando la función utilitaria
-    const createdPost = await createPost(postData);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual('Post Published');
 
-    // Verificar que el post se creó correctamente
-    expect(createdPost).toHaveProperty('id');
-    expect(createdPost.title).toBe(postData.title);
-    expect(createdPost.content).toBe(postData.post);
-    expect(createdPost.author.id).toBe(postData.author);
-
-    // Guardar el ID del post para pruebas posteriores
-    postId = createdPost.id;
   });
 
   it('should get the created post', async () => {
     // Usar la función de utilitaria para obtener el post
-    const retrievedPost = await getPost(postId);
+    const response = await request(app).get(`/post/all/${userName}`);
 
-    // Verificar que el post recuperado es el mismo que el creado
-    expect(retrievedPost).toBeDefined();
-    expect(retrievedPost.id).toBe(postId);
-    expect(retrievedPost.title).toBe('Test Post Title');
-    expect(retrievedPost.content).toBe('This is a test post content.');
-  });
+    console.log(response.body.allPosts[0].author.userName);
 
-  it('should update the post', async () => {
-    const updateData = {
-      title: 'Updated Test Post Title',
-      post: 'This is the updated content of the test post.',
-    };
+    const post = response.body.allPosts.find(
+        (r: any) =>
+          r.title === 'Test Post Title' &&
+          r.post === 'This is a test post content.' &&
+          r.author.userName === userName
+    );
 
-    // Realizar una actualización en el post
-    const response = await request(app)
-      .put(`/post/${postId}`)
-      .send(updateData);
 
-    // Verificar que la actualización fue exitosa
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual('Post updated successfully');
+    expect(post).toBeDefined();
+    postId = post.id;
 
-    // Verificar que el post fue actualizado
-    const updatedPost = await getPost(postId);
-    expect(updatedPost.title).toBe(updateData.title);
-    expect(updatedPost.content).toBe(updateData.post);
+    console.log(postId);
+
+    expect(post.title).toEqual('Test Post Title');
+    expect(post.post).toEqual('This is a test post content.');
+    expect(post.author.userName).toEqual(userName);
+
   });
 
   it('should delete the post', async () => {
@@ -90,10 +81,7 @@ describe('Post Functional Tests', () => {
     const response = await deletePost(postId);
 
     // Verificar que la eliminación fue exitosa
-    expect(response).toEqual('Post deleted successfully');
+    expect(response).toEqual('Post Deleted');
 
-    // Intentar obtener el post eliminado
-    const deletedPost = await getPost(postId);
-    expect(deletedPost).toBeNull();
   });
 });

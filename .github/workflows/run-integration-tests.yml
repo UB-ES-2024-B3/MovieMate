@@ -57,3 +57,6 @@ jobs:
     - name: Run Integration Test for Review
       run: docker exec backend_sprint1 sh -c "npm run test:integration_review"
 
+    - name: Run Integration Test for Post
+      run: docker exec backend_sprint1 sh -c "npm run test:integration_post"
+
