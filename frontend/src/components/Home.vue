@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[100vh]">
+  <div class="flex flex-col h-screen">
       <header class="bg-cyan-600 h-16 flex items-center justify-between">
         <div class="flex flex-1">
           <!-- Botón de Películas -->
@@ -23,16 +23,126 @@
           </button>
         </div>
       </header>
-      <div class="flex h-[calc(100vh-4rem)]">
+
+    <!-- Panel de Filtros Horizontal -->
+    <div v-if="isMovies" class="flex justify-center bg-gray-800 py-4 mb-6 rounded-lg shadow-md w-full min-h-59">
+      <div class="flex items-center space-x-4 w-full max-w-screen-xl">
+        <!-- Filtro de Género -->
+        <div class="filter-group">
+          <label for="genre" class="text-white font-semibold">Género</label>
+          <select v-model="filters.genre" id="genre" class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md">
+            <option value="">Todos</option>
+            <option value="Acción">Acción</option>
+            <option value="Comedia">Comedia</option>
+            <option value="Drama">Drama</option>
+            <option value="Terror">Terror</option>
+          </select>
+        </div>
+
+        <!-- Filtro de Directores -->
+        <div class="filter-group">
+          <label for="director" class="text-white font-semibold">Director</label>
+          <input
+              v-model="filters.director"
+              type="text"
+              id="director"
+              placeholder="Buscar Director"
+              class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+          />
+        </div>
+
+        <!-- Filtro de Actores -->
+        <div class="filter-group">
+          <label for="actors" class="text-white font-semibold">Actores</label>
+          <input
+              v-model="filters.actors"
+              type="text"
+              id="actors"
+              placeholder="Buscar Actores"
+              class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+          />
+        </div>
+
+        <!-- Filtro de Año de Estreno -->
+        <div class="filter-group">
+          <label for="year" class="text-white font-semibold">Año de Estreno</label>
+          <input
+              v-model="filters.year"
+              type="number"
+              id="year"
+              placeholder="Ej. 2010"
+              class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+          />
+        </div>
+
+        <!-- Filtro de Duración -->
+        <div class="filter-group">
+          <label for="duration" class="text-white font-semibold">Duración (min)</label>
+          <input
+              v-model="filters.duration"
+              type="number"
+              id="duration"
+              placeholder="Ej. 120"
+              class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+          />
+        </div>
+
+        <!-- Filtro de Clasificación -->
+        <div class="filter-group">
+          <label for="classification" class="text-white font-semibold">Clasificación</label>
+          <select v-model="filters.classification" id="classification" class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md">
+            <option value="PG">PG</option>
+            <option value="PG-13">PG-13</option>
+            <option value="R">R</option>
+            <option value="NC-17">NC-17</option>
+          </select>
+        </div>
+
+        <!-- Filtro de Puntuación -->
+        <div class="filter-group">
+          <label for="score" class="text-white font-semibold">Puntuación</label>
+          <input
+              v-model="filters.score"
+              type="number"
+              id="score"
+              min="0"
+              max="10"
+              step="0.1"
+              placeholder="Ej. 8.0"
+              class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+          />
+        </div>
+
+        <!-- Filtro de Total de Reseñas -->
+        <div class="filter-group">
+          <label for="reviews" class="text-white font-semibold">Total de Reseñas</label>
+          <input
+              v-model="filters.reviews"
+              type="number"
+              id="reviews"
+              placeholder="Ej. 50"
+              class="bg-gray-700 text-white px-4 py-2 rounded-md shadow-md"
+          />
+        </div>
+
+        <!-- Botón Aplicar Filtros -->
+        <div class="ml-4">
+          <button
+              @click="applyFilters"
+              class="bg-cyan-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-cyan-700 transition duration-300"
+          >
+            Aplicar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="flex h-[calc(100vh-4rem)]">
         <!-- Lateral izquierdo -->
-        <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between h-full">
-          <div v-if="isMovies">
-            <h2 class="text-white text-xl font-bold">PELÍCULAS</h2>
-            <button class="mt-4 bg-gray-800 text-white rounded py-2 px-4 mb-2">CATEGORÍA 1</button>
-            <button class="bg-gray-800 text-white rounded py-2 px-4 mb-2">CATEGORÍA 2</button>
-            <button class="bg-gray-800 text-white rounded py-2 px-4">CATEGORÍA 3</button>
-          </div>
-          <div v-else class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <aside  v-if="!isMovies" class="bg-cyan-600 w-64 p-6 flex flex-col justify-between h-full">
+          <div>
             <h2 class="text-white text-xl font-bold mb-4">Ordenar por:</h2>
             <div class="space-y-6">
               <!-- Grupo Recientes/Antiguos -->
@@ -106,6 +216,7 @@
           </div>
 
           <section v-if="isMovies && movies.length > 0" class="relative w-full">
+
             <h3 class="text-cyan-600 text-3xl font-bold mb-6 text-center">TOP 10 PELÍCULAS</h3>
             <div class="relative overflow-hidden w-full">
               <!-- Flecha Izquierda -->
@@ -407,6 +518,17 @@ export default {
           newComment: {
             content: "",
             postId: null,
+          },
+
+          filters: {
+            genre: "",
+            director: "",
+            actors: "",
+            year: "",
+            duration: "",
+            classification: "",
+            score: "",
+            reviews: "",
           },
         };
     },
@@ -750,6 +872,37 @@ export default {
           this.displayMessage("Hubo un error al añadir el comentario.", true);
         }
       },
+
+      // Método para aplicar los filtros
+      async applyFilters() {
+
+        try {
+          const payload = {
+            genre: this.filters.genre || '', // Asignar vacío si no está seleccionado
+            director: this.filters.director || '',
+            actors: this.filters.actors || '',
+            premiereYear: this.filters.year || '',
+            duration: this.filters.duration || '',
+            classification: this.filters.classification || '',
+            score: this.filters.score || '',
+            totalReviews: this.filters.reviews || ''
+          };
+          const BASE_URL = process.env['VUE_APP_API_BASE_URL']
+          const response = await axios.post(`${BASE_URL}/movie/get-filtered?pageNumber=1&maxPageSize=10`, payload);
+
+          if (response.status === 200) {
+            console.log(response.data.movies); // Ajusta según la estructura de tu respuesta
+          } else {
+            this.showMessage = true;
+            this.toastError = true;
+            this.message = "Error al obtener las películas.";
+          }
+        } catch (error) {
+          this.showMessage = true;
+          this.toastError = true;
+          this.message = "Hubo un error al procesar la solicitud.";
+        }
+      },
     }
 }
 </script>
@@ -764,4 +917,46 @@ export default {
 .scroll-smooth {
   scroll-behavior: smooth;
 }
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.filter-group label {
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+.filter-group select,
+.filter-group input {
+  font-size: 1rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: #2d2d2d;
+  color: white;
+}
+
+.filter-group input::placeholder {
+  color: #888;
+}
+
+.filter-group select,
+.filter-group input {
+  transition: all 0.3s ease;
+}
+
+.filter-group select:hover,
+.filter-group input:hover {
+  border-color: #00b5e2;
+}
+
+.filter-button {
+  transition: all 0.3s ease;
+}
+.filter-button:hover {
+  transform: scale(1.05);
+}
+
 </style>
