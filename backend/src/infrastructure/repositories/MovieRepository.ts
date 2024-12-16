@@ -8,6 +8,7 @@ import {
     AuthorDtoOut,
     Filters,
     GetMoviesFilteredDtoOut,
+    MovieDtoOut,
     MovieReviewDtoOut,
     MoviesList,
     MovieWithReviewsDtoOut,
@@ -15,8 +16,6 @@ import {
 } from "../../interfaces/Interfaces";
 import {UserEntity} from "../entities/UserEntity";
 import {ReviewEntity} from "../entities/ReviewEntity";
-import {createHash} from "crypto";
-import {User} from "../../domain/models/User";
 
 export class MovieRepository implements IMovieRepository {
     private readonly repository: Repository<MovieEntity>;
@@ -44,7 +43,7 @@ export class MovieRepository implements IMovieRepository {
         return movieEntity;
     }
 
-    async createMovie(movie:Movie): Promise<string> {
+    async createMovie(movie: Movie): Promise<string> {
         const movieFromDB = await this.repository.findOne({where: {title: movie.title}});
 
         if (movieFromDB) {
@@ -365,7 +364,7 @@ export class MovieRepository implements IMovieRepository {
                 movies: moviesFromDb.map(movie => ({
                     id: movie.id,
                     title: movie.title,
-                    image: movie.image ? movie.image.toString('base64') : null,
+                    image: movie.image ? this.imageToBase64(movie.image) : null,
                 })),
                 paginationInfo: {
                     moviesFound: total,
@@ -436,7 +435,7 @@ export class MovieRepository implements IMovieRepository {
             .addSelect('MAX(movie.duration)', 'maxDuration')
             .getRawOne();
 
-        return { min: parseInt(result.minDuration, 10), max: parseInt(result.maxDuration, 10) };
+        return {min: parseInt(result.minDuration, 10), max: parseInt(result.maxDuration, 10)};
     }
 
     async getScoreRange(): Promise<{ min: number; max: number }> {
@@ -446,7 +445,7 @@ export class MovieRepository implements IMovieRepository {
             .addSelect('MAX(movie.score)', 'maxScore')
             .getRawOne();
 
-        return { min: parseFloat(result.minScore), max: parseFloat(result.maxScore) };
+        return {min: parseFloat(result.minScore), max: parseFloat(result.maxScore)};
     }
 
     async getTotalReviewsRange(): Promise<{ min: number; max: number }> {
@@ -456,8 +455,24 @@ export class MovieRepository implements IMovieRepository {
             .addSelect('MAX(array_length(movie.totalReviews, 1))', 'maxReviews')
             .getRawOne();
 
-        return { min: parseInt(result.minReviews, 10), max: parseInt(result.maxReviews, 10) };
+        return {min: parseInt(result.minReviews, 10), max: parseInt(result.maxReviews, 10)};
     }
 
+    async getTop10Reviewed(): Promise<MovieDtoOut[]> {
+        const moviesFromDb = await this.repository
+            .createQueryBuilder('item')
+            .select(['item.id', 'item.title', 'item.image'])
+            .addSelect('jsonb_array_length(item.totalReviews)', 'reviews_count')
+            .orderBy('reviews_count', 'DESC')
+            .limit(10)
+            .getMany();
+
+        const movies = moviesFromDb.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            image: movie.image ? this.imageToBase64(movie.image) : null,
+        }));
+        return movies;
+    }
 
 }

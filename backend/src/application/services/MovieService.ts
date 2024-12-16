@@ -1,8 +1,7 @@
 import {Movie} from "../../domain/models/Movie";
 import {inject, injectable} from "tsyringe";
 import {IMovieRepository} from "../../domain/repositories/IMovieRepository";
-import {Filters, MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
-import {User} from "../../domain/models/User";
+import {Filters, MovieDtoOut, MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 @injectable()
 export class MovieService {
@@ -13,7 +12,7 @@ export class MovieService {
         return await this.movieRepository.createMovie(movie);
     }
 
-    async deleteMovie(id: number){
+    async deleteMovie(id: number) {
         return await this.movieRepository.deleteMovie(id);
     }
 
@@ -37,11 +36,11 @@ export class MovieService {
         return await this.movieRepository.search(query);
     }
 
-    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut>{
+    async reviewMovie(userName: string, idMovie: number, puntuacion: number): Promise<MovieReviewDtoOut> {
         return await this.movieRepository.reviewMovie(userName, idMovie, puntuacion);
     }
 
-    async addFavorites(userName: string, idMovie: number): Promise<String>{
+    async addFavorites(userName: string, idMovie: number): Promise<String> {
         return await this.movieRepository.addFavorites(userName, idMovie);
     }
 
@@ -64,6 +63,7 @@ export class MovieService {
     async getTotalReviewsRange(): Promise<{ min: number; max: number }> {
         return await this.movieRepository.getTotalReviewsRange();
     }
+
     async getAllActors(): Promise<string[]> {
         return await this.movieRepository.getUniqueActors();
     }
@@ -78,6 +78,10 @@ export class MovieService {
 
     async getAllClassifications(): Promise<string[]> {
         return await this.movieRepository.getUniqueClassifications();
+    }
+
+    async getTop10Reviewed(): Promise<MovieDtoOut[]> {
+        return await this.movieRepository.getTop10Reviewed();
     }
 
 }

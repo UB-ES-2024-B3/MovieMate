@@ -236,4 +236,13 @@ export class MovieController {
         }
     }
 
+    static async getTop10Reviewed(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.movieService.getTop10Reviewed();
+            res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
 }

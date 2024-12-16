@@ -1,5 +1,5 @@
 import {Movie} from "../models/Movie"
-import {Filters, MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
+import {Filters, MovieDtoOut, MovieReviewDtoOut, MoviesList, MovieWithReviewsDtoOut} from "../../interfaces/Interfaces";
 
 export interface IMovieRepository {
 
@@ -38,4 +38,6 @@ export interface IMovieRepository {
     getScoreRange(): Promise<{ min: number; max: number }>;
 
     getTotalReviewsRange(): Promise<{ min: number; max: number }>;
+
+    getTop10Reviewed(): Promise<MovieDtoOut[]>;
 }
