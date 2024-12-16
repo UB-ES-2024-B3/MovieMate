@@ -27,7 +27,8 @@ const mockMovieRepository: jest.Mocked<IMovieRepository> = {
     getUniqueClassifications: jest.fn(),
     getUniqueDirectors: jest.fn(),
     getUniqueGenres: jest.fn(),
-    getUniquePremiereYears: jest.fn()
+    getUniquePremiereYears: jest.fn(),
+    getTop10Reviewed: jest.fn()
 };
 
 describe('MovieService Unit Tests', () => {
