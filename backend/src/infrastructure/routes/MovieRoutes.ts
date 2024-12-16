@@ -20,5 +20,6 @@ router.get("/filters/premiere-years", (req: Request, res: Response, next: NextFu
 router.get("/filters/duration-range", (req: Request, res: Response, next: NextFunction) => MovieController.getDurationRange(req, res, next));
 router.get("/filters/score-range", (req: Request, res: Response, next: NextFunction) => MovieController.getScoreRange(req, res, next));
 router.get("/filters/total-reviews-range", (req: Request, res: Response, next: NextFunction) => MovieController.getTotalReviewsRange(req, res, next));
+router.get("/filters/top-more-reviews", (req: Request, res: Response, next: NextFunction) => MovieController.getTop10Reviewed(req, res, next));
 
 export default router;
