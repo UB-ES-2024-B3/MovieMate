@@ -42,7 +42,7 @@ export class CommentRepository implements ICommentRepository {
         if (comment.review != null) {
             reviewFromDB = await this.reviewRepository.findOneBy({id: comment.review});
             reviewFromDB.totalComments = reviewFromDB.totalComments + 1;
-            await this.repository.save(reviewFromDB);
+            await this.reviewRepository.save(reviewFromDB);
         }
 
         let commentFromDB = null;

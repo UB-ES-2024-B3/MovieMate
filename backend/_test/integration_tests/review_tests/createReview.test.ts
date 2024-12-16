@@ -2,14 +2,14 @@ import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 import {createTestMovie, deleteTestMovie, getTestMovie} from '../../test_utils/testUtilsMovies';
 import {createTestUser, deleteTestUser, getUserTest} from '../../test_utils/testUtilsUsers';
 import axios from 'axios';
+import {deleteReviewFromUser} from "../../test_utils/testUtilsReviews";
 
-const baseURL = 'http://localhost:3000/movie';
-const userURL = 'http://localhost:3000/user';
+const baseURL = 'http://localhost:3000/review/';
 let movieId: string;
 let userId: string;
 let userName: string;
 
-describe('PUT /movie/favorites', () => {
+describe('Review Test Integration', () => {
     beforeAll(async () => {
         const existingMovie = await getTestMovie('TestMovie');
         if (!existingMovie) {
@@ -31,33 +31,21 @@ describe('PUT /movie/favorites', () => {
     });
 
     afterAll(async () => {
+        await deleteReviewFromUser(userName, Number(movieId));
         await deleteTestMovie(movieId);
         await deleteTestUser(userName);
     });
 
-    test('should add a movie to favorites', async () => {
-        const response = await axios.put(`${baseURL}/favorites`, {
-            userName,
-            idMovie: movieId,
+    test('should add a review in one movie', async () => {
+        const reviewAddResponse = await axios.post(`${baseURL}`, {
+            title: 'ReviewTitleTest',
+            review: 'ReviewTest',
+            author: Number(userId),
+            movie: Number(movieId)
         });
 
-        expect(response.status).toBe(200);
-        expect(response.data).toBe('Movie added to favorites');
-
-        const favorites = await axios.get(`${userURL}/${userName}/favorites`);
-        expect(favorites.data).toContainEqual(expect.objectContaining({ id: movieId }));
+        expect(reviewAddResponse.status).toBe(200);
+        expect(reviewAddResponse.data).toBe("Review Published")
     });
 
-    test('should remove a movie from favorites', async () => {
-        const response = await axios.put(`${baseURL}/favorites`, {
-            userName,
-            idMovie: movieId,
-        });
-
-        expect(response.status).toBe(200);
-        expect(response.data).toBe('Movie removed from favorites');
-
-        const favorites = await axios.get(`${userURL}/${userName}/favorites`);
-        expect(favorites.data).not.toContainEqual(expect.objectContaining({ id: movieId }));
-    });
 });
