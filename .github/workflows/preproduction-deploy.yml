@@ -75,7 +75,7 @@ jobs:
       - name: Wait for Database to be Ready
         run: |
           echo "Waiting for the database to be ready..."
-          for i in {1..30}; do
+          for i in {1..15}; do
             nc -zv es-b3-movimate-pre.westeurope.azurecontainer.io 5432 && break
             echo "Database not ready yet, retrying in 5 seconds..."
             sleep 5
