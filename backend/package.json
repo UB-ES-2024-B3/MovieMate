@@ -13,6 +13,7 @@
     "test:functional_user": "jest _test/functional_tests/Users --runInBand",
     "test:functional_movie": "jest _test/functional_tests/Movies --runInBand",
     "test:functional_review": "jest _test/functional_tests/Reviews --runInBand",
+    "test:functional_post": "jest _test/functional_tests/Post --runInBand",
     "build": "tsc",
     "start": "node dist/main/index.js",
     "dev": "ts-node-dev --respawn src/main/index.ts"
