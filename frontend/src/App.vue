@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-900 text-white flex flex-col">
+  <div class="min-h-screen bg-gray-900 text-white flex flex-col h-screen">
     <header class="bg-header-color flex items-center justify-between p-4 border-gray-200">
       <router-link to="/" class="self-center text-2xl font-semibold whitespace-nowrap dark:text-black">
         <h1>MovieMate</h1>
@@ -111,11 +111,11 @@
       </router-link>
     </header>
 
-    <main class="flex-grow">
+    <main class="flex-1 overflow-y-auto">
       <router-view></router-view>
     </main>
 
-    <footer class="bg-gray-800 text-center text-sm p-4">
+    <footer class="bg-gray-800 text-center text-sm p-4 mt-6">
       <p>&copy; 2024 MovieMate. All rights reserved.</p>
     </footer>
   </div>

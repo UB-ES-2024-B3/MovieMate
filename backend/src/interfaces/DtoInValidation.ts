@@ -31,6 +31,19 @@ export class DtoInValidation {
         isAdmin: t.union([t.boolean, t.undefined])
     });
 
+    static MovieDtoInCodec = t.type({
+        title: t.string,
+        description: t.string,
+        genres: t.array(t.string),
+        directors: t.array(t.string),
+        actors: t.array(t.string),
+        premiereDate: t.string,
+        duration: t.number,
+        classification: t.union([t.string, t.null]),
+        score: t.union([t.number, t.null]),
+        totalReviews: t.union([ t.array(t.number), t.null])
+    });
+
     static ReviewDtoInCodec = t.type({
         title: t.string,
         review: t.string,
@@ -80,6 +93,10 @@ export class DtoInValidation {
     // Método para validar los datos de la solicitud
     static validateUserDto(data: any) {
         return DtoInValidation.UserDtoInCodec.decode(data);
+    }
+
+    static validateMovieDto(data: any){
+        return DtoInValidation.MovieDtoInCodec.decode(data);
     }
 
     static validateReviewDto(data: any) {

@@ -23,7 +23,11 @@ export class ReviewController {
 
     static async createReview(req: Request, res: Response, next: NextFunction) {
         try {
-            const reviewData = req.body;
+            const reviewData = {
+              ...req.body,
+              like: 0,
+              disLike: 0,
+            };
 
             // Validar los datos con la clase DtoIn
             const validationResult = DtoInValidation.validateReviewDto(reviewData);
@@ -68,6 +72,16 @@ export class ReviewController {
     static async getAllReviews(req: Request, res: Response, next: NextFunction) {
         try {
             const result = await this.reviewService.getAllReviews();
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async deleteReview(req: Request, res: Response, next: NextFunction){
+        try {
+            const reviewId = parseInt(req.params.reviewId);
+            const result = await this.reviewService.deleteReview(reviewId);
             return res.status(200).json(result);
         } catch (e) {
             next(e);

@@ -332,6 +332,10 @@ export class UserRepository implements IUserRepository {
             throw createError(404, `User ${userName1} does not exist`);
         }
 
+        if(user1.id == user2.id){
+            throw createError(404, `You can't follow yourself`);
+        }
+
 
         const isFollowing = user1.following?.some(followingUser => followingUser.id === user2.id);
         if(isFollowing){

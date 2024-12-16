@@ -1,29 +1,27 @@
 import axios from 'axios';
+import {createTestUser, deleteTestUser, getUserTest} from "../../test_utils/testUtilsUsers";
+import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 
 const baseURL = 'http://localhost:3000/user';
 
 describe('Update Tests', () => {
   let userId: string;
+  let userName: string;
 
   beforeAll(async () => {
-    try {
-      const response = await axios.post(`${baseURL}/register`, {
-        userName: 'testUser',
-        email: 'testuser@example.com',
-        birthDate: '2000-01-01',
-        password: 'securepassword123',
-        gender: 'male',
-        isAdmin: false
-      });
-      userId = response.data.user.id;  // Ajusta esto según la estructura de la respuesta.
-    } catch (error) {
-      if (error.response) {
-        // El servidor respondió con un error
-        console.error('Error:', error.response.data);  // Esto te dará detalles sobre el error.
+      const existingUser = await getUserTest('TestUser');
+      if (!existingUser) {
+          const user = await createTestUser();
+          userName = user.user.userName;
+          userId = user.user.id;
       } else {
-        console.error('Error:', error.message);  // Esto capturará errores de red o algo fuera del servidor.
+          userName = existingUser.user.userName;
+          userId = existingUser.user.id;
       }
-    }
+  });
+
+  afterAll(async () => {
+      await deleteTestUser(userName);
   });
 
 
@@ -31,6 +29,7 @@ describe('Update Tests', () => {
   test('should update an existing user', async () => {
     try {
       const updateResponse = await axios.put(`${baseURL}/update/${userId}`, { userName: 'updatedUser' });
+      userName = "updatedUser";
       expect(updateResponse.status).toBe(200);
     } catch (error) {
       if (error.response) {

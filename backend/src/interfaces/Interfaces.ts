@@ -158,3 +158,23 @@ export interface UpdateCommentData {
 export interface UserId {
     id: number;
 }
+
+export interface Filters {
+    genres?: string;
+    directors?: string;
+    actors?: string;
+    premiereYear?: number;
+    duration?: number;
+    classification?: string;
+    score?: number;
+    totalReviews?: number;
+}
+
+export interface GetMoviesFilteredDtoOut {
+    movies: MovieDtoOut[],
+    paginationInfo: {
+        moviesFound: number,
+        actualPage?: number,
+        totalPages?: number
+    }
+}
