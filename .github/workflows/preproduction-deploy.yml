@@ -76,7 +76,7 @@ jobs:
         run: |
           echo "Waiting for the database to be ready..."
           for i in {1..30}; do
-            nc -zv moviemate-pre-db.westeurope.azurecontainer.io 5432 && break
+            nc -zv es-b3-movimate-pre.westeurope.azurecontainer.io 5432 && break
             echo "Database not ready yet, retrying in 5 seconds..."
             sleep 5
           done
