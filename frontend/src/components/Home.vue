@@ -25,7 +25,7 @@
     </header>
 
     <!-- Panel de Filtros Horizontal -->
-    <div class="flex flex-col sm:flex-row justify-center bg-gray-800 py-4 mb-6 rounded-lg shadow-md w-full">
+    <div v-if="isMovies" class="flex flex-col sm:flex-row justify-center bg-gray-800 py-4 mb-6 rounded-lg shadow-md w-full">
       <div class="flex items-center space-x-4 w-full max-w-screen-xl flex-wrap justify-center">
       <!-- Filtro de Género -->
         <div class="filter-group">
@@ -247,6 +247,57 @@
                   />
                 </router-link>
                 <p class="text-white text-lg font-bold mt-4">{{ movie._title }}</p>
+              </div>
+            </div>
+
+            <!-- Flecha Derecha -->
+            <button
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white rounded-full w-12 h-12 z-10 flex items-center justify-center shadow hover:bg-gray-700"
+                @click="scrollRight"
+            >
+              &#8594;
+            </button>
+          </div>
+
+          <!-- Espacio entre los dos carruseles -->
+          <div class="my-12"></div>
+
+          <!-- Nueva Sección: Películas de Acción -->
+          <h3 class="text-cyan-600 text-3xl font-bold mb-6 text-center">PELICULAS MÁS VISTAS</h3>
+          <div class="relative overflow-hidden w-full">
+            <!-- Flecha Izquierda -->
+            <button
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white rounded-full w-12 h-12 z-10 flex items-center justify-center shadow hover:bg-gray-700"
+                @click="scrollLeft"
+            >
+              &#8592;
+            </button>
+
+            <!-- Carrusel de Acción -->
+            <div
+                ref="actionScrollContainer"
+                class="flex items-center overflow-x-hidden scroll-smooth w-full px-16"
+            >
+              <div
+                  v-for="movie in mostViewMovies"
+                  :key="movie.id"
+                  class="flex-shrink-0 bg-gray-700 text-center w-64 h-96 mx-4 rounded-lg shadow-lg p-4 flex flex-col items-center justify-between"
+              >
+                <router-link :to="`/movie/${movie.title}`">
+                  <img
+                      v-if="movie?.image"
+                      :src="movie.image"
+                      alt="Movie Poster"
+                      class="h-72 w-full object-cover rounded-lg hover:scale-105 transition duration-300"
+                  />
+                  <img
+                      v-else
+                      :src="'https://via.placeholder.com/100?text=' + movie.title"
+                      alt="Movie Poster"
+                      class="h-72 w-full object-cover rounded-lg hover:scale-105 transition duration-300"
+                  />
+                </router-link>
+                <p class="text-white text-lg font-bold mt-4">{{ movie.title }}</p>
               </div>
             </div>
 
@@ -540,6 +591,7 @@ export default {
       isMovies: true,
       movies: [],
       actionMovies: [],
+      mostViewMovies: [],
       autoScroll: null,
       isAuthenticated: false,
       username_actual: "",
@@ -595,6 +647,7 @@ export default {
   mounted() {
     this.fetchFilterData();
     this.fetchMovies();
+    this.fetchMostViewMovies();
     this.fetchActionMovies();
     this.startAutoScroll();
   },
@@ -661,6 +714,18 @@ export default {
         console.error("Error fetching movies: ", error);
       }
     },
+
+    async fetchMostViewMovies() {
+      try {
+        const BASE_URL = process.env['VUE_APP_API_BASE_URL'];
+        const response = await axios.get(`${BASE_URL}/movie/filters/top-more-reviews`);
+        this.mostViewMovies = response.data;
+
+      } catch (error) {
+        console.error('Error al cargar las películas:', error);
+      }
+    },
+
     async fetchActionMovies() {
       try {
       const payload = {
