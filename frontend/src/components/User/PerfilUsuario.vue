@@ -40,58 +40,86 @@
     <!-- Contenido principal -->
     <main class="bg-gray-900 text-white flex-grow p-6 overflow-y-auto flex items-start justify-center">
       <div class="text-center w-full max-w-4xl mt-6 relative">
-        <div class="flex items-center justify-between mb-8">
-          <!-- Avatar y descripción -->
-          <div class="flex items-center">
-            <div class="w-28 h-28 bg-gray-500 rounded-full mr-8 overflow-hidden flex items-center justify-center">
-              <!-- Mostrar imagen si existe -->
-              <img v-if="user?.image" :src="user.image" alt="Profile" class="w-full h-full object-cover" />
-              <!-- Mostrar ícono por defecto si no hay imagen -->
-              <span v-else class="text-white text-5xl">&#128100;</span>
+        <!-- Contenedor principal con Flexbox -->
+        <div class="flex items-start justify-start space-x-8 mb-8">
+          <!-- Avatar -->
+          <div class="w-28 h-28 bg-gray-500 rounded-full overflow-hidden flex items-center justify-center">
+            <!-- Mostrar imagen si existe -->
+            <img v-if="user?.image" :src="user.image" alt="Profile" class="w-full h-full object-cover" />
+            <!-- Mostrar ícono por defecto si no hay imagen -->
+            <span v-else class="text-white text-5xl">&#128100;</span>
+          </div>
+
+          <!-- Información del perfil y botones -->
+          <div class="text-left flex-1">
+            <router-link :to="`/user/${user.userName}`" class="text-3xl font-bold text-cyan-400">
+              <h3>@{{ user.userName }}</h3>
+            </router-link>
+            <p class="text-cyan-400 mt-1">{{ user.description }}</p>
+
+            <!-- Botones followers y following -->
+            <div class="flex mt-2 space-x-4">
+              <button @click="viewFollowers" class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
+                {{ this.followersCount || 0 }} FOLLOWERS
+              </button>
+              <button @click="viewFollowings" class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
+                {{ this.followingCount || 0 }} FOLLOWING
+              </button>
             </div>
 
-            <!-- Información del perfil -->
-            <div class="text-left">
-              <router-link :to="`/user/${user.userName}`" class="text-3xl font-bold text-cyan-400">
-                <h3>@{{ user.userName }}</h3>
-              </router-link>
-
-              <p class="text-cyan-400 mt-1">{{ user.description }}</p>
-
-              <!-- Botones de seguidores/seguidos -->
-              <div class="flex mt-2 space-x-4">
-                <button @click="viewFollowers" class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
-                  {{ this.followersCount || 0 }} FOLLOWERS
-                </button>
-                <button  @click="viewFollowings" class="bg-cyan-600 text-white rounded-full px-6 py-2 text-base">
-                  {{ this.followingCount || 0 }} FOLLOWING
-                </button>
-              </div>
-
-
-              <!-- Botón editar o seguir -->
+            <!-- Botón EDIT PROFILE -->
+            <div class="mt-4">
               <router-link v-if="isLogged" to="/editar">
-                <button class="bg-cyan-600 text-white rounded-full px-6 py-2 mt-4 w-full hover:bg-gray-800 transition duration-200">EDIT PROFILE</button>
+                <button class="bg-cyan-600 text-white rounded-full px-28 py-2 text-base transition duration-200">
+                  EDIT PROFILE
+                </button>
               </router-link>
               <button
-                  v-else
-                  @click="openConfirmation"
-                  :class="isFollowing ? 'bg-red-600' : 'bg-cyan-600'"
-                  class="text-white rounded-full px-6 py-2 mt-4 w-full hover:bg-gray-800 transition duration-200"
+                v-else
+                @click="openConfirmation"
+                :class="isFollowing ? 'bg-red-600' : 'bg-cyan-600'"
+                class="bg-cyan-600 text-white rounded-full px-28 py-2 text-base transition duration-200"
               >
                 {{ isFollowing ? 'DEJAR DE SEGUIR' : 'SEGUIR' }}
               </button>
-
-              <!-- Mensaje de éxito -->
-              <div v-if="followMessage" class="mt-4 text-center">
-                <p class="text-cyan-400 font-semibold">{{ followMessage }}</p>
-              </div>
             </div>
           </div>
         </div>
 
+        <!-- Línea divisoria -->
+        <div class="border-t border-cyan-400 w-full mt-8"></div>
+
+        <!-- Publicaciones del usuario -->
+        <div class="mt-10">
+          <div class="review-container">
+            <div v-if="reviews.length > 0">
+              <div v-for="(review, index) in reviews" :key="index"
+                   class="review-card bg-gray-800 text-white rounded-md p-4 mb-4 shadow-lg">
+                <router-link :to="`/review/${review.id}`">
+                  <h5 class="text-[#5ce1e6] font-semibold text-lg mb-2 text-left">{{ review.title }}</h5>
+                  <p class="text-gray-400 text-sm mb-4 text-left">{{ review.movie.title }}</p>
+                  <p class="text-gray-200 mb-4 text-left">{{ review.content }}</p>
+                  <!-- Botones de Comentar y Me gusta dentro de la reseña -->
+                  <div class="flex justify-end space-x-4 mt-4">
+                    <button class="text-gray-400 hover:text-cyan-400 transition">
+                      <i class="fas fa-thumbs-up"></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-cyan-400 transition">
+                      <i class="fas fa-thumbs-down"></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-cyan-400 transition">
+                      <i class="fas fa-comment"></i>
+                    </button>
+                  </div>
+                </router-link>
+              </div>
+            </div>
+            <p v-else class="text-gray-400 flex justify-center">No hay publicaciones disponibles.</p>
+          </div>
+        </div>
       </div>
     </main>
+
 
     <!-- Modal de confirmación -->
     <transition name="fade">
@@ -192,6 +220,7 @@ export default {
       followingCount: 0,
       followers: [],
       followings: [],
+      reviews: [],
       showFollowersList: false,
       showFollowingsList: false,
       showModal: false,
@@ -274,8 +303,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const { user, isOwnProfile, isFollowing} = response.data;
-
+        const { user, isOwnProfile, isFollowing, reviews} = response.data;
         this.user = {
           id: user.id,
           userName: user.userName,
@@ -286,6 +314,7 @@ export default {
         };
         this.isLogged = isOwnProfile;
         this.isFollowing = isFollowing;
+        this.reviews = reviews;
         await this.setUserData(this.user)
         // Set follower and following counts
         await this.fetchFollowingCount();
