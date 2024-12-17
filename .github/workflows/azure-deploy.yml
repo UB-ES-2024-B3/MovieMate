@@ -34,7 +34,26 @@ jobs:
         echo "ACR_USERNAME=$(echo $acr_credentials | jq -r .username)" >> $GITHUB_ENV
         echo "ACR_PASSWORD=$(echo $acr_credentials | jq -r .password)" >> $GITHUB_ENV
 
-    # 4. Build and push Docker images
+    # 4. Ensure Database Container is Running
+    - name: Start Database Container if not running
+      run: |
+        if [ "$(docker ps -q -f name=db-container)" ]; then
+          echo "Database container is already running."
+        elif [ "$(docker ps -aq -f name=db-container)" ]; then
+          echo "Database container exists but is stopped. Starting it..."
+          docker start db-container
+        else
+          echo "Database container does not exist. Creating and starting it..."
+          docker run -d \
+            --name db-container \
+            -e POSTGRES_DB="es-b3-database" \
+            -e POSTGRES_USER="user" \
+            -e POSTGRES_PASSWORD="12345" \
+            -p 5432:5432 \
+            postgres:latest
+        fi
+
+    # 5. Build and push Docker images
     - name: Log in to ACR
       run: |
         az acr login --name moviemateacr
@@ -44,36 +63,26 @@ jobs:
         ACR_NAME: moviemateacr.azurecr.io
         FRONTEND_IMAGE: es-frontend
         BACKEND_IMAGE: es-backend
-        DB_IMAGE: db-postgres
       run: |
         # Build images
         docker build -t $ACR_NAME/$FRONTEND_IMAGE:latest ./frontend
         docker build -t $ACR_NAME/$BACKEND_IMAGE:latest ./backend
         
-        # Build Postgres
-        docker pull postgres:latest
-        docker tag postgres:latest $ACR_NAME/$DB_IMAGE:latest
-        
         # Push images to ACR
         docker push $ACR_NAME/$FRONTEND_IMAGE:latest
         docker push $ACR_NAME/$BACKEND_IMAGE:latest
-        docker push $ACR_NAME/$DB_IMAGE:latest
+        
 
-    # 5. Deploy containers to Azure
-    - name: Deploy Database Container
+    - name: Wait for Database to be Ready
       run: |
-        az container create --resource-group MovieMate-Resources \
-          --name db-container \
-          --image moviemateacr.azurecr.io/db-postgres:latest \
-          --registry-username ${{ env.ACR_USERNAME }} \
-          --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-db \
-          --ports 5432 \
-          --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345" \
-          --os-type Linux \
-          --cpu 1 \
-          --memory 1.5
+        echo "Waiting for the database to be ready..."
+        for i in {1..15}; do
+          nc -zv moviemate-db.westeurope.azurecontainer.io 5432 && break
+          echo "Database not ready yet, retrying in 5 seconds..."
+          sleep 5
+        done
 
+    # 6. Deploy containers to Azure
     - name: Deploy Backend Container
       run: |
         az container create --resource-group MovieMate-Resources \
