@@ -1,5 +1,14 @@
 <template>
   <div class="flex h-[calc(100vh-4rem)]" v-if="user">
+    <div
+      v-if="showMessage"
+      :class="[
+        'fixed top-4 right-4 p-4 rounded-md text-white shadow-lg',
+        toastError ? 'bg-red-500' : 'bg-green-500'
+      ]"
+    >
+      {{ message }}
+    </div>
     <!-- Lateral izquierdo -->
     <aside class="bg-cyan-600 w-64 p-6 flex flex-col justify-between h-full">
       <div v-if="isLogged" class="flex flex-col space-y-4 mb-6">
@@ -13,6 +22,11 @@
         <button @click="goToFavorites" class="flex items-center justify-center text-black rounded-md px-4 py-2 border-2 border-black hover:bg-black hover:text-cyan-400 transition duration-200 gap-4">
           <img src="../../assets/guardado.png" class="w-12 h-12" />
           <span class="font-bold text-lg">PELÍCULAS FAVORITAS</span>
+        </button>
+
+        <button v-if="isLogged" @click=cerrarSesion  class="flex items-center justify-center text-black rounded-md px-4 py-2 border-2 border-black hover:bg-black hover:text-cyan-400 transition duration-200 gap-6">
+          <img src="../../assets/cerrar_sesion.png" class="w-12 h-12" />
+          <span class="font-bold text-lg">CERRAR SESION</span>
         </button>
 
         <!-- Botón moderar -->
@@ -164,6 +178,7 @@
 
 <script>
 import axios from "axios";
+import {mapActions} from "vuex";
 
 export default {
   data() {
@@ -180,6 +195,9 @@ export default {
       showFollowersList: false,
       showFollowingsList: false,
       showModal: false,
+      showMessage: false, // Controlar la visibilidad del mensaje
+      message: "", // Mensaje a mostrar
+      toastError: false //Para enseñar si es error o no
     };
   },
 
@@ -197,6 +215,7 @@ export default {
   },
 
   methods: {
+    ...mapActions(['setUserData', "clearUserData"]),
     async fetchFollowingCount() {
       try {
         const token = sessionStorage.getItem("auth_token");
@@ -212,7 +231,22 @@ export default {
         console.error("Error fetching the following list:", error);
       }
     },
+    displayMessage(message, error, callback) {
+      this.message = message;
+      this.showMessage = true;
+      this.toastError = error;
+      setTimeout(() => {
+        this.showMessage = false;
+        if (callback) callback();
+      }, 5000);
+    },
+    async cerrarSesion() {
+      sessionStorage.removeItem("auth_token");
+      sessionStorage.removeItem("username");
+      this.isLogged = false;
 
+      this.displayMessage("Has Cerrado Sesion Correctamente", true, () => window.location.href = '/');
+    },
     async fetchFollowersCount() {
       try {
         const token = sessionStorage.getItem("auth_token");
@@ -252,7 +286,7 @@ export default {
         };
         this.isLogged = isOwnProfile;
         this.isFollowing = isFollowing;
-
+        await this.setUserData(this.user)
         // Set follower and following counts
         await this.fetchFollowingCount();
         await this.fetchFollowersCount()

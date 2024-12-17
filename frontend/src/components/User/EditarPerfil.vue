@@ -69,13 +69,13 @@
             <!-- USERNAME -->
             <div>
               <label for="nombre" class="block mb-2 text-sm font-medium text-cyan-400">UserName</label>
-              <input type="text" name="userName" v-model="formData.userName" id="nombre" class="form_text_input text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-gray-700 text-white" placeholder="Your username" required>
+              <input type="text" name="userName" v-model="formData.userName" id="nombre" class="form_text_input text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-gray-700 text-white" placeholder="Your username">
             </div>
 
             <!-- EMAIL -->
             <div>
               <label for="email" class="block mb-2 text-sm font-medium text-cyan-400">Email</label>
-              <input type="email" name="email" v-model="formData.email" id="email" class="form_text_input text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-gray-700 text-white" placeholder="Your email" required>
+              <input type="email" name="email" v-model="formData.email" id="email" class="form_text_input text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-gray-700 text-white" placeholder="Your email">
             </div>
 
             <!-- GENDER -->
@@ -117,7 +117,7 @@ import axios from 'axios';
 export default {
   name: "EditarUsuario",
   computed: {
-    ...mapState(['userData']) // Accede a userData desde el estado de Vuex
+    ...mapState(['userData'])
   },
   data() {
     return {
@@ -139,6 +139,7 @@ export default {
     };
   },
   created() {
+    console.log(this.userData)
     if (this.userData) {
       const {id, userName, email, gender, description, image} = this.userData;
       this.formData = {id, userName, email, gender, description, image, imageFile: null};
@@ -180,7 +181,6 @@ export default {
                   return
               }
           }
-
           const response = await axios.put(
               `${BASE_URL}/user/update/${this.formData.id}`,
               this.formData, {
@@ -191,6 +191,7 @@ export default {
           );
         if (response.status === 200) {
           sessionStorage.setItem("username", this.formData.userName);
+          sessionStorage.setItem("auth_token", response.data);
           this.showToastWithMessage("Perfil actualizado con éxito", false, () => {
             window.location.href = '/user/${this.username}';
           });
