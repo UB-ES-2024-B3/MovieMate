@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white flex flex-col h-screen">
     <header class="bg-header-color flex items-center justify-between p-4 border-gray-200">
-      <router-link to="/" class="self-center text-2xl font-semibold whitespace-nowrap dark:text-black">
+      <router-link to="/" class="self-center text-2xl font-semibold whitespace-nowrap dark:text-cyan-600">
         <h1>MovieMate</h1>
       </router-link>
 
