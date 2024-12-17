@@ -47,4 +47,16 @@ export class UserService {
     async getAllFavorites(userName: string): Promise<MoviesInFavsDtoOut[]> {
         return await this.userRepository.getAllFavorites(userName);
     }
+
+    async follow(userName1: string, userName2: string) {
+        return await this.userRepository.follow(userName1, userName2);
+    }
+
+    async getFollowers(userName: string) {
+        return await this.userRepository.getFollowers(userName);
+    }
+
+    async getFollowing(userName: string) {
+        return await this.userRepository.getFollowing(userName);
+    }
 }

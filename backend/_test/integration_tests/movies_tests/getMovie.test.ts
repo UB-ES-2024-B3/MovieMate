@@ -1,28 +1,29 @@
 import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 import axios from 'axios';
+import {createTestMovie, deleteTestMovie, getTestMovie} from "../../test_utils/testUtilsMovies";
+import {deleteTestUser} from "../../test_utils/testUtilsUsers";
 
 const baseURL = 'http://localhost:3000/movie';
 let testMovieId: string;
 
 describe('Movies API Tests', () => {
-
     beforeAll(async () => {
-        try {
-            const response = await axios.get(`${baseURL}/'Movie 4'`);
-            console.log(response.data); // Verifica la estructura de la respuesta
-            if (response.data && response.data._id) {
-                testMovieId = response.data._id; // Accede al _id si está presente
-            } else {
-                throw new Error('Movie not found');
-            }
-        } catch (error) {
-            console.error('Error fetching movie:', error);
+        const existingMovie = await getTestMovie('TestMovie');
+        if (!existingMovie) {
+            const movie = await createTestMovie();
+            testMovieId = movie.movie._id;
+        } else {
+            testMovieId = existingMovie.movie._id;
         }
+    });
+
+    afterAll(async () => {
+        await deleteTestMovie(testMovieId);
     });
 
 
     test('should fetch movie details successfully', async () => {
-        const response = await axios.get(`${baseURL}/Movie 4`);
+        const response = await axios.get(`${baseURL}/TestMovie`);
         expect(response.status).toBe(200);
     });
 

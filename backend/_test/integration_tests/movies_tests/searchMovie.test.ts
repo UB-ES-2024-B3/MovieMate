@@ -1,31 +1,33 @@
 import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 import axios from 'axios';
+import {createTestMovie, deleteTestMovie, getTestMovie} from "../../test_utils/testUtilsMovies";
 
 const baseURL = 'http://localhost:3000/movie';
 let testMovieId: string;
-
+let testMovieTitle: string;
 describe('Movies Search Tests', () => {
 
     beforeAll(async () => {
-        try {
-            const response = await axios.get(`${baseURL}/movie/Movie%204`);
-
-            console.log(response.data); // Verifica la estructura de la respuesta
-            if (response.data && response.data._id) {
-                testMovieId = response.data._id; // Accede al _id si está presente
-            } else {
-                throw new Error('Movie not found');
-            }
-        } catch (error) {
-            console.error('Error fetching movie:', error);
+        const existingMovie = await getTestMovie('TestMovie');
+        if (!existingMovie) {
+            const movie = await createTestMovie();
+            testMovieId = movie.movie._id;
+            testMovieTitle = movie.movie._title;
+        } else {
+            testMovieId = existingMovie.movie._id;
+            testMovieTitle = existingMovie.movie._title;
         }
     });
 
+    afterAll(async () => {
+        await deleteTestMovie(testMovieId);
+    });
+
+
     test('should return movies matching the search query', async () => {
-        const response = await axios.get(`${baseURL}/search?query=Movie%204`);
-
-
+        const response = await axios.get(`${baseURL}/search?query=${testMovieTitle}`);
         expect(response.status).toBe(200);
+        expect(response.data[0].title).toEqual(testMovieTitle)
     });
 
     test('should return empty array if no movies match the search query', async () => {

@@ -10,103 +10,111 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # 1. Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # 2. Log in to Azure CLI
-    - name: Log in to Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: >
-          {
-            "clientId": "1285c1aa-e7c3-4fad-bdb8-1e6d0f21b822",
-            "clientSecret": "Mkq8Q~iBRRiQ72pXsL8CUsag27lucuMsnLM3Gdxv",
-            "subscriptionId": "deb369ec-1076-46f4-bc4d-4443879e0c54",
-            "tenantId": "a2313cab-b1c3-4f3a-bb11-2157447ddbb4"
-          }
+      # 2. Log in to Azure CLI
+      - name: Log in to Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: >
+            {
+              "clientId": "1285c1aa-e7c3-4fad-bdb8-1e6d0f21b822",
+              "clientSecret": "Mkq8Q~iBRRiQ72pXsL8CUsag27lucuMsnLM3Gdxv",
+              "subscriptionId": "deb369ec-1076-46f4-bc4d-4443879e0c54",
+              "tenantId": "a2313cab-b1c3-4f3a-bb11-2157447ddbb4"
+            }
 
-    # 3. ACR Credentials
-    - name: Get ACR credentials
-      id: acr-credentials
-      run: |
-        acr_credentials=$(az acr credential show --name moviemateacr --query "{username:username, password:passwords[0].value}" -o json)
-        echo "ACR_USERNAME=$(echo $acr_credentials | jq -r .username)" >> $GITHUB_ENV
-        echo "ACR_PASSWORD=$(echo $acr_credentials | jq -r .password)" >> $GITHUB_ENV
+      # 3. ACR Credentials
+      - name: Get ACR credentials
+        id: acr-credentials
+        run: |
+          acr_credentials=$(az acr credential show --name moviemateacr --query "{username:username, password:passwords[0].value}" -o json)
+          echo "ACR_USERNAME=$(echo $acr_credentials | jq -r .username)" >> $GITHUB_ENV
+          echo "ACR_PASSWORD=$(echo $acr_credentials | jq -r .password)" >> $GITHUB_ENV
 
-    # 4. Build and push Docker images
-    - name: Log in to ACR
-      run: |
-        az acr login --name moviemateacr
+      # 4. Ensure Database Container is Running
+      - name: Start Database Container if not running
+        run: |
+          if [ "$(docker ps -q -f name=pre-db-container)" ]; then
+            echo "Database container is already running."
+          elif [ "$(docker ps -aq -f name=pre-db-container)" ]; then
+            echo "Database container exists but is stopped. Starting it..."
+            docker start pre-db-container
+          else
+            echo "Database container does not exist. Creating and starting it..."
+            docker run -d \
+              --name pre-db-container \
+              -e POSTGRES_DB="es-b3-database" \
+              -e POSTGRES_USER="user" \
+              -e POSTGRES_PASSWORD="12345" \
+              -p 5432:5432 \
+              postgres:latest
+          fi
 
-    - name: Build and push Docker images
-      env:
-        ACR_NAME: moviemateacr.azurecr.io
-        FRONTEND_IMAGE: pre-frontend
-        BACKEND_IMAGE: pre-backend
-        DB_IMAGE: pre-db-postgres
-      run: |
-        # Build images
-        docker build -t $ACR_NAME/$FRONTEND_IMAGE:latest ./frontend
-        docker build -t $ACR_NAME/$BACKEND_IMAGE:latest ./backend
-        
-        # Build Postgres
-        docker pull postgres:latest
-        docker tag postgres:latest $ACR_NAME/$DB_IMAGE:latest
-        
-        # Push images to ACR
-        docker push $ACR_NAME/$FRONTEND_IMAGE:latest
-        docker push $ACR_NAME/$BACKEND_IMAGE:latest
-        docker push $ACR_NAME/$DB_IMAGE:latest
+      # 5. Build and push Docker images
+      - name: Log in to ACR
+        run: |
+          az acr login --name moviemateacr
 
-    # 5. Deploy containers to Azure
-    - name: Deploy Database Container
-      run: |
-        az container create --resource-group MovieMate-Resources \
-          --name pre-db-container \
-          --image moviemateacr.azurecr.io/pre-db-postgres:latest \
-          --registry-username ${{ env.ACR_USERNAME }} \
-          --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-pre-db \
-          --ports 5432 \
-          --environment-variables POSTGRES_DB="es-b3-database" POSTGRES_USER="user" POSTGRES_PASSWORD="12345" \
-          --os-type Linux \
-          --cpu 1 \
-          --memory 1.5
+      - name: Build and push Docker images
+        env:
+          ACR_NAME: moviemateacr.azurecr.io
+          FRONTEND_IMAGE: pre-frontend
+          BACKEND_IMAGE: pre-backend
+        run: |
+          # Build images
+          docker build -t $ACR_NAME/$FRONTEND_IMAGE:latest ./frontend
+          docker build -t $ACR_NAME/$BACKEND_IMAGE:latest ./backend
+          
+          # Push images to ACR
+          docker push $ACR_NAME/$FRONTEND_IMAGE:latest
+          docker push $ACR_NAME/$BACKEND_IMAGE:latest
 
-    - name: Deploy Backend Container
-      run: |
-        az container create --resource-group MovieMate-Resources \
-          --name pre-backend-container \
-          --image moviemateacr.azurecr.io/pre-backend:latest \
-          --registry-username ${{ env.ACR_USERNAME }} \
-          --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-pre-backend \
-          --ports 3000 \
-          --environment-variables DB_HOST="moviemate-pre-db.westeurope.azurecontainer.io" \
-                                  DB_NAME="es-b3-database" \
-                                  DB_PASSWORD="12345" \
-                                  DB_PORT="5432" \
-                                  DB_USERNAME="user" \
-                                  SW_HOST="0.0.0.0" \
-                                  SW_PORT="3000" \
-                                  MAIL_USER="moviemate@zohomail.eu" \
-                                  MAIL_PASS="Movie@1234ADJLMN" \
-                                  SECRET_KEY="ES-UB-B3" \
-          --os-type Linux \
-          --cpu 1 \
-          --memory 1.5
+      - name: Wait for Database to be Ready
+        run: |
+          echo "Waiting for the database to be ready..."
+          for i in {1..15}; do
+            nc -zv es-b3-movimate-pre.westeurope.azurecontainer.io 5432 && break
+            echo "Database not ready yet, retrying in 5 seconds..."
+            sleep 5
+          done
 
-    - name: Deploy Frontend Container
-      run: |
-        az container create --resource-group MovieMate-Resources \
-          --name pre-frontend-container \
-          --image moviemateacr.azurecr.io/pre-frontend:latest \
-          --registry-username ${{ env.ACR_USERNAME }} \
-          --registry-password ${{ env.ACR_PASSWORD }} \
-          --dns-name-label moviemate-pre-frontend \
-          --ports 8000 \
-          --environment-variables VUE_APP_API_BASE_URL="http://moviemate-pre-backend.westeurope.azurecontainer.io:3000" \
-          --os-type Linux \
-          --cpu 1 \
-          --memory 1.5
+      - name: Deploy Backend Container
+        run: |
+          az container create --resource-group MovieMate-Resources \
+            --name pre-backend-container \
+            --image moviemateacr.azurecr.io/pre-backend:latest \
+            --registry-username ${{ env.ACR_USERNAME }} \
+            --registry-password ${{ env.ACR_PASSWORD }} \
+            --dns-name-label moviemate-pre-backend \
+            --ports 3000 \
+            --environment-variables DB_HOST="es-b3-movimate-pre.westeurope.azurecontainer.io" \
+                                    DB_NAME="es-b3-database" \
+                                    DB_PASSWORD="12345" \
+                                    DB_PORT="5432" \
+                                    DB_USERNAME="user" \
+                                    SW_HOST="0.0.0.0" \
+                                    SW_PORT="3000" \
+                                    MAIL_USER="moviemate@zohomail.eu" \
+                                    MAIL_PASS="Movie@1234ADJLMN" \
+                                    SECRET_KEY="ES-UB-B3" \
+            --os-type Linux \
+            --cpu 1 \
+            --memory 1.5
+      
+
+      - name: Deploy Frontend Container
+        run: |
+          az container create --resource-group MovieMate-Resources \
+            --name pre-frontend-container \
+            --image moviemateacr.azurecr.io/pre-frontend:latest \
+            --registry-username ${{ env.ACR_USERNAME }} \
+            --registry-password ${{ env.ACR_PASSWORD }} \
+            --dns-name-label moviemate-pre-frontend \
+            --ports 8000 \
+            --environment-variables VUE_APP_API_BASE_URL="http://moviemate-pre-backend.westeurope.azurecontainer.io:3000" \
+            --os-type Linux \
+            --cpu 1 \
+            --memory 1.5

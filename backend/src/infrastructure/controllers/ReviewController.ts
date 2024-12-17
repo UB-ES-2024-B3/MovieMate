@@ -23,7 +23,11 @@ export class ReviewController {
 
     static async createReview(req: Request, res: Response, next: NextFunction) {
         try {
-            const reviewData = req.body;
+            const reviewData = {
+              ...req.body,
+              like: 0,
+              disLike: 0,
+            };
 
             // Validar los datos con la clase DtoIn
             const validationResult = DtoInValidation.validateReviewDto(reviewData);
@@ -41,7 +45,9 @@ export class ReviewController {
                 author: validatedData.author,
                 movie: validatedData.movie,
                 review: validatedData.review,
-                title: validatedData.title
+                title: validatedData.title,
+                like: validatedData.like,
+                disLike: validatedData.disLike,
             }
 
             const result = await this.reviewService.createReview(review);
@@ -69,6 +75,49 @@ export class ReviewController {
             return res.status(200).json(result);
         } catch (e) {
             next(e);
+        }
+    }
+
+    static async deleteReview(req: Request, res: Response, next: NextFunction){
+        try {
+            const reviewId = parseInt(req.params.reviewId);
+            const result = await this.reviewService.deleteReview(reviewId);
+            return res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    static async addLike(req: Request, res:Response, next: NextFunction) {
+        try {
+            const userName = req.body.userName;
+            const idReview = parseInt(req.body.idReview);
+
+
+            if(!userName || isNaN(idReview)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.reviewService.addLike(userName, idReview);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
+        }
+    }
+
+    static async addDislike(req: Request, res: Response, next: NextFunction){
+        try {
+            const userName = req.body.userName;
+            const idReview = parseInt(req.body.idReview);
+
+            if(!userName || isNaN(idReview)){
+                throw createError(400, `Parameters are incorrect`);
+            }
+
+            const result = await this.reviewService.addDislike(userName, idReview);
+            return res.status(200).json(result);
+        }catch (error){
+            next(error);
         }
     }
 }

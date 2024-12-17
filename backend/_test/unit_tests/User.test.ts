@@ -18,7 +18,10 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
     sendRecoveryEmail: jest.fn(),
     recoverPassword: jest.fn(),
     search: jest.fn(),
-    getAllFavorites: jest.fn()
+    getAllFavorites: jest.fn(),
+    follow: jest.fn(),
+    getFollowers: jest.fn(),
+    getFollowing: jest.fn(),
 };
 
 describe('UserService Unit Tests', () => {
@@ -39,7 +42,7 @@ describe('UserService Unit Tests', () => {
                 'hashedPassword123!',
                 'male',
                 'This is a test user',
-                false
+                false,
             );
 
             mockUserRepository.register.mockResolvedValue('Registration successful');
@@ -172,9 +175,11 @@ describe('UserService Unit Tests', () => {
                 description: null,
                 isAdmin: false,
                 image: null,
+                totalFollowers: 0,
+                totalFollowing: 0,
             };
 
-            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[] });
+            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[], posts:[], });
 
             const result = await userService.getUser(userId, authToken);
 
@@ -196,4 +201,72 @@ describe('UserService Unit Tests', () => {
             );
         });
     });
+
+    describe('followUser', () => {
+        it('should register a user and follow another user succeessfull', async () => {
+            const user1 = new User(
+                1,
+                'user1',
+                'user@example.com',
+                new Date('2001-05-11'),
+                'hola125_P',
+                'male',
+                'Descripcion usuario prueva',
+                false
+            );
+
+            const user2 = new User(
+                2,
+                'user2',
+                'user2@example.com',
+                new Date('2000-04-09'),
+                'Prova123_',
+                'female',
+                'Descricpio usuario prueva 2',
+                false
+            )
+
+            mockUserRepository.register.mockResolvedValue('Registration successful');
+
+            mockUserRepository.follow.mockResolvedValue(`${user1.userName} has followed ${user2.userName}`)
+
+             const mockUser = {
+                id: user1.id,
+                userName: user1.userName,
+                email: user1.email,
+                password: user1.password,
+                birthDate: user1.birthDate,
+                gender: user1.gender,
+                description: user1.description,
+                isAdmin: user1.isAdmin,
+                image: null,
+                totalFollowers: 0,
+                totalFollowing: 1,
+            };
+
+            mockUserRepository.get.mockResolvedValue({ user: mockUser, isOwnProfile: true, reviews:[], posts:[], });
+
+            // @ts-ignore
+            mockUserRepository.getFollowers.mockResolvedValue(['user1']);
+            // @ts-ignore
+            mockUserRepository.getFollowing.mockResolvedValue(['user2']);
+
+            const followResult = await userService.follow(user2.userName, user1.userName);
+            expect(followResult).toBe('user1 has followed user2');
+            expect(mockUserRepository.follow).toHaveBeenCalledWith(user2.userName, user1.userName);
+
+            const result = await userService.getUser('1', 'mock-auth-token');
+            expect(result.user.totalFollowers).toBe(0);
+            expect(result.user.totalFollowing).toBe(1);
+            expect(mockUserRepository.get).toHaveBeenCalledWith('1', 'mock-auth-token');
+
+            const followers = await userService.getFollowers(user2.userName);
+            expect(followers).toContain('user1');
+            expect(mockUserRepository.getFollowers).toHaveBeenCalledWith(user2.userName);
+
+            const following = await userService.getFollowing(user1.userName);
+            expect(following).toContain('user2');
+            expect(mockUserRepository.getFollowing).toHaveBeenCalledWith(user1.userName);
+        })
+    })
 });

@@ -10,9 +10,14 @@ import MovieCard from "@/components/Movie/MovieCard.vue";
 import PublicarResena from "@/components/Movie/PublicarResena.vue";
 import PeliculasFavoritas from "@/components/User/PeliculasFavoritas.vue";
 import MovieReview from "@/components/Movie/MovieReview.vue";
+import PostCard from "@/components/Posts/PostCard.vue";
+import CommentDetails from "@/components/Comment/CommentDetails.vue";
+import ResultadosFiltrados from "../components/Movie/ResultadosFiltrados.vue";
 
 const routes = [
   { path: '/', component: Home },
+  { path: '/comment/:commentId', component: CommentDetails},
+  { path: '/post/:postId', component: PostCard},
   { path: '/login', component: Login },
   { path: '/user/:userName', component: PerfilUsuario},
   { path: '/register', component: Register},
@@ -22,6 +27,11 @@ const routes = [
   { path: '/resena/:movieId/:userId', component: PublicarResena},
   { path: '/favorites', component: PeliculasFavoritas},
   { path: '/review/:id', component: MovieReview},
+  {
+    path: '/filtered-movies',
+    name: 'FilteredMovies',
+    component: ResultadosFiltrados,
+  },
 ];
 
 const router = createRouter({

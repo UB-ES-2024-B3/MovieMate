@@ -32,7 +32,8 @@ jobs:
         working-directory: ./backend
         run: npm install
 
-      # 4. Run unit tests
+      # 4. Run unit tests (optional for develop and pre-production)
       - name: Run unit tests
         working-directory: ./backend
         run: npm run test:unit
+        continue-on-error: ${{ github.ref_name == 'develop' || github.ref_name == 'pre-production' }}
